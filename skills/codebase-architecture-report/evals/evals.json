@@ -1,0 +1,23 @@
+{
+  "skill_name": "codebase-architecture-report",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate a source-aware architecture overview of this repo. Include key flows, architecture decisions, security controls, gaps, and file references.",
+      "expected_output": "A report that maps the codebase architecture using source-backed evidence with evidence labels (Source-backed, Inferred, Unclear, Gap), traces real flows from source files, identifies security controls and gaps, includes an evidence index of files read, and has an executive summary.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create an HTML architecture report for this codebase that I can share with a client.",
+      "expected_output": "A client-readable architecture report with evidence-backed claims, scoped technical depth, source references, flow diagrams, security posture, gaps, and recommendations. HTML output delegates to the html-document skill for presentation with SVG diagrams, stat cards, badges, and evidence provenance.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Map the auth and billing flows in this repo and tell me which parts are source-backed, inferred, unclear, or gaps.",
+      "expected_output": "A scoped flow report that traces auth and billing from source files, tags each claim with evidence labels, captures decision tradeoffs, lists concrete gaps with severity and evidence, and includes the evidence index of files read.",
+      "files": []
+    }
+  ]
+}
