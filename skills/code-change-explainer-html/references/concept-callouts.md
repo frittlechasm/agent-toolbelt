@@ -12,10 +12,12 @@ Each callout has five parts in this order:
 4. **Java parallel**: the closest Java equivalent, even if imperfect. Explicitly call out where it diverges.
 5. **Gotcha**: one pitfall to remember (often the divergence from the Java parallel).
 
-## Suggested HTML structure
+## HTML structure
+
+Use the **Callout** pattern from `html-document` `references/elements.md` — the `<aside class="callout">` with an `<h4>` heading, a `<pre><code>` for the minimal syntax, and a `<dl>` of `<dt>`/`<dd>` field pairs. That file owns the CSS (class name, tokens, spacing, print rules); do not redefine it here, or the styling will drift from the rest of the document. This skill only owns the *content* of the five fields below.
 
 ```html
-<aside class="concept-callout">
+<aside class="callout">
   <h4>Optional chaining <code>?.</code></h4>
   <pre><code>user?.profile?.name</code></pre>
   <dl>
@@ -44,45 +46,7 @@ Each callout has five parts in this order:
 </aside>
 ```
 
-The `<dl>` / `<dt>` / `<dd>` structure renders cleanly, prints well, and is keyboard-accessible without extra work.
-
-## Suggested CSS skeleton
-
-Drop into the document's `<style>` block. Re-use the document's accent color and font stack:
-
-```css
-.concept-callout {
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--accent);
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
-  padding: 0.75rem 1rem;
-  margin: 1rem 0;
-  border-radius: 4px;
-  break-inside: avoid;
-}
-.concept-callout h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.95rem;
-}
-.concept-callout pre {
-  margin: 0.25rem 0 0.75rem 0;
-  padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
-  overflow-x: auto;
-}
-.concept-callout dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.25rem 0.75rem;
-  margin: 0;
-}
-.concept-callout dt { font-weight: 600; color: var(--muted); }
-.concept-callout dd { margin: 0; }
-@media print {
-  .concept-callout { break-inside: avoid; }
-}
-```
+The `<dl>` / `<dt>` / `<dd>` structure renders cleanly, prints well, and is keyboard-accessible without extra work. The Name maps to the `<h4>`, the Minimal syntax to the `<pre><code>`, and Semantic / Java parallel / Gotcha to `<dt>`/`<dd>` pairs.
 
 ## Placement guidance
 

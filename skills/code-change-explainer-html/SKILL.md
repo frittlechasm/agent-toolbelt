@@ -10,11 +10,11 @@ Build a standalone `.html` document that **teaches** what changed in code, line 
 ## Boundaries and dependencies
 
 - This skill owns **what** goes on the page: the lessons, the Java mental model, the choice of which concepts deserve callouts, the line-by-line walkthroughs, the verification step.
-- This skill does **not** own how the page is rendered. Presentation — fonts, spacing, code-block styling, callout boxes, before/after panel layout, badges, print rules — lives in [`html-document`](../html-document/SKILL.md). Read its `references/elements.md` before drafting, especially:
-  - §4 Code & Comparison (before/after panels, annotated diffs, multi-approach)
-  - §5 Callouts & Glossary (the concept callout box this skill leans on)
-  - §6 Badges (severity, confidence)
-  - §18 Document Scaffolds (Code-change explainer scaffold)
+- This skill does **not** own how the page is rendered. Presentation — fonts, spacing, code-block styling, callout boxes, before/after panel layout, badges, print rules — lives in [`html-document`](../html-document/SKILL.md). Read its `references/elements.md` before drafting. Sections are referenced by name (not number) so they survive renumbering — the ones this skill leans on:
+  - **Code extensions** — before/after panels, annotated diffs, multi-column code
+  - **Callouts** — the concept callout box this skill leans on
+  - **Badges** — severity, confidence
+  - **Document scaffolds** — the *Code-change explainer* scaffold
 - Always invoke `html-document` to render the final `.html`. Do not redefine styling here that already exists there.
 
 Read the matching language reference before drafting:
@@ -51,7 +51,7 @@ Callout box mapping the new code to specific Java terms. Be concrete — vague a
 - "The arrow function is a lambda — equivalent to `users.stream().map(User::getEmail).toList()`."
 - "`async` returns `CompletableFuture<User>`; `await` is `.join()`, non-blocking."
 
-Render via `html-document`'s concept callout pattern (§5).
+Render via `html-document`'s concept callout pattern (**Callouts**).
 
 ### 4. Strategy
 
@@ -59,7 +59,7 @@ Why the code changed, 3–6 sentences. Tie back to architectural concerns a Java
 
 ### 5. Code Comparison
 
-Use the before/after stacked-panel pattern from `html-document` `references/elements.md` §4. Two separate sections — *not* a unified diff — because unified diffs hide spatial structure and that is exactly what we want the reader to see. Use the document skill's panel styling for height, scroll, and stacking behaviour.
+Use the before/after stacked-panel pattern from `html-document` `references/elements.md` (**Code extensions**). Two separate sections — *not* a unified diff — because unified diffs hide spatial structure and that is exactly what we want the reader to see. Use the document skill's panel styling for height, scroll, and stacking behaviour.
 
 ### 6. Line-by-Line Walkthrough (the heart)
 
@@ -70,7 +70,7 @@ For every meaningful line of the After code (group boilerplate together; never s
 - **What it does**: behavioural effect at runtime — value type, side effects.
 - **Why this way**: why this construct over alternatives — the author's call.
 
-Use an ordered list of cards or a `<dl>` definition list — not a wide table. `html-document` §3 covers the typography choices.
+Use an ordered list of cards or a `<dl>` definition list — not a wide table. Lean on the base typography in `html-document`'s SKILL.md rather than inventing new styling.
 
 Worked entry:
 
@@ -81,7 +81,7 @@ Worked entry:
 
 ### 7. Concept Callouts (required for non-trivial syntax)
 
-Every non-trivial construct gets a callout with five fields: Name, Minimal syntax, Semantic, Java parallel, Gotcha. Use the concept callout pattern from `html-document` §5; the HTML structure and decision rules live in `references/concept-callouts.md`, and the always-callout-worthy list per language is in each language reference.
+Every non-trivial construct gets a callout with five fields: Name, Minimal syntax, Semantic, Java parallel, Gotcha. Use the concept callout pattern from `html-document` (**Callouts**); the HTML structure and decision rules live in `references/concept-callouts.md`, and the always-callout-worthy list per language is in each language reference.
 
 ### 8. Gotchas
 
@@ -109,7 +109,7 @@ A concrete, copy-pasteable check: a command, a curl, a UI flow, a test name.
 7. Remaining work.
 8. Files to read next.
 
-Compose using the *Code-change explainer scaffold* in `html-document` `references/elements.md` §18.
+Compose using the *Code-change explainer* scaffold in `html-document` `references/elements.md` (**Document scaffolds**).
 
 ## Quality Checklist
 

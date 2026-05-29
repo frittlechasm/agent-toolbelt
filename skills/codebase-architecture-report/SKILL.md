@@ -1,6 +1,6 @@
 ---
 name: codebase-architecture-report
-description: Generate source-aware architecture reports for existing codebases — covering system structure, flows, decisions, security controls, and gaps with evidence labels. Use when the user asks to explain, document, or report on a codebase's architecture.
+description: Generate source-aware architecture reports for existing codebases — system structure, key flows, design decisions, security controls, and gaps, with every claim tagged by an evidence label (source-backed, inferred, unclear, gap). Use this whenever the user wants to understand, explain, document, or report on how a codebase works — architecture overviews, onboarding docs, client- or audit-facing implementation write-ups, "map the auth/billing/sync flows", "document our architecture decisions", "how does this repo work and what are the risks", or a source-aware HTML architecture report. Triggers even when the user never says "architecture" — any request to map a system's moving parts, trace flows through real code, or surface decisions and gaps with file-level evidence. Use improve-codebase-architecture instead for finding refactoring opportunities, and security-review instead for a standalone security audit with no report.
 ---
 
 # Codebase Architecture Report
@@ -10,7 +10,7 @@ Gather source-backed evidence from a codebase and produce an architecture report
 ## Boundaries and dependencies
 
 - This skill owns **content and evidence**: what was read, what was found, what is claimed, what is gap, what is recommendation.
-- It does **not** own presentation. For HTML output, delegate to [`html-document`](../html-document/SKILL.md). That skill renders every element — diagrams, badges, risk maps, evidence provenance, stat cards, tabs, and the full *Architecture report scaffold* in its `references/elements.md` §18.
+- It does **not** own presentation. For HTML output, delegate to [`html-document`](../html-document/SKILL.md). That skill renders every element — diagrams, badges, risk maps, evidence provenance, stat cards, tabs, and the full *Architecture report* scaffold in its `references/elements.md` (**Document scaffolds**). Sections there are referenced by name, not number, so they survive renumbering.
 - Use `improve-codebase-architecture` instead when the primary task is to find refactoring opportunities or propose deeper modules.
 - Use `security-review` instead when the user asks for a standalone security review without needing an architecture report.
 - Use this skill when the output is a report that explains the system, flows, decisions, controls, and gaps.
@@ -183,7 +183,7 @@ A list of all files read during the investigation, grouped by area (docs, config
 
 **Markdown**: clean heading hierarchy, fenced code blocks for file references, and tables for structured data (decisions, controls, gaps). The document should read well in any Markdown renderer.
 
-**HTML**: invoke `html-document` for presentation. Pass it the report content (sections, evidence, claims, diagrams to include) and the document type (`ARCHITECTURE REPORT · <project>`). It composes everything using the *Architecture report scaffold* in its `references/elements.md` §18 — breadcrumb, TL;DR, stat cards, SVG architecture map, annotated flowcharts for key flows, evidence badges, risk map, evidence provenance, hover-linked glossary. Do not redefine any of those patterns here.
+**HTML**: invoke `html-document` for presentation. Pass it the report content (sections, evidence, claims, diagrams to include) and the document type (`ARCHITECTURE REPORT · <project>`). It composes everything using the *Architecture report* scaffold in its `references/elements.md` (**Document scaffolds**) — eyebrow, TL;DR, stat cards, SVG architecture map (**Diagrams**), flow steps for key flows, evidence badges (**Badges**), evidence provenance (**Framing**). Do not redefine any of those patterns here.
 
 ## Large Codebases
 
