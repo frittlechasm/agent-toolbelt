@@ -1,6 +1,6 @@
 ---
 name: commit-msg
-description: Generate conventional commit messages from uncommitted changes. Use when the user asks to "commit", "generate a commit message", "write a commit message", "check changes and commit", or any request involving creating git commit messages from staged or unstaged changes.
+description: Generate conventional commit messages from uncommitted changes. ALWAYS use this skill for ANY request to produce, write, draft, suggest, propose, create, or generate a git commit message — including "commit", "commit message", "commit msg", "generate/write/draft/suggest a commit message", "what should the commit message be", "message for this commit", "git commit message", "check changes and commit", or "now commit". Trigger whenever a commit message needs to be authored from staged or unstaged changes, regardless of exact wording.
 ---
 
 # Commit Message Generator
