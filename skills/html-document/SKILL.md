@@ -5,7 +5,7 @@ description: Create or refine standalone HTML documents for human reading, print
 
 # HTML Document
 
-Generate standalone `.html` files. Single column, dark, minimal. Every document uses the same base CSS — no project-specific styling.
+Generate standalone `.html` files. Single column, dark, minimal. Every document uses the same base CSS — no project-specific styling. When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, switch to the opt-in PDF-Ready Mode (see `references/pdf-ready.md`).
 
 Other skills that emit HTML use this skill for presentation.
 
@@ -92,6 +92,8 @@ For elements beyond base HTML — diffs, badges, stat cards, diagrams, timelines
 
 ## Print and PDF
 
+Default documents are flowing HTML: they print cleanly, but browser pagination decides where page breaks fall.
+
 ```css
 @media print {
   :root { --bg: #fff; --text: #111; --muted: #555; --faint: #888; --line: #ddd; --code-bg: #f5f5f5; --code: #333; --link: #1a5fb4; }
@@ -102,6 +104,10 @@ For elements beyond base HTML — diffs, badges, stat cards, diagrams, timelines
 
 `break-inside: avoid` on `pre`, tables, and any grouped content. No fixed-position elements.
 
+## PDF-Ready Mode
+
+When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, read `references/pdf-ready.md` and follow it. That mode treats each page like a slide — fixed geometry, one job per page, composed to fit with no overflow, and verified with an `agent-browser` check. Don't use it for ordinary flowing documents.
+
 ## Checklist
 
 - Single standalone `.html` file.
@@ -110,3 +116,4 @@ For elements beyond base HTML — diffs, badges, stat cards, diagrams, timelines
 - Sections use `<h2>` (which carries the border-top separator).
 - Readable on mobile.
 - Printable.
+- If PDF-ready mode was requested (`references/pdf-ready.md`): uses fixed-height `.pdf-page` sections, declares the paper size, passes the `agent-browser` overflow check (empty result), and includes a screenshot-based visual inspection.
