@@ -43,7 +43,23 @@ One-line title plus `Java equivalent: ...` naming the closest Java analogue.
 
 What the change accomplishes, 2–4 plain sentences, no code yet. Define any source-language jargon inline.
 
-### 3. Java Mental Model (required)
+### 3. Explain Like I'm Five (optional — hard concepts only)
+
+Only when a lesson's central concept is genuinely hard for *anyone*, regardless of language background — async/await, closures, ownership and move semantics, generics variance, pointers vs. references, the event loop. Skip it entirely for anything a Java engineer already groks (a method, a field, a loop, an assignment). Forcing an analogy onto an easy concept patronises the reader and bloats the page; if you can't find one that's genuinely illuminating, omit the section — a weak analogy is worse than none.
+
+One short everyday-world analogy, **no code and no Java terms** — the point is to build raw intuition *before* Section 4 maps it back to Java. Keep it to 2–4 sentences.
+
+Distinct from its neighbours, and the model must not just restate them:
+
+- **Concept (2)** — what the change accomplishes, in plain technical sentences.
+- **Explain Like I'm Five (3)** — one non-technical analogy for the hard idea, zero jargon.
+- **Java Mental Model (4)** — the precise mapping to Java terms.
+
+> *Example (closures):* A closure is like a chef who walks out of the kitchen carrying a backpack of ingredients. Wherever they cook later, they still have exactly the ingredients they grabbed on the way out — not whatever happens to be in the new kitchen.
+
+Render via `html-document`'s **Callout** pattern (reuse `<aside class="callout">`) with an `<h4>` such as "In plain terms" so it reads distinctly from the concept callouts. Do not add new CSS.
+
+### 4. Java Mental Model (required)
 
 Callout box mapping the new code to specific Java terms. Be concrete — vague analogies are worse than none:
 
@@ -53,15 +69,15 @@ Callout box mapping the new code to specific Java terms. Be concrete — vague a
 
 Render via `html-document`'s concept callout pattern (**Callouts**).
 
-### 4. Strategy
+### 5. Strategy
 
 Why the code changed, 3–6 sentences. Tie back to architectural concerns a Java engineer recognises: cohesion, layering, testability, transactional boundaries, error propagation.
 
-### 5. Code Comparison
+### 6. Code Comparison
 
 Use the before/after stacked-panel pattern from `html-document` `references/elements.md` (**Code extensions**). Two separate sections — *not* a unified diff — because unified diffs hide spatial structure and that is exactly what we want the reader to see. Use the document skill's panel styling for height, scroll, and stacking behaviour.
 
-### 6. Line-by-Line Walkthrough (the heart)
+### 7. Line-by-Line Walkthrough (the heart)
 
 For every meaningful line of the After code (group boilerplate together; never skip silently):
 
@@ -79,15 +95,15 @@ Worked entry:
 > *Does:* `fetchUser` returns `Promise<User>`. `await` suspends the surrounding `async` function until resolved; a rejection throws here.
 > *Why:* `.then(...)` chains push the rest into a callback and lose linear flow. `await` reads top-to-bottom like blocking Java, without blocking the thread.
 
-### 7. Concept Callouts (required for non-trivial syntax)
+### 8. Concept Callouts (required for non-trivial syntax)
 
 Every non-trivial construct gets a callout with five fields: Name, Minimal syntax, Semantic, Java parallel, Gotcha. Use the concept callout pattern from `html-document` (**Callouts**); the HTML structure and decision rules live in `references/concept-callouts.md`, and the always-callout-worthy list per language is in each language reference.
 
-### 8. Gotchas
+### 9. Gotchas
 
 Short list of language-specific pitfalls drawn from the actual code: equality (`===` vs `==`, `is` vs `==`), mutation in collection ops, `this`-binding, mutable default args, nil interface values, move semantics.
 
-### 9. Verification
+### 10. Verification
 
 A concrete, copy-pasteable check: a command, a curl, a UI flow, a test name.
 
@@ -114,6 +130,7 @@ Compose using the *Code-change explainer* scaffold in `html-document` `reference
 ## Quality Checklist
 
 - Every Lesson has a Java Mental Model with a *specific* Java analogue, not a hand-wave.
+- "Explain Like I'm Five" appears only on genuinely hard concepts, adds a jargon-free analogy, and never just restates the Concept or Java Mental Model — easy lessons have none.
 - Every non-trivial syntactic feature has a Concept Callout with Java parallel and gotcha.
 - Every line of After code is accounted for — quoted, grouped, or explicitly noted.
 - Pattern names stated where applicable.
