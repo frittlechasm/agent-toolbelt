@@ -102,6 +102,8 @@ The base CSS handles `<pre><code>`. These patterns are for specialized code pres
 
 ### Annotated diff
 
+`overflow-wrap: anywhere` on the code cell lets long lines wrap inside the code column instead of widening the table. The number and sign columns use `white-space: nowrap` + `width: 1px` so they shrink to fit and never wrap (don't give `.ln` a `ch` width — with `box-sizing: border-box` the cell padding would squeeze the digits onto two lines). `vertical-align: top` keeps the number aligned with the first row of a wrapped line.
+
 ```html
 <table class="diff">
   <tr class="ctx"><td class="ln">12</td><td class="sign"> </td><td>function handle(req) {</td></tr>
@@ -113,9 +115,9 @@ The base CSS handles `<pre><code>`. These patterns are for specialized code pres
 ```css
 .diff { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 14px;
   border: 1px solid var(--line); margin: 20px 0; }
-.diff td { padding: 2px 12px; }
-.diff .ln { color: var(--faint); width: 3ch; text-align: right; user-select: none; }
-.diff .sign { width: 1ch; }
+.diff td { padding: 2px 12px; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+.diff .ln { color: var(--faint); width: 1px; text-align: right; user-select: none; white-space: nowrap; }
+.diff .sign { width: 1px; white-space: nowrap; }
 .diff .add { background: color-mix(in srgb, #4ade80 10%, var(--code-bg)); }
 .diff .del { background: color-mix(in srgb, #f87171 10%, var(--code-bg)); }
 .diff .ctx { background: var(--code-bg); }
@@ -123,7 +125,7 @@ The base CSS handles `<pre><code>`. These patterns are for specialized code pres
 
 ### Before / After
 
-Two panels side-by-side on desktop, stacked on mobile. The grid already stretches both panels to the taller one's height; the rules below make the *code block itself* grow to fill its panel, so the two boxes end up the **same height** — balanced, with the shorter side getting empty space below rather than a ragged short box. Code stays top-aligned, so each version's spatial shape is still visible.
+Two panels side-by-side on desktop, stacked on mobile. The rules below stretch each code block to fill its panel, so both boxes match the taller one's height — the shorter side gets trailing space, not a ragged box. Code stays top-aligned, so each version's shape stays visible.
 
 ```html
 <div class="ba">
@@ -133,18 +135,20 @@ Two panels side-by-side on desktop, stacked on mobile. The grid already stretche
 ```
 
 ```css
-.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 20px 0; }
-.ba > section { display: flex; flex-direction: column; }            /* panels equal height via grid stretch */
-.ba > section > :last-child { flex: 1; display: flex; flex-direction: column; margin: 0; }  /* code area fills the panel */
-.ba > section > :last-child > pre { flex: 1; margin: 0; }           /* nested <pre> (under a label header) fills too */
-@media (max-width: 640px) { .ba { grid-template-columns: 1fr; } }
+.ba { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin: 20px 0; }
+.ba > section { display: flex; flex-direction: column; min-width: 0; }   /* min-width:0: panel may shrink below its code's width */
+.ba > section > :last-child { flex: 1; display: flex; flex-direction: column; min-width: 0; margin: 0; }  /* code area fills the panel */
+.ba > section > :last-child > pre { flex: 1; min-width: 0; margin: 0; }  /* nested <pre> (under a label header) fills too */
+@media (max-width: 640px) { .ba { grid-template-columns: minmax(0, 1fr); } }
 ```
 
-The selector targets the panel's **last child** — the code area, whether that's a bare `<pre>` or a wrapper like `code-file` holding a file-path header plus a `<pre>` — and lets it grow while the `<h3>` label keeps its natural height. So equal heights hold whether or not the code has a header bar. Don't put the code block anywhere but last in the `<section>`, or it won't be the element that stretches.
+`minmax(0, 1fr)` and `min-width: 0` are load-bearing: without them a `1fr` track (or flex item) won't shrink below its content's intrinsic width, so the panel widens the whole page instead of letting the `<pre>` wrap inside it. Apply the same pattern to any grid/flex container holding a `<pre>` or `<table>` — it's what keeps the document fitting a ~320px side panel.
+
+The `:last-child` selector targets the panel's code area — a bare `<pre>` or a `code-file` wrapper (file-path header + `<pre>`) — and stretches it while the `<h3>` label keeps its height, so equal heights hold with or without a header bar. Keep the code block last in the `<section>`, or it won't be the element that stretches.
 
 ### Multi-column code
 
-Three short snippets side-by-side. Same grid pattern as Before/After but with `grid-template-columns: 1fr 1fr 1fr`.
+Three short snippets side-by-side. Same grid pattern as Before/After but with `grid-template-columns: repeat(3, minmax(0, 1fr))` plus `min-width: 0` on the children, so each column can shrink and its code wraps. Collapse to one column at the 640px breakpoint.
 
 ---
 
@@ -279,20 +283,23 @@ One shared arrowhead `<marker>` in `<defs>`, then reuse it on every edge with `m
 
 The same kit composes a **UML class box** — a `.node` rect with an internal divider `<line class="edge">` under the class name to separate the name compartment from its fields. For multi-class or sequence diagrams, the hand-SVG quickly gets tedious; switch to Mermaid below.
 
-### Oversized diagrams
+### Wide diagrams, images & art
 
-By default the SVG scales to fit its container (`width: 100%`), so it already adapts to any screen and the reader can zoom with native browser/pinch zoom. Only when a diagram is genuinely too detailed to read at column width, keep it at full size and let the reader scroll it sideways instead of shrinking it — wrap it so just the diagram scrolls, leaving the document layout untouched:
+Code wraps to fit a narrow screen; visual content can't — reflowing an image or diagram destroys it. So anything that must keep its shape — an oversized diagram, a wide screenshot, raster or vector art — keeps its natural size and scrolls *horizontally inside its own block* via one shared wrapper, leaving the document layout (and the page) untouched. This `.scroll-x` is the **only** horizontal scroll the document should ever have.
 
 ```css
-.diagram-scroll { overflow-x: auto; margin: 24px 0; }
-.diagram-scroll .diagram { width: 720px; min-width: 720px; margin: 0; }  /* full size; swipe/scroll to pan */
+.scroll-x { overflow-x: auto; margin: 24px 0; }
+.scroll-x > * { margin: 0; }                            /* media sits flush in the scroller */
+.scroll-x img { max-width: none; }                      /* natural size; swipe/scroll to pan */
+.scroll-x .diagram { width: auto; min-width: 720px; }   /* match the diagram's viewBox width */
 ```
 
 ```html
-<div class="diagram-scroll"><svg class="diagram" viewBox="0 0 720 200" …>…</svg></div>
+<div class="scroll-x"><img src="architecture.png" alt="System map" width="1400"></div>
+<div class="scroll-x"><svg class="diagram" viewBox="0 0 720 200" …>…</svg></div>
 ```
 
-No JS, and it prints as the full diagram. Reach for it sparingly — most diagrams read fine scaled, and the layout rules above keep them small enough that they don't need it.
+Defaults first: a hand-SVG `.diagram` (`width: 100%`) and a plain `<img>` (`max-width: 100%`, from the base CSS) already scale to fit the column, and the reader can pinch/zoom — that's preferred. Reach for `.scroll-x` only when shrinking would make a detailed diagram or image unreadable. No JS, and it prints at full size.
 
 ### Themed Mermaid
 
@@ -380,6 +387,8 @@ td { padding: 8px 12px; color: var(--muted); border-bottom: 1px solid var(--line
 ```
 
 Right-align numeric columns. No sticky headers. No zebra striping by default.
+
+If a table has many columns or long unbreakable cells, it can push past the viewport and scroll the whole page sideways on a narrow screen. For prose-heavy cells, let them wrap (`td { overflow-wrap: anywhere; }`). For a genuinely wide grid that can't wrap, reuse the `.scroll-x` wrapper (see Diagrams) so only the table scrolls: `<div class="scroll-x"><table>…</table></div>`.
 
 ---
 

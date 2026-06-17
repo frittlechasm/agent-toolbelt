@@ -49,9 +49,12 @@ li + li { margin-top: 8px; }
 strong { color: var(--text); }
 
 code { color: var(--code); font-family: var(--mono); font-size: 0.93em; }
-pre { margin: 20px 0; padding: 18px; overflow-x: auto; border: 1px solid var(--line);
-  background: var(--code-bg); color: var(--code); font-family: var(--mono); font-size: 14px; line-height: 1.55; }
+pre { margin: 20px 0; padding: 18px; border: 1px solid var(--line);
+  background: var(--code-bg); color: var(--code); font-family: var(--mono); font-size: 14px; line-height: 1.55;
+  white-space: pre-wrap; overflow-wrap: anywhere; }
 pre code { font-size: inherit; }
+
+img { max-width: 100%; height: auto; }
 
 blockquote { margin: 28px 0; padding: 0 0 0 18px; border-left: 2px solid var(--text); }
 blockquote p { color: var(--text); }
@@ -85,6 +88,11 @@ Use this CSS verbatim. Extend it only when the document needs elements not cover
 - Start with `<h1>` title. First `<p>` is the subtitle (audience, date, scope).
 - Content flows vertically. No sidebar, no sticky nav, no table of contents.
 - Responsive: readable on mobile, no overflow.
+- **The page never scrolls horizontally** at any width down to ~320px (side panel, in-app browser). Two strategies by content type:
+  - **Code wraps.** Long lines reflow (`white-space: pre-wrap; overflow-wrap: anywhere`) — no horizontal scroll bar. Grid/flex containers holding code still need `minmax(0, 1fr)` + `min-width: 0` so a panel can shrink.
+  - **Images and art scroll.** Things that can't reflow without losing meaning — images, SVG art and diagrams, many-column data tables — keep their size and scroll *horizontally inside their own block* (the `.scroll-x` wrapper), never widening the page. Plain `<img>` fits the column by default (`max-width: 100%`); wrap it in `.scroll-x` only to preserve full detail.
+
+  See `references/elements.md`.
 
 ## Extended patterns
 
@@ -115,5 +123,6 @@ When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-sty
 - `<h1>` and subtitle visible on first screen.
 - Sections use `<h2>` (which carries the border-top separator).
 - Readable on mobile.
+- No horizontal *page* scroll down to ~320px — long code lines wrap; images, art, diagrams, and wide data tables scroll inside their own block (`.scroll-x`).
 - Printable.
 - If PDF-ready mode was requested (`references/pdf-ready.md`): uses fixed-height `.pdf-page` sections, declares the paper size, passes the `agent-browser` overflow check (empty result), and includes a screenshot-based visual inspection.
