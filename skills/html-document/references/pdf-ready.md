@@ -2,6 +2,8 @@
 
 Use this mode only when the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, fixed-page, or similar output. For ordinary long-form HTML, stay with the flowing layout in SKILL.md.
 
+Wanting to *export, save, or print to PDF* is **not** a trigger on its own — a flowing document already produces a clean PDF through the browser's print dialog. Switch to this mode only when the user wants each page deliberately composed (slides, a deck, fixed pages, page-perfect handouts). Forcing a short or flowing document into fixed-height pages just scatters its sections with large empty gaps — when in doubt, stay flowing.
+
 PDF-ready mode changes the contract from "content flows" to "each page is intentionally composed." Treat every page like a slide: one page, one job, a bounded amount of content, and a layout chosen from a small set of templates. The guiding constraint is that nothing may spill off a page — so you compose to fit rather than letting the browser decide where breaks fall.
 
 ## Structure

@@ -5,9 +5,7 @@ description: Create or refine standalone HTML documents for human reading, print
 
 # HTML Document
 
-Generate standalone `.html` files. Single column, dark, minimal. Every document uses the same base CSS — no project-specific styling. When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, switch to the opt-in PDF-Ready Mode (see `references/pdf-ready.md`).
-
-Other skills that emit HTML use this skill for presentation.
+Generate standalone `.html` files: single column, dark, minimal, the same base CSS for every document — no project-specific styling. When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, switch to the opt-in PDF-Ready Mode (`references/pdf-ready.md`). Wanting to *export, save, or print to PDF* is **not** that request — a flowing document already produces a clean PDF through the browser; stay in the default mode unless the user wants each page deliberately composed.
 
 ## Scope
 
@@ -84,19 +82,17 @@ Use this CSS verbatim. Extend it only when the document needs elements not cover
 
 ## Layout
 
-- `<main class="page">` wraps all content. Single column, 920px max.
-- Start with `<h1>` title. First `<p>` is the subtitle (audience, date, scope).
-- Content flows vertically. No sidebar, no sticky nav, no table of contents.
-- Responsive: readable on mobile, no overflow.
-- **The page never scrolls horizontally** at any width down to ~320px (side panel, in-app browser). Two strategies by content type:
-  - **Code wraps.** Long lines reflow (`white-space: pre-wrap; overflow-wrap: anywhere`) — no horizontal scroll bar. Grid/flex containers holding code still need `minmax(0, 1fr)` + `min-width: 0` so a panel can shrink.
-  - **Images and art scroll.** Things that can't reflow without losing meaning — images, SVG art and diagrams, many-column data tables — keep their size and scroll *horizontally inside their own block* (the `.scroll-x` wrapper), never widening the page. Plain `<img>` fits the column by default (`max-width: 100%`); wrap it in `.scroll-x` only to preserve full detail.
+- `<main class="page">` wraps all content: single column, 920px max. Start with `<h1>`; the first `<p>` is the subtitle (audience, date, scope). Content flows vertically — no sidebar, sticky nav, or table of contents.
+- **The page never scrolls horizontally** down to ~320px (side panel, in-app browser). Three responses, in order of preference:
+  - **Side-by-side panels stack.** Before/after and multi-column code collapse to one column when the columns won't fit, driven by the container's real width (`repeat(auto-fit, minmax(min(100%, Nrem), 1fr))`) rather than a viewport breakpoint — so a narrow desktop window stacks too.
+  - **Code wraps.** Long lines reflow (`white-space: pre-wrap; overflow-wrap: anywhere`); grid/flex parents need `min-width: 0` so the panel can shrink. The fallback once a column is itself narrow.
+  - **Images and art scroll.** What can't reflow without losing meaning — images, SVG diagrams, wide data tables — keeps its size and scrolls inside its own `.scroll-x` block, never widening the page.
 
   See `references/elements.md`.
 
 ## Extended patterns
 
-For elements beyond base HTML — diffs, badges, stat cards, diagrams, timelines, comparison panels, tabs, accordions, copy buttons — read `references/elements.md`. Only add these when the content needs them.
+For elements beyond base HTML — diffs, badges, stat cards, timelines, comparison panels, tabs, accordions, copy buttons — read `references/elements.md`. For diagrams (hand-SVG or themed Mermaid), read `references/diagrams.md` directly. Only add these when the content needs them.
 
 ## Print and PDF
 
@@ -114,15 +110,12 @@ Default documents are flowing HTML: they print cleanly, but browser pagination d
 
 ## PDF-Ready Mode
 
-When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, read `references/pdf-ready.md` and follow it. That mode treats each page like a slide — fixed geometry, one job per page, composed to fit with no overflow, and verified with an `agent-browser` check. Don't use it for ordinary flowing documents.
+When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, read `references/pdf-ready.md` and follow it — fixed page geometry, one job per page, composed to fit, verified with an `agent-browser` check. Not for ordinary flowing documents, and **not** merely because the user mentions exporting/saving/printing to PDF — forcing short content into fixed pages leaves large empty gaps. When unsure, prefer the default flowing mode; it prints and exports to PDF cleanly on its own.
 
 ## Checklist
 
-- Single standalone `.html` file.
-- Uses the base CSS verbatim.
-- `<h1>` and subtitle visible on first screen.
-- Sections use `<h2>` (which carries the border-top separator).
-- Readable on mobile.
-- No horizontal *page* scroll down to ~320px — long code lines wrap; images, art, diagrams, and wide data tables scroll inside their own block (`.scroll-x`).
+- Single standalone `.html` file, base CSS verbatim.
+- `<h1>` and subtitle visible on first screen; sections use `<h2>` (carries the border-top separator).
+- Readable on mobile; no horizontal *page* scroll to ~320px (panels stack, code wraps, media scrolls in `.scroll-x`).
 - Printable.
-- If PDF-ready mode was requested (`references/pdf-ready.md`): uses fixed-height `.pdf-page` sections, declares the paper size, passes the `agent-browser` overflow check (empty result), and includes a screenshot-based visual inspection.
+- PDF-ready mode, if requested (`references/pdf-ready.md`): fixed-height `.pdf-page` sections, declared paper size, passing `agent-browser` overflow check, screenshot inspection.
