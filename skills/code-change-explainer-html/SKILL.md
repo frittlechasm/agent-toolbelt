@@ -1,6 +1,6 @@
 ---
 name: code-change-explainer-html
-description: Create or refine standalone HTML documents that teach code changes line by line, anchored to a comparison language the reader already knows (their most-familiar language) and with detailed callouts explaining the non-obvious syntax of the language the code is actually written in. Use this whenever the user wants a teaching document for code changes, refactors, optimization passes, implementation explainers, before/after walkthroughs, PR write-ups for review, understanding what an AI agent changed across a coding session in an unfamiliar language, or any artifact whose purpose is to *teach* a reader what changed and why. Triggers on phrases like "explain the code change", "walk through this refactor", "write up what changed and why", "explain what you changed this session", "walk me through what the agent did", "explain this in terms of a language I know", "before/after document", "implementation explainer", "teach me what this code does", "PR explainer", or any time the goal is teaching rather than tracking work. Extends `html-document` for presentation.
+description: Create standalone HTML that teaches what a code change does, line by line — anchored to a comparison language the reader already knows, with callouts on the non-obvious syntax of the language the code is written in. Use to *teach* what changed and why (not to track work): refactors, before/after walkthroughs, PR explainers, or understanding what an AI agent changed in an unfamiliar language. Triggers: "explain this code change", "walk me through what the agent did", "explain this in terms of a language I know", "implementation explainer". Extends `html-document` for presentation.
 ---
 
 # Code Change Explainer HTML
@@ -20,7 +20,7 @@ Before drafting, decide which language to anchor explanations to, in this strict
 2. **Memory.** If the prompt is silent and your environment has a stored preference (a memory recording the user's most-familiar language), use that.
 3. **Ask.** Only when *neither* the prompt nor memory specifies, ask the user — e.g. *"Which language are you most familiar with? I'll explain the change in those terms."* — and wait for the answer before drafting. Do not guess a default.
 
-After resolving, **record the choice in persistent memory** (if your environment supports it) as the user's preferred comparison language, so future documents skip the question. A prompt naming a one-off comparison language for a single document overrides memory for that document but should not silently replace a stored general preference; when in doubt, keep the stored preference and ask if the user wants it changed.
+After resolving, **record the choice in persistent memory** (if supported) so future documents skip the question. A one-off language named in the prompt overrides memory for that document only — don't silently overwrite a stored general preference; when in doubt, keep it and ask.
 
 Throughout this skill, *"the comparison language"* means whatever was resolved here. The examples below happen to use various languages; substitute the resolved one.
 
@@ -50,7 +50,7 @@ The usual trigger is *"explain what the agent changed this session,"* not a hand
 
 ## The Reader
 
-Fluent in the **comparison language** and its ecosystem — they think in its idioms, libraries, and patterns. They have *not* internalised the **target** language's idioms — spell those out. If you catch yourself writing "as you know, in <target language> …", reframe: the reader does *not* know the target language; that is why the document exists.
+Fluent in the **comparison language** and its idioms; has *not* internalised the **target** language's — spell those out. If you catch yourself writing "as you know, in <target language> …", reframe: the reader does *not* know the target language; that is why the document exists.
 
 ## Lesson Anatomy
 
@@ -78,19 +78,13 @@ What the change accomplishes, 2–4 plain sentences, no code yet. Define any tar
 
 ### 3. Explain Like I'm Five (optional — hard concepts only)
 
-Only when a lesson's central concept is genuinely hard for *anyone*, regardless of language background — async/await, closures, ownership and move semantics, generics variance, pointers vs. references, the event loop. Skip it entirely for anything the reader already groks from the comparison language (a method, a field, a loop, an assignment). Forcing an analogy onto an easy concept patronises the reader and bloats the page; if you can't find one that's genuinely illuminating, omit the section — a weak analogy is worse than none.
+Only when a lesson's central concept is genuinely hard for *anyone* — async/await, closures, ownership/move semantics, generics variance, pointers vs. references, the event loop. Skip it for anything the reader already groks from the comparison language; a weak or forced analogy is worse than none.
 
-One short everyday-world analogy, **no code and no programming terms** — the point is to build raw intuition *before* Section 4 maps it back to the comparison language. Keep it to 2–4 sentences.
+One everyday-world analogy in 2–4 sentences, **no code and no programming terms** — build raw intuition *before* Section 4 maps it to the comparison language. It must not just restate the Concept (what the change does) or the Mental Model (the precise comparison-language mapping).
 
-Distinct from its neighbours, and the model must not just restate them:
+> *Example (closures):* A closure is like a chef who leaves the kitchen with a backpack of ingredients — wherever they cook later, they still have exactly what they grabbed, not whatever is in the new kitchen.
 
-- **Concept (2)** — what the change accomplishes, in plain technical sentences.
-- **Explain Like I'm Five (3)** — one non-technical analogy for the hard idea, zero jargon.
-- **Mental Model (4)** — the precise mapping to comparison-language terms.
-
-> *Example (closures):* A closure is like a chef who walks out of the kitchen carrying a backpack of ingredients. Wherever they cook later, they still have exactly the ingredients they grabbed on the way out — not whatever happens to be in the new kitchen.
-
-Render via `html-document`'s **Callout** pattern (reuse `<aside class="callout">`) with an `<h4>` such as "In plain terms" so it reads distinctly from the concept callouts. Do not add new CSS.
+Render via `html-document`'s **Callout** pattern (`<aside class="callout">`) with an `<h4>` like "In plain terms". Do not add new CSS.
 
 ### 4. Mental Model (required)
 
@@ -132,12 +126,7 @@ Worked entry (target TypeScript, comparison Java):
 
 ### 8. Concept Callouts (required for non-trivial target syntax)
 
-Every non-trivial construct **of the target language** gets a callout with five fields: Name, Minimal syntax, Semantic, Parallel (in the comparison language), Gotcha. Use the concept callout pattern from `html-document` (**Callouts**); the HTML structure, the dedup rule, and the scope rules live in `references/concept-callouts.md`. To decide *which* constructs deserve a callout, run the category sweep in `references/any-language.md` over the actual code.
-
-Two hard rules (detailed in `references/concept-callouts.md`):
-
-- **Never explain the comparison language's syntax.** The reader knows it. It appears only as the *parallel*, to anchor the target construct — never as a thing to be taught.
-- **Never explain the same target construct twice.** The first time a construct appears, give it a full callout; afterwards reference back ("as covered in Lesson 2, `?.` short-circuits on nullish values").
+Every non-trivial construct **of the target language** gets a callout — five fields: Name, Minimal syntax, Semantic, Parallel (in the comparison language), Gotcha. Run the category sweep in `references/any-language.md` to decide *which* constructs qualify; the HTML structure, the field detail, and the two hard rules — **never explain the comparison language's syntax** (it appears only as the parallel) and **never explain the same construct twice** (reference back instead) — all live in `references/concept-callouts.md`.
 
 ### 9. Gotchas
 
@@ -174,21 +163,12 @@ Compose using the *Code-change explainer* scaffold in `html-document` `reference
 
 ## Quality Checklist
 
-- Change set ingested from the real diff where one exists; skipped noise (generated files, lockfiles, formatting) noted in the coverage line, not silently dropped.
-- Lessons grouped by concept across files and ordered along the architecture / data flow, not by file order.
-- Every Lesson carries a trust badge (Idiomatic / Works-but-unusual / Risky), justified in a few words, with uncertainty stated rather than defaulting to Idiomatic.
-- Gotchas cover the platform / runtime / framework footguns the code touches, not only language syntax.
-- The *why* is reconstructed for agent-made changes, with inferences flagged as inferences and questionable choices called out honestly.
-- Comparison language resolved by the prompt → memory → ask priority, and recorded in memory when newly learned.
-- Audience line names the comparison language so the reader knows the anchor.
-- Multi-concept changes are split into one Lesson per concept (not lumped into a single sprawling Lesson); interlocking Lessons get the end-to-end flow section.
-- Every Lesson has a Mental Model with a *specific* comparison-language analogue, not a hand-wave.
-- "Explain Like I'm Five" appears only on genuinely hard concepts, adds a jargon-free analogy, and never just restates the Concept or Mental Model — easy lessons have none.
-- Every non-trivial **target** syntactic feature has a Concept Callout with a comparison-language parallel and a gotcha.
-- **No explanation of the comparison language's own syntax** anywhere — it appears only as the parallel.
-- **No duplicate syntax explanations** — each target construct is taught once, then referenced back.
-- Every line of the in-scope After code is accounted for — quoted, grouped, or explicitly noted (noise triaged out is covered by the coverage line, not silently skipped).
-- Pattern names stated where applicable.
-- Concept map at the top lists every feature taught below.
-- Presentation deferred to `html-document`: before/after panels, callout boxes, badges, and print fallbacks all rendered through its element catalog.
-- No "as you know, in <target language> …" remains.
+- Comparison language resolved (prompt → memory → ask) and recorded in memory when newly learned.
+- Change set sourced from the real diff; noise (generated / lockfiles / formatting) noted in the coverage line, not silently dropped.
+- Lessons split one-per-concept across files and ordered along the data flow, not file order; interlocking Lessons get the end-to-end flow section.
+- Every Lesson has a *specific* Mental Model analogue and a justified trust badge (uncertainty stated, not defaulted to Idiomatic).
+- The *why* is reconstructed for agent changes — inferences flagged as inferences, questionable choices called out.
+- Gotchas cover platform / runtime / framework footguns, not only language syntax.
+- Two hard rules held: no comparison-language syntax explained (it appears only as the parallel), and no construct taught twice.
+- Every line of in-scope After code is accounted for; "Explain Like I'm Five" only on genuinely hard concepts, never restating Concept/Mental Model.
+- Presentation fully deferred to `html-document` (before/after panels, callouts, badges, print).

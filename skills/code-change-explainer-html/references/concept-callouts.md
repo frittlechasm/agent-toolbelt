@@ -53,7 +53,7 @@ Use the **Callout** pattern from `html-document` `references/elements.md` — th
 </aside>
 ```
 
-The `<dl>` / `<dt>` / `<dd>` structure renders cleanly, prints well, and is keyboard-accessible without extra work. The Name maps to the `<h4>`, the Minimal syntax to the `<pre><code>`, and Semantic / Parallel / Gotcha to `<dt>`/`<dd>` pairs. The "Parallel" `<dd>` should open with the comparison language ("In Python, …", "In C#, …") so the anchor is unmistakable.
+This structure prints well and is keyboard-accessible for free. Open the "Parallel" `<dd>` with the comparison language ("In Python, …", "In C#, …") so the anchor is unmistakable.
 
 ## Placement guidance
 
@@ -88,9 +88,7 @@ async function loadUser(id: string): Promise<User | null> {
 }
 ```
 
-Three callouts are warranted here:
-
-### Callout 1: `async function` returns a Promise
+This warrants three callouts — `async function`, `await`, and `??`. Here is the first in the five-field prose form; write the other two the same way:
 
 > **`async` function**
 > ```ts
@@ -100,26 +98,6 @@ Three callouts are warranted here:
 > **Parallel.** In Java, like a method returning `CompletableFuture<T>`. The body looks synchronous because `await` suspends the function (not the thread).
 > **Gotcha.** Forgetting `await` returns a `Promise<T>` where you wanted a `T`. The type checker catches some of these; many slip through, especially through `any`.
 
-### Callout 2: `await` suspends until settle
-
-> **`await` operator**
-> ```ts
-> const x = await promise;
-> ```
-> **Semantic.** Pauses execution of the surrounding `async` function until the awaited Promise settles. On fulfilment, evaluates to the resolved value. On rejection, throws — propagates as a normal exception that can be caught with `try` / `catch`.
-> **Parallel.** In Java, closest to `CompletableFuture.get()` or `.join()`, but non-blocking — the JavaScript thread continues running other tasks (event loop), and only this *function* is suspended.
-> **Gotcha.** Only valid inside `async` functions (or at the top level of an ES module). Inside a regular `function`, it's a syntax error.
-
-### Callout 3: Nullish coalescing `??`
-
-> **Nullish coalescing `??`**
-> ```ts
-> const value = maybe ?? fallback;
-> ```
-> **Semantic.** Returns `fallback` if `maybe` is `null` or `undefined`; otherwise returns `maybe`. Distinct from `||`, which falls back on *any* falsy value.
-> **Parallel.** In Java, like `Optional.ofNullable(maybe).orElse(fallback)`.
-> **Gotcha.** Using `||` instead of `??` is a frequent bug: `count || 10` returns `10` when `count` is `0`, which is usually wrong. Reach for `??` unless you specifically want falsy-fallback behaviour.
-
 ## Finding which constructs to call out
 
-There are no per-language cheat-sheets — a fixed list would surface the same callouts every time, when the point is to react to the non-obvious constructs in *this* code. Run the category sweep in `references/any-language.md` over the actual After code to flag what diverges from the comparison language (absence/null, equality, mutability, async, error model, type-system surprises, syntactic sugar, memory/ownership, metaprogramming, and platform/runtime/framework behaviour). For each flagged construct, fill the five fields below; the Gotcha is usually the precise way it diverges from its comparison-language parallel.
+There are no per-language cheat-sheets — a fixed list would surface the same callouts every time, when the point is to react to the non-obvious constructs in *this* code. Run the category sweep in `references/any-language.md` over the actual After code to flag what diverges from the comparison language (absence/null, equality, mutability, async, error model, type-system surprises, syntactic sugar, memory/ownership, metaprogramming, and platform/runtime/framework behaviour). For each flagged construct, fill the five fields from *Anatomy of a Callout* above; the Gotcha is usually the precise way it diverges from its comparison-language parallel.
