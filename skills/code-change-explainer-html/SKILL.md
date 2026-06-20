@@ -1,6 +1,6 @@
 ---
 name: code-change-explainer-html
-description: Create standalone HTML that teaches what a code change does, line by line — anchored to a comparison language the reader already knows, with callouts on the non-obvious syntax of the language the code is written in. Use to *teach* what changed and why (not to track work): refactors, before/after walkthroughs, PR explainers, or understanding what an AI agent changed in an unfamiliar language. Triggers: "explain this code change", "walk me through what the agent did", "explain this in terms of a language I know", "implementation explainer". Extends `html-document` for presentation.
+description: 'Create standalone HTML that teaches what a code change does, line by line — anchored to a comparison language the reader already knows, with callouts on the non-obvious syntax of the language the code is written in. Use to *teach* what changed and why (not to track work): refactors, before/after walkthroughs, PR explainers, or understanding what an AI agent changed in an unfamiliar language. Triggers: "explain this code change", "walk me through what the agent did", "explain this in terms of a language I know", "implementation explainer". Extends `html-document` for presentation.'
 ---
 
 # Code Change Explainer HTML
