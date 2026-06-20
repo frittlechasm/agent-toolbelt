@@ -54,7 +54,7 @@ Fluent in the **comparison language** and its idioms; has *not* internalised the
 
 ## Lesson Anatomy
 
-**One Lesson per distinct concept — not one per diff.** A single code change usually bundles several things to learn, and each deserves its own Lesson. A function refactor that introduces an async signature, an awaited call, and an optional-unwrap is **three Lessons**, each teaching one concept end to end — that segregation is what makes the document scannable and lets the reader re-derive the change one idea at a time. Lumping a multi-concept change into a single sprawling Lesson is the most common failure here: prefer several short, focused Lessons. Collapse to one Lesson only when the change genuinely teaches just one thing (e.g. extracting a named constant). When Lessons interlock, add the end-to-end flow section (see Document Structure) to show how they compose.
+**One Lesson per distinct concept — not one per diff.** A single code change usually bundles several things to learn, and each deserves its own Lesson. A function refactor that introduces an async signature, an awaited call, and an optional-unwrap is **three Lessons**, each teaching one concept end to end — that segregation is what makes the document scannable and lets the reader re-derive the change one idea at a time. Lumping a multi-concept change into a single sprawling Lesson is the most common failure here: prefer several short, focused Lessons. Collapse to one Lesson only when the change genuinely teaches just one thing (e.g. extracting a named constant). The opposite failure is over-splitting: don't spin up a Lesson for a construct that is **trivial for this reader** — type annotations for a reader who already knows a typed language, a renamed import, object/field shorthand. Fold those into a related Lesson in a line, or omit them. A Lesson must earn its place by teaching something the comparison-language reader doesn't already know. When Lessons interlock, add the end-to-end flow section (see Document Structure) to show how they compose.
 
 Use this section order within each Lesson; skip a section only when it truly does not apply.
 
@@ -71,6 +71,8 @@ Tag each Lesson with one of `html-document`'s confidence / severity **Badges** (
 - **Risky** (`badge-red`) — a latent bug, footgun, or violated platform constraint; explain the risk in Gotchas.
 
 This is honest labelling, not a code review — one badge per Lesson, justified in a few words. When you are unsure, say so rather than stamping `Idiomatic` by default.
+
+**The badge and the Gotchas must agree.** If a Lesson's Gotchas or Strategy surface a genuine hazard in the *changed code itself* — a swallowed error, a footgun, a violated platform constraint — the badge is amber or red, never green. `Idiomatic` is honest only when nothing real is flagged. (Generic language pitfalls that the change doesn't actually trip — "`==` vs `===`" on code that uses neither — are background, not hazards, and don't move the badge.)
 
 ### 2. Concept
 
