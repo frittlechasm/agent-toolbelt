@@ -46,7 +46,7 @@ ul, ol { margin: 0 0 20px; padding-left: 24px; color: var(--muted); font-size: 1
 li + li { margin-top: 8px; }
 strong { color: var(--text); }
 
-code { color: var(--code); font-family: var(--mono); font-size: 0.93em; }
+code { color: var(--code); font-family: var(--mono); font-size: 0.93em; overflow-wrap: anywhere; }
 pre { margin: 20px 0; padding: 18px; border: 1px solid var(--line);
   background: var(--code-bg); color: var(--code); font-family: var(--mono); font-size: 14px; line-height: 1.55;
   white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -174,9 +174,9 @@ Boxed explainer for a concept. Rendered near the relevant code.
 .callout { border: 1px solid var(--line); border-left: 3px solid var(--link); padding: 18px;
   margin: 28px 0; break-inside: avoid; }
 .callout h4 { margin: 0 0 8px; }
-.callout dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 8px 0 0; }
+.callout dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 8px 0 0; }
 .callout dt { color: var(--faint); font-weight: 600; }
-.callout dd { margin: 0; color: var(--muted); }
+.callout dd { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
 ```
 
 ### Note / Gotcha

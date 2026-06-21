@@ -26,7 +26,7 @@ Throughout this skill, *"the comparison language"* means whatever was resolved h
 
 ## Boundaries and dependencies
 
-- This skill owns **what** goes on the page: the lessons, the comparison-language mental model, the choice of which target-language concepts deserve callouts, the line-by-line walkthroughs, the verification step.
+- This skill owns **what** goes on the page: the lessons, the comparison-language mental model, the choice of which target-language concepts deserve callouts, and the line-by-line walkthroughs.
 - This skill does **not** own how the page is rendered. Presentation — fonts, spacing, code-block styling, callout boxes, before/after panel layout, badges, print rules — lives in [`html-document`](../html-document/SKILL.md). Read its `references/elements.md` before drafting. Sections are referenced by name (not number) so they survive renumbering — the ones this skill leans on:
   - **Code extensions** — before/after panels, annotated diffs, multi-column code
   - **Callouts** — the concept callout box this skill leans on
@@ -52,63 +52,26 @@ The usual trigger is *"explain what the agent changed this session,"* not a hand
 
 Fluent in the **comparison language** and its idioms; has *not* internalised the **target** language's — spell those out. If you catch yourself writing "as you know, in <target language> …", reframe: the reader does *not* know the target language; that is why the document exists.
 
+## Reader-first teaching rules
+
+Every Lesson must be understandable before code. Start with the practical problem, before comparison-language equivalents, architecture terms, pattern names, or trust-badge commentary. Define target/platform terms before relying on them. Use a 3–6 step **Before The Fix** timeline for event-driven, async, UI, cross-process, distributed, or lifecycle behavior. For related sub-fixes, add subheads under **What Changed** or split into separate Lessons.
+
 ## Lesson Anatomy
 
-**One Lesson per distinct concept — not one per diff.** A single code change usually bundles several things to learn, and each deserves its own Lesson. A function refactor that introduces an async signature, an awaited call, and an optional-unwrap is **three Lessons**, each teaching one concept end to end — that segregation is what makes the document scannable and lets the reader re-derive the change one idea at a time. Lumping a multi-concept change into a single sprawling Lesson is the most common failure here: prefer several short, focused Lessons. Collapse to one Lesson only when the change genuinely teaches just one thing (e.g. extracting a named constant). The opposite failure is over-splitting: don't spin up a Lesson for a construct that is **trivial for this reader** — type annotations for a reader who already knows a typed language, a renamed import, object/field shorthand. Fold those into a related Lesson in a line, or omit them. A Lesson must earn its place by teaching something the comparison-language reader doesn't already know. When Lessons interlock, add the end-to-end flow section (see Document Structure) to show how they compose.
+**One Lesson per distinct concept, not one per diff.** Split multi-concept changes into short focused Lessons; collapse only when the change teaches one idea. Do not create Lessons for constructs trivial to the comparison-language reader. When Lessons interlock, add the end-to-end flow section.
 
-Use this section order within each Lesson; skip a section only when it truly does not apply.
+Use these visible headings inside each Lesson; keep the names reader-facing and skip only when truly irrelevant:
 
-### 1. Title, Equivalent, and Trust
-
-One-line title plus a one-line equivalent naming the closest analogue **in the comparison language**, and a **trust badge** rating the change — so a reader learning from an agent's output absorbs the *good* way, not just what compiled.
-
-> **Adding a user-by-email lookup** — *In Spring terms: a `findByEmail` on a Spring Data JPA Repository.* (when the comparison language is Java)
-
-Tag each Lesson with one of `html-document`'s confidence / severity **Badges** (reuse them; do not invent new CSS):
-
-- **Idiomatic** (`badge-green`) — the standard, safe way to do this in the target language / platform.
-- **Works, but unusual** (`badge-amber`) — functional, but not how an experienced practitioner would write it; name the idiomatic alternative in Strategy.
-- **Risky** (`badge-red`) — a latent bug, footgun, or violated platform constraint; explain the risk in Gotchas.
-
-This is honest labelling, not a code review — one badge per Lesson, justified in a few words. When you are unsure, say so rather than stamping `Idiomatic` by default.
-
-**The badge and the Gotchas must agree.** If a Lesson's Gotchas or Strategy surface a genuine hazard in the *changed code itself* — a swallowed error, a footgun, a violated platform constraint — the badge is amber or red, never green. `Idiomatic` is honest only when nothing real is flagged. (Generic language pitfalls that the change doesn't actually trip — "`==` vs `===`" on code that uses neither — are background, not hazards, and don't move the badge.)
-
-### 2. Concept
-
-What the change accomplishes, 2–4 plain sentences, no code yet. Define any target-language jargon inline.
-
-### 3. Explain Like I'm Five (optional — hard concepts only)
-
-Only when a lesson's central concept is genuinely hard for *anyone* — async/await, closures, ownership/move semantics, generics variance, pointers vs. references, the event loop. Skip it for anything the reader already groks from the comparison language; a weak or forced analogy is worse than none.
-
-One everyday-world analogy in 2–4 sentences, **no code and no programming terms** — build raw intuition *before* Section 4 maps it to the comparison language. It must not just restate the Concept (what the change does) or the Mental Model (the precise comparison-language mapping).
-
-> *Example (closures):* A closure is like a chef who leaves the kitchen with a backpack of ingredients — wherever they cook later, they still have exactly what they grabbed, not whatever is in the new kitchen.
-
-Render via `html-document`'s **Callout** pattern (`<aside class="callout">`) with an `<h4>` like "In plain terms". Do not add new CSS.
-
-### 4. Mental Model (required)
-
-Callout box mapping the new code to specific **comparison-language** terms. Be concrete — vague analogies are worse than none. For example, if the comparison language is Java:
-
-- "This module is a Spring `@Service`; the default export is the instance."
-- "The arrow function is a lambda — equivalent to `users.stream().map(User::getEmail).toList()`."
-- "`async` returns `CompletableFuture<User>`; `await` is `.join()`, non-blocking."
-
-Phrase the mapping in whatever the resolved comparison language is. Render via `html-document`'s concept callout pattern (**Callouts**).
-
-### 5. Strategy
-
-Why the code changed, 3–6 sentences. Tie back to architectural concerns the reader recognises from the comparison language: cohesion, layering, testability, transactional boundaries, error propagation.
-
-When an AI agent made the change, the rationale is usually *undocumented* — infer it from the evidence: what the new code replaced, what problem or constraint it resolves, what pattern it conforms to. State an inference *as* an inference ("this looks aimed at removing the callback nesting"), not as established fact. And be honest when the change is **not** clearly right: if a choice is unusual, risky, or you cannot reconstruct a good reason for it, say so plainly — a reader learning from the change is better served by "this works but is an unusual way to do it" than by a confident rationalisation. Carry that judgement into the Lesson's trust badge (Section 1).
-
-### 6. Code Comparison
-
-Use the before/after stacked-panel pattern from `html-document` `references/elements.md` (**Code extensions**). Two separate sections — *not* a unified diff — because unified diffs hide spatial structure and that is exactly what we want the reader to see. Use the document skill's panel styling for height, scroll, and stacking behaviour.
-
-### 7. Line-by-Line Walkthrough (the heart)
+1. **Title and Trust** — title plus one badge: `Idiomatic`, `Works, but unusual`, or `Risky`. Badge and **Target And Platform Gotchas** must agree.
+2. **The Bug In Plain English** — 2–4 plain sentences; first explanatory paragraph starts with the practical problem.
+3. **Terms You Need** — 2–4 bullets defining target/platform vocabulary.
+4. **Before The Fix** — timeline for behavior/lifecycle bugs; otherwise 1–3 old-behavior bullets.
+5. **What Changed** — short bullets; use subheads for compound fixes.
+6. **Why It Matters** — user-visible/runtime/safety effect before any architecture framing.
+7. **Explain Like I'm Five** — optional; only for genuinely hard concepts, 2–4 jargon-free sentences in a callout.
+8. **Mental Model** — closest comparison-language analogue and concrete mapping callout.
+9. **Code Comparison** — before/after panels from `html-document` (**Code extensions**), never a unified diff.
+10. **Line-By-Line Walkthrough** — the heart:
 
 For every meaningful line of the After code (group boilerplate together; never skip silently):
 
@@ -118,48 +81,26 @@ For every meaningful line of the After code (group boilerplate together; never s
 - **Why this way**: why this construct over alternatives — the author's call.
 
 Use an ordered list of cards or a `<dl>` definition list — not a wide table. Lean on the base typography in `html-document`'s SKILL.md rather than inventing new styling.
+11. **Target-Language Callouts** — non-trivial target syntax only; follow `concept-callouts.md`, never teach the comparison language, never repeat a construct.
+12. **Target And Platform Gotchas** — actual language/platform/runtime pitfalls touched by this code; feed real hazards into the trust badge.
 
-Worked entry (target TypeScript, comparison Java):
-
-> **Line 5:** `const result = await fetchUser(id);`
-> *Says:* declare `result` from awaiting `fetchUser(id)`.
-> *Does:* `fetchUser` returns `Promise<User>`. `await` suspends the surrounding `async` function until resolved; a rejection throws here.
-> *Why:* `.then(...)` chains push the rest into a callback and lose linear flow. `await` reads top-to-bottom like blocking Java, without blocking the thread.
-
-### 8. Concept Callouts (required for non-trivial target syntax)
-
-Every non-trivial construct **of the target language** gets a callout — five fields: Name, Minimal syntax, Semantic, Parallel (in the comparison language), Gotcha. Run the category sweep in `references/any-language.md` to decide *which* constructs qualify; the HTML structure, the field detail, and the two hard rules — **never explain the comparison language's syntax** (it appears only as the parallel) and **never explain the same construct twice** (reference back instead) — all live in `references/concept-callouts.md`.
-
-### 9. Gotchas
-
-Short list of **language and platform** pitfalls drawn from the actual code.
-
-- *Language*: equality semantics, mutation in collection ops, scoping/binding surprises, default-argument traps, nil/null edge cases, move semantics.
-- *Platform / runtime / framework*: the footguns that aren't in the syntax but bite at runtime — React render/effect timing and stale closures, Node-vs-browser event-loop behaviour, ORM lazy-loading and N+1 queries, main-thread / UI-thread constraints, GC and retain cycles, framework lifecycle ordering, library API traps.
-
-These are often *why* the change was made — surface the ones the actual code touches, and feed any genuine hazard into the Lesson's trust badge.
-
-### 10. Verification
-
-A concrete, copy-pasteable check: a command, a curl, a UI flow, a test name.
-
-## Explanation Style
+## Style
 
 - Pair-programming voice anchored to the comparison language: "Notice that …", "If you've written a service in <comparison language>, this is the same idea."
 - Tie every explanation to a quoted snippet — no abstract lectures.
 - Name patterns (Adapter, Strategy, Repository, Visitor, Builder) and tie them to the comparison language.
-- Explain the *why*, not only the *what*.
+- Explain the *why* in plain language before architecture framing.
+- Prefer short sentences; if a sentence needs several target/platform terms, split it and define them first.
 
 ## Document Structure
 
 1. Title, audience (state the comparison language), summary — including a one-line **coverage note**: what was taught vs. what was skipped as noise (generated files, lockfiles, formatting).
-2. Status / verification strip.
+2. Status / scope strip.
 3. Concept map — outline of every concept taught (TOC + learning contract).
 4. Lessons.
 5. Optimised flow / end-to-end runtime path (when changes interlock).
-6. End-to-end verification.
-7. Remaining work.
-8. Files to read next.
+6. Remaining work.
+7. Files to read next.
 
 Compose using the *Code-change explainer* scaffold in `html-document` `references/elements.md` (**Document scaffolds**).
 
@@ -167,9 +108,9 @@ Compose using the *Code-change explainer* scaffold in `html-document` `reference
 
 - Comparison language resolved (prompt → memory → ask) and recorded in memory when newly learned.
 - Change set sourced from the real diff; noise (generated / lockfiles / formatting) noted in the coverage line, not silently dropped.
-- Lessons split one-per-concept across files and ordered along the data flow, not file order; interlocking Lessons get the end-to-end flow section.
-- Every Lesson has a *specific* Mental Model analogue and a justified trust badge (uncertainty stated, not defaulted to Idiomatic).
-- The *why* is reconstructed for agent changes — inferences flagged as inferences, questionable choices called out.
+- Lessons split one-per-concept and ordered along data flow; interlocking Lessons get end-to-end flow.
+- Every Lesson uses the standard headings, starts with the practical problem, defines terms before use, and has a specific Mental Model plus justified trust badge.
+- **What Changed** and **Why It Matters** explain the fix plainly; agent-change inferences are labelled and questionable choices called out.
 - Gotchas cover platform / runtime / framework footguns, not only language syntax.
 - Two hard rules held: no comparison-language syntax explained (it appears only as the parallel), and no construct taught twice.
 - Every line of in-scope After code is accounted for; "Explain Like I'm Five" only on genuinely hard concepts, never restating Concept/Mental Model.
