@@ -2,10 +2,10 @@
 """Align columns in a pipe-delimited plain-text table.
 
 Usage:
-    python3 align_table.py <file_path>
+    python3 align_table.py [--strip] [--in-place] <file_path|->
 
 Reads the file, finds all pipe-delimited table rows, aligns columns
-to uniform width, and writes the result back in place.
+to uniform width, and prints the result to stdout by default.
 """
 
 import re
@@ -16,6 +16,8 @@ def strip_markdown(text: str) -> str:
     """Remove common markdown formatting from text."""
     # Remove bold
     text = text.replace("**", "")
+    # Remove inline code markers while preserving the code/value text
+    text = re.sub(r"`([^`]+)`", r"\1", text)
     # Remove markdown reference links like ([label][ref])
     text = re.sub(r"\s*\(\[.*?\]\[.*?\]\)", "", text)
     # Remove inline markdown links [text](url) -> text
@@ -27,16 +29,15 @@ def strip_markdown(text: str) -> str:
     return text.strip()
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 align_table.py <file_path>")
-        sys.exit(1)
+def strip_non_table_markdown(line: str) -> str:
+    """Remove markdown artifacts from non-table lines while preserving content."""
+    if re.match(r"^\s*\[[^\]]+\]:\s+\S+", line):
+        return ""
+    return strip_markdown(line.rstrip("\n")) + ("\n" if line.endswith("\n") else "")
 
-    file_path = sys.argv[1]
-    strip = "--strip" in sys.argv
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+def align_table(lines: list[str], strip: bool = False) -> list[str]:
+    """Return table-aligned lines without mutating the source file."""
 
     # Identify table lines (start with |)
     table_indices = []
@@ -59,17 +60,15 @@ def main():
                 table_indices.append(i)
                 table_rows.append(cells)
         else:
-            non_table[i] = line
+            non_table[i] = strip_non_table_markdown(line) if strip else line
 
     if not table_rows:
-        print("No table found in file.")
-        sys.exit(0)
+        return lines
 
     # Calculate column widths from non-separator rows
     data_rows = [r for r in table_rows if r is not None]
     if not data_rows:
-        print("No data rows found.")
-        sys.exit(0)
+        return lines
 
     num_cols = max(len(r) for r in data_rows)
     col_widths = [0] * num_cols
@@ -102,10 +101,37 @@ def main():
         else:
             output_lines[idx] = format_row(row) + "\n"
 
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.writelines(output_lines)
+    return output_lines
 
-    print(f"Done. Aligned {len(table_indices)} table rows ({num_cols} columns).")
+
+def main():
+    args = sys.argv[1:]
+    strip = "--strip" in args
+    in_place = "--in-place" in args
+    paths = [arg for arg in args if not arg.startswith("--")]
+
+    if len(paths) != 1:
+        print("Usage: python3 align_table.py [--strip] [--in-place] <file_path|->", file=sys.stderr)
+        sys.exit(1)
+
+    file_path = paths[0]
+    if file_path == "-":
+        lines = sys.stdin.readlines()
+    else:
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+    output_lines = align_table(lines, strip=strip)
+
+    if in_place:
+        if file_path == "-":
+            print("--in-place requires a file path, not stdin", file=sys.stderr)
+            sys.exit(1)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.writelines(output_lines)
+        return
+
+    sys.stdout.writelines(output_lines)
 
 
 if __name__ == "__main__":

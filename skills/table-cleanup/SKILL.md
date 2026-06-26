@@ -5,53 +5,29 @@ description: Clean up markdown tables for plain-text sharing (email, chat, Slack
 
 # Table Cleanup
 
-Strip markdown formatting from tables and produce cleanly aligned plain-text tables suitable for email, chat, or pasting into documents.
+Produce clean, aligned plain-text tables for email, chat, Slack, or documents.
 
-## Workflow
+## Output
 
-1. Read the source file containing the markdown table
-2. Strip markdown syntax:
-   - Remove bold markers (`**`)
-   - Remove italic markers (`*`)
-   - Remove markdown links (`[text](url)` -> `text`, `([label][ref])` -> remove entirely)
-   - Remove emoji characters if they were part of markdown annotations (e.g. checkmarks used as markers)
-3. Align all columns so pipe (`|`) characters are vertically consistent across every row
-4. Write the cleaned file back
+Reply with only the cleaned table/content unless the user asks for explanation.
+Do not edit source files unless the user explicitly asks you to update a file.
 
-## Column Alignment
+## Cleanup Rules
 
-Use the bundled Python script for reliable alignment:
+- Strip markdown emphasis markers from cell text.
+- Strip inline code markers from cell text while preserving the code/value text.
+- Convert inline links (`[text](url)`) to `text`.
+- Remove reference-style annotation links inside cells, such as `([label][ref])`.
+- Remove marker emoji used as table annotations when they do not add content.
+- Preserve non-table text the user included, but keep it plain.
+- Align columns by padding cells so pipes line up across every row.
+
+## Helper Script
+
+Use the bundled script when a table is in a file or deterministic alignment helps:
 
 ```bash
-python3 scripts/align_table.py <file_path>
+python3 scripts/align_table.py --strip <file_path>
 ```
 
-The script:
-- Parses pipe-delimited rows
-- Calculates max width per column across all data rows
-- Pads every cell to uniform width
-- Rebuilds the separator row to match
-- Preserves non-table lines (headers, blank lines) as-is
-
-If the script is unavailable, align manually:
-1. Split each row by `|`
-2. Find the max content width for each column
-3. Left-justify and pad each cell with spaces to that width
-4. Rebuild the separator line with dashes matching column widths
-
-## Stripping Patterns (quick reference)
-
-| Pattern              | Action                        |
-|----------------------|-------------------------------|
-| `**text**`           | Replace with `text`           |
-| `*text*`             | Replace with `text`           |
-| `([label][ref])`     | Remove entirely               |
-| `[text](url)`        | Replace with `text`           |
-| `✅` (marker emoji)  | Remove                        |
-| Trailing ref links   | Remove `[1]: url` lines       |
-
-## Tips
-
-- Always strip formatting first, then align — stripping changes cell widths
-- Preserve the table structure (pipes and separator row) for readability
-- Keep non-table content (intro text, notes) untouched
+The script prints the cleaned result to stdout by default. Use `--in-place` only when the user explicitly requests file modification.
