@@ -1,25 +1,35 @@
 # agent-toolbelt
 
-Personal agent tooling written locally.
+Skills and related utilities. 
 
-This repo stores custom skills, agents, scripts, plugins, and related assets.
-Tool-owned registries and marketplace installs are intentionally kept outside
-this repository.
+## Install
 
-## Layout
+List the skills provided by this repository:
 
-- `skills/` - locally-authored skills.
+```bash
+npx skills add frittlechasm/agent-toolbelt --list
+```
 
-Local environments can symlink individual skills from their configured skill
-discovery path into this repository without moving externally-installed skills
-or tool-owned registries.
+Install every skill into the current project:
 
-## Current Skills
+```bash
+npx skills add frittlechasm/agent-toolbelt --skill '*' -y
+```
 
-- `code-change-explainer-html`
-- `codebase-architecture-report`
-- `commit-msg`
-- `html-document`
-- `sync-repos`
-- `sync-upstream`
-- `table-cleanup`
+To install one skill:
+
+```bash
+npx skills add frittlechasm/agent-toolbelt --skill <skill-name> -y
+```
+
+## Skills
+
+| Skill | What it helps with |
+| --- | --- |
+| `code-change-explainer-html` | Creates a standalone HTML walkthrough of a code change, explaining what changed line by line in terms of a language the reader already knows. |
+| `codebase-architecture-report` | Maps an existing codebase into a source-aware architecture report with evidence labels, key flows, decisions, controls, and gaps. |
+| `commit-msg` | Generates concise conventional commit messages from staged or unstaged git changes. |
+| `html-document` | Creates polished standalone HTML documents for reports, explainers, proposals, plans, and other document-like outputs. |
+| `sync-repos` | Mirrors tracked files from one local git repo to another while preserving the target repo's `deploy.yml`. |
+| `sync-upstream` | Keeps a fork current with its upstream parent, rebases feature branches, and rebuilds `dev`. |
+| `table-cleanup` | Strips markdown formatting from tables and aligns them for readable plain-text sharing. |
