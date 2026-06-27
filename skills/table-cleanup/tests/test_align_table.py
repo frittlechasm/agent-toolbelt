@@ -28,16 +28,22 @@ class AlignTableTests(unittest.TestCase):
             "[1]: https://example.com/source\n",
         ]
 
-        output = "".join(align_table_module.align_table(source, strip=True))
+        output_lines = align_table_module.align_table(source, strip=True)
+        output = "".join(output_lines)
 
         self.assertIn("Intro note\n", output)
-        self.assertIn("| Platform | Ready   | runbook           |", output)
-        self.assertIn("| Data     | Blocked | waiting on vendor |", output)
+        # Markdown is stripped from cells...
         self.assertNotIn("**", output)
         self.assertNotIn("https://", output)
-        self.assertNotIn("✅", output)
-        self.assertNotIn("❌", output)
         self.assertNotIn("[1]:", output)
+        # ...but meaningful status emoji are preserved (they are the cell's value).
+        self.assertIn("✅ Ready", output)
+        self.assertIn("❌ Blocked", output)
+        self.assertIn("runbook", output)
+        self.assertIn("waiting on vendor", output)
+        # Columns align: every rendered table row has identical width.
+        table_widths = {len(l.rstrip("\n")) for l in output_lines if l.lstrip().startswith("|")}
+        self.assertEqual(len(table_widths), 1)
 
     def test_separator_is_rebuilt_without_alignment_markers(self):
         source = [
@@ -69,8 +75,11 @@ class AlignTableTests(unittest.TestCase):
             temp_file.seek(0)
             self.assertEqual(temp_file.read(), original)
 
-        self.assertIn("| Alpha | Good   | 1.2.0   |", result.stdout)
+        self.assertIn("✅ Good", result.stdout)
+        self.assertIn("Alpha", result.stdout)
+        self.assertIn("1.2.0", result.stdout)
         self.assertNotIn("`", result.stdout)
+        self.assertNotIn("**", result.stdout)
 
 
 if __name__ == "__main__":

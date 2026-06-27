@@ -9,7 +9,7 @@
       "expectations": [
         "The output contains only the cleaned table/content, without explanatory prose.",
         "The table columns are padded so pipe characters align across rows.",
-        "Markdown emphasis markers, inline link URLs, marker emoji, and reference-style annotation links are removed.",
+        "Markdown emphasis markers, inline link URLs, and reference-style annotation links are removed (status emoji such as ✅/❌ are preserved as meaningful data).",
         "Reference definition lines such as '[1]: https://example.com/source' are not included in the output."
       ]
     },

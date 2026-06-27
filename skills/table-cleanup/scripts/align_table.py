@@ -24,8 +24,9 @@ def strip_markdown(text: str) -> str:
     text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
     # Remove italic (single *) but not inside words like don't
     text = re.sub(r"(?<!\w)\*([^*]+)\*(?!\w)", r"\1", text)
-    # Remove common marker emojis
-    text = text.replace("✅", "").replace("❌", "")
+    # Note: emoji are intentionally preserved. A ✅/❌ in a Status column is
+    # the cell's meaning, not markdown. Deciding whether an emoji is decorative
+    # is a judgment call left to the caller, not a blanket replace here.
     return text.strip()
 
 
