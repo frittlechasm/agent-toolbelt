@@ -16,6 +16,13 @@ git -C <source> rev-parse --git-dir
 git -C <target> rev-parse --git-dir
 ```
 
+Check both worktrees before changing files. If the target has existing uncommitted changes, show them and ask before overwriting or deleting anything. Source changes may be synced as-is, but the user should see what is being copied.
+
+```bash
+git -C <source> status --short
+git -C <target> status --short
+```
+
 ### 2. Mirror tracked files
 
 ```bash

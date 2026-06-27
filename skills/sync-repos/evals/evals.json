@@ -1,0 +1,44 @@
+{
+  "skill_name": "sync-repos",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Sync the tracked code from /tmp/public-agent-toolbelt into /tmp/work-agent-toolbelt. Keep the work repo's deploy.yml intact, stage the result, and don't push anything.",
+      "expected_output": "The assistant verifies both paths are git repositories, checks worktree status, mirrors source tracked files into the target, deletes target tracked files missing from source except deploy.yml, stages target changes, reports status/stat verification, preserves target deploy.yml, and does not push.",
+      "files": [],
+      "expectations": [
+        "Both source and target are verified with git rev-parse before syncing.",
+        "Both worktree statuses are checked before files are changed.",
+        "The sync uses the source tracked file list rather than copying untracked files.",
+        "Target tracked files absent from source are removed, except deploy.yml.",
+        "The target deploy.yml remains unchanged.",
+        "The assistant stages changes in the target and reports git status or cached diff.",
+        "The assistant does not push."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Copy my changes from ../public-widget to ../client-widget. There are some generated logs and a local .env in public-widget; don't bring those over. Also don't commit yet.",
+      "expected_output": "The assistant syncs only git-tracked source files, excludes untracked/generated/local files, stages target changes, reports verification, and does not commit.",
+      "files": [],
+      "expectations": [
+        "Only files returned by git ls-files in the source are copied.",
+        "Untracked files such as logs or .env are not copied.",
+        "The assistant stages target changes with git add -A.",
+        "The assistant reports target status or staged diff.",
+        "The assistant does not commit."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Mirror public to work, same as last time.",
+      "expected_output": "If the source or target path is not explicit from context, the assistant asks for the missing path or paths before running sync commands.",
+      "files": [],
+      "expectations": [
+        "The assistant does not guess source or target paths.",
+        "The assistant asks for missing path information.",
+        "No destructive copy or delete command is run before paths are known."
+      ]
+    }
+  ]
+}
