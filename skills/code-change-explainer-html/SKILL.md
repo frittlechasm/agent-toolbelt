@@ -44,7 +44,7 @@ The usual trigger is *"explain what the agent changed this session,"* not a hand
 
 Use these visible headings inside each Lesson; keep the names reader-facing and skip only when truly irrelevant:
 
-1. **Title and Trust** — title plus one badge: `Idiomatic`, `Works, but unusual`, or `Risky`. Badge and **Target And Platform Gotchas** must agree.
+1. **Title and Trust** — title plus one badge: `Idiomatic`, `Works, but unusual`, or `Risky`. Choose the badge from the actual target-language/platform behavior explained in the Lesson; if the code has a gotcha, name it in **Terms You Need** or the relevant syntax callout.
 2. **The Bug In Plain English** — A very simple explanation of the issue and why the changes were required.
 3. **Terms You Need** — brief definitions for target/platform vocabulary the reader needs before the code.
 4. **Before The Fix** — A very simple explanation of the old behavior and its implications. Use a 3–6 step timeline for event-driven, async, UI, cross-process, distributed, or lifecycle bugs.
