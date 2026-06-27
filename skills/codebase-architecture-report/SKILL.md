@@ -10,10 +10,9 @@ Gather source-backed evidence from a codebase and produce an architecture report
 ## Boundaries and dependencies
 
 - This skill owns **content and evidence**: what was read, what was found, what is claimed, what is gap, what is recommendation.
-- It does **not** own presentation. For HTML output, delegate to [`html-document`](../html-document/SKILL.md). That skill renders every element — diagrams, badges, risk maps, evidence provenance, stat cards, tabs, and the full *Architecture report* scaffold in its `references/elements.md` (**Document scaffolds**). Sections there are referenced by name, not number, so they survive renumbering.
+- It does **not** own presentation. For HTML output, delegate to [`html-document`](../html-document/SKILL.md) with the report content, evidence, diagrams to include, and document type `ARCHITECTURE REPORT · <project>`.
 - Use `improve-codebase-architecture` instead when the primary task is to find refactoring opportunities or propose deeper modules.
 - Use `security-review` instead when the user asks for a standalone security review without needing an architecture report.
-- Use this skill when the output is a report that explains the system, flows, decisions, controls, and gaps.
 
 ## Principles
 
@@ -59,7 +58,7 @@ Read only what is needed for the scope. Start with:
 - deployment files: Dockerfile, compose, Helm, Terraform, CI/CD, env examples
 - relevant tests
 
-Use the Glob tool for file discovery, the Grep tool for content search, and the Read tool for targeted reads. Build an evidence index as you go — track every file you read and what you found in it.
+Use fast file discovery and content search tools available in the environment, then read targeted files. Build an evidence index as you go — track every file you read and what you found in it.
 
 ### 3. Map Architecture
 
@@ -183,7 +182,7 @@ A list of all files read during the investigation, grouped by area (docs, config
 
 **Markdown**: clean heading hierarchy, fenced code blocks for file references, and tables for structured data (decisions, controls, gaps). The document should read well in any Markdown renderer.
 
-**HTML**: invoke `html-document` for presentation. Pass it the report content (sections, evidence, claims, diagrams to include) and the document type (`ARCHITECTURE REPORT · <project>`). It composes everything using the *Architecture report* scaffold in its `references/elements.md` (**Document scaffolds**) — eyebrow, TL;DR, stat cards, SVG architecture map (**Diagrams**), flow steps for key flows, evidence badges (**Badges**), evidence provenance (**Framing**). Do not redefine any of those patterns here.
+**HTML**: invoke `html-document` for presentation. Pass it the report content and document type (`ARCHITECTURE REPORT · <project>`). Use its *Architecture report* scaffold; do not redefine presentation patterns here.
 
 ## Large Codebases
 
@@ -194,11 +193,3 @@ For large repos:
 - create a subsystem map and mark uninspected areas
 - validate high-impact claims with direct source reads
 - label broad claims as `Inferred` unless backed by docs/code
-
-## Example Triggers
-
-- "Generate an architecture overview of this repo."
-- "Create a source-aware HTML architecture report."
-- "Map the auth, billing, and sync flows and identify security gaps."
-- "Give me a client-facing implementation overview with evidence from the code."
-- "Review this codebase and document architecture decisions and risks."
