@@ -1,0 +1,43 @@
+{
+  "skill_name": "sync-upstream",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run /sync-upstream in this fork. It has origin plus a GitHub parent repo, local main is behind upstream/main, and there are two feature branches plus dev. Keep all branches synced and tell me what happened.",
+      "expected_output": "The assistant follows the full workflow: detects or configures upstream, fast-forwards main, rebases every non-main/non-dev local branch, pushes rebased branches with --force-with-lease, rebuilds dev from main by merging feature branches, restores any stash, and reports a branch summary plus dev graph.",
+      "files": [],
+      "expectations": [
+        "Checks working tree status before modifying branches.",
+        "Fetches upstream main and updates local main only with a fast-forward merge.",
+        "Excludes main and dev when selecting feature branches to rebase.",
+        "Uses --force-with-lease for rewritten feature branches and dev.",
+        "Reports per-branch results and shows the dev graph."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "sync upstream for this fork, but main has local-only commits and upstream/main also has new commits. Do not lose my local main work.",
+      "expected_output": "The assistant stops when main cannot fast-forward, does not force merge or reset, shows both sides of the divergence, and asks the user how to proceed.",
+      "files": [],
+      "expectations": [
+        "Attempts or verifies fast-forward-only update of main.",
+        "Does not run git reset, non-fast-forward merge, or force push main.",
+        "Shows commits in main..upstream/main and upstream/main..main.",
+        "Stops before rebasing feature branches or rebuilding dev."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Bring my fork up to date. One feature branch conflicts during rebase; there is a PATCH.md and docs/branch-auth-refresh.md with conflict guidance. Preserve the branch intent if you can, but skip it if it cannot be resolved safely.",
+      "expected_output": "The assistant reads the intent documents before resolving conflicts, applies branch-specific guidance where possible, continues the rebase and pushes with --force-with-lease, or aborts and reports the skipped branch with clear manual next steps.",
+      "files": [],
+      "expectations": [
+        "Reads PATCH.md or docs/PATCH.md before conflict resolution when present.",
+        "Reads docs/branch-auth-refresh.md before resolving that branch.",
+        "Preserves upstream and branch intent when resolving conflicts.",
+        "Uses git rebase --abort and reports the branch if the conflict is not safely resolvable.",
+        "Does not add AI Co-Authored-By trailers."
+      ]
+    }
+  ]
+}

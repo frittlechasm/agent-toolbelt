@@ -1,22 +1,26 @@
 ---
 name: sync-upstream
-description: Syncs a forked repository's local main branch with its upstream parent, then rebases all feature branches onto the updated main and rebuilds dev by merging all feature branches. Use this skill whenever the user says "sync upstream", "sync with upstream", "pull from upstream", "update from upstream", "keep branches in sync", "sync the repo", or runs /sync-upstream. Also trigger when the user asks to bring their fork up to date with the original project.
+description: Sync a forked repository with its upstream parent: fast-forward local main from upstream/main, rebase every feature branch, and rebuild dev from the rebased branches. Use this skill whenever the user says "sync upstream", "sync with upstream", "pull from upstream", "update from upstream", "keep branches in sync", "sync the repo", runs /sync-upstream, or asks to bring a fork up to date with the original project.
 ---
 
 # sync-upstream
 
-Keeps a fork in sync with its upstream parent: updates `main`, rebases every feature branch, and rebuilds `dev` as a clean merge of all features.
+Use this workflow from the target repository. It rewrites feature branches, so prefer fast-forward updates for `main`, `--force-with-lease` for rewritten branches, and explicit reporting whenever you stop.
 
 ## Before you start
 
-Stash any dirty working tree so nothing gets clobbered:
+Check the working tree before changing branches:
 
 ```bash
-git stash list   # note count before
-git stash        # only if git status shows changes
+git status --short
+git stash list
 ```
 
-Remember whether you stashed so you can pop at the end.
+If there are tracked or untracked changes, stash them and remember that you did:
+
+```bash
+git stash push -u -m "sync-upstream temporary stash"
+```
 
 ## Step 1 — Wire up the upstream remote
 
@@ -68,26 +72,27 @@ git checkout <branch>
 git rebase main
 ```
 
-### Handling conflicts
+### Conflict resolution
 
-If rebase stops with conflicts:
+Before resolving rebase or merge conflicts, gather intent context:
 
-1. Before touching any file, gather intent context:
-   - Check for `PATCH.md` at the repo root (`./PATCH.md`) and in `docs/PATCH.md`. If either exists, read it — it describes the overall intent and motivation behind the branch's changes, which is essential for resolving conflicts correctly.
-   - Check `docs/branch-<branchname>.md` — it has a **Conflict Hot-Spots** table and **Resolution guidance** section written specifically for that branch.
-   - If neither file exists, infer intent on your own: read `git log main..<branch> --oneline` to see what commits the branch adds, inspect the conflicted files to understand what the branch is trying to change, and form a clear mental model of the branch's purpose before resolving anything.
-   Together these sources tell you *why* the branch exists and *where* the tricky spots are. If PATCH.md contradicts a specific resolution in the branch doc, prefer the branch doc — it is more granular.
-2. Resolve each conflicted file following the guidance. The intent described in PATCH.md and the branch docs tells you what the branch changes are trying to accomplish — make sure both the upstream additions and the branch's changes are preserved.
-3. Stage resolved files and continue:
-   ```bash
-   git add <resolved-files>
-   git rebase --continue
-   ```
-4. If a conflict is unresolvable, abort, skip the branch, and report it at the end:
-   ```bash
-   git rebase --abort
-   git checkout main
-   ```
+1. Read `./PATCH.md` or `docs/PATCH.md` if present.
+2. Read `docs/branch-<branchname>.md` if present; prefer it over PATCH.md for branch-specific conflicts.
+3. If no guidance exists, infer intent from `git log main..<branch> --oneline` and the conflicted files before editing.
+
+Preserve both upstream changes and the branch's purpose. After resolving rebase conflicts:
+
+```bash
+git add <resolved-files>
+git rebase --continue
+```
+
+If a conflict is not safely resolvable, abort, skip the branch, and report it at the end:
+
+```bash
+git rebase --abort
+git checkout main
+```
 
 After a clean (or resolved) rebase:
 
@@ -112,7 +117,7 @@ Delete the old `dev` and create a fresh one from `main`:
 
 ```bash
 git checkout main
-git branch -D dev
+git branch -D dev 2>/dev/null || true
 git checkout -b dev
 ```
 
@@ -120,7 +125,7 @@ git checkout -b dev
 
 Before merging, scan the `docs/branch-*.md` files for the phrase **"strict superset"**. If branch B is described as a strict superset of branch A, merge A first, then B. This avoids redundant commits and keeps the graph clean.
 
-If a merge into `dev` produces conflicts, follow the same resolution process as Step 3: check `PATCH.md` (root or `docs/`) for intent, then `docs/branch-<branchname>.md` for specific guidance.
+If a merge into `dev` produces conflicts, use the conflict-resolution process above.
 
 Merge each branch:
 
