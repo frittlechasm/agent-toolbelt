@@ -4,19 +4,19 @@
     {
       "id": 1,
       "prompt": "Generate a polished standalone HTML document from this technical summary so I can export it as a PDF for a client.",
-      "expected_output": "A single-file HTML document with editorial CSS (no Tailwind), document type breadcrumb, TL;DR block, clear narrative flow, table of contents, print/PDF styles with @page and break-inside rules, responsive layout, and no decorative elements.",
+      "expected_output": "A single-file flowing HTML document using the base CSS, no frameworks or external assets, no table of contents, clean print styles with @page and break-inside rules, responsive layout without horizontal page scroll, and no decorative elements. The document should not switch into fixed-page PDF-ready mode merely because the user wants to export it as a PDF.",
       "files": []
     },
     {
       "id": 2,
       "prompt": "Refine this architecture report HTML. Add flow diagrams, decision explainers, better evidence sections, and make it print cleanly.",
-      "expected_output": "An improved HTML document with hand-built SVG diagrams for complex flows, tabbed code snippets, decision sections with badges, evidence provenance section, click-to-reveal detail panels, and A4-friendly print styles.",
+      "expected_output": "An improved standalone HTML document that uses the architecture-report scaffold from elements.md, adds informational SVG diagrams for complex flows, decision sections with evidence badges, evidence provenance, responsive overflow handling, and clean print styles. Interactive elements should appear only where they materially improve the document.",
       "files": []
     },
     {
       "id": 3,
       "prompt": "Convert this markdown implementation plan into a high-quality HTML document with interactive sections explaining why each decision was made.",
-      "expected_output": "A single-file HTML document with stat summary cards, timeline/milestone visualization, inline mockups, tabbed snippets, accordion decisions with tradeoffs, and keyboard-accessible interactions that degrade cleanly for print.",
+      "expected_output": "A single-file HTML document using the base document style, with decision sections that explain tradeoffs, appropriate extended elements from elements.md only when needed, keyboard-accessible interactions if used, responsive behavior down to narrow widths, and clean print output.",
       "files": []
     }
   ]
