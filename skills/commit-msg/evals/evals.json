@@ -1,0 +1,41 @@
+{
+  "skill_name": "commit-msg",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Write a commit message for the staged changes in this repo. Do not commit it.",
+      "expected_output": "A conventional commit message based on git diff --cached, with only the message text and no git commit execution or attribution trailer.",
+      "files": [],
+      "assertions": [
+        "Inspects staged changes before unstaged changes.",
+        "Outputs only the commit message, with no explanatory prose.",
+        "Uses a valid conventional commit header with type, optional scope, colon, and imperative lowercase subject.",
+        "Does not include Co-authored-by or other commit trailers."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Nothing is staged yet, but I want a commit msg for my current local changes. Please just suggest the message.",
+      "expected_output": "A conventional commit message based on git diff because no staged diff exists, with an appropriate type/scope and no extra explanation.",
+      "files": [],
+      "assertions": [
+        "Falls back to unstaged changes only after confirming there are no staged changes.",
+        "Outputs only the commit message text.",
+        "Chooses a type that reflects the change purpose rather than defaulting to chore.",
+        "Keeps the subject concise, imperative, lowercase, and without a trailing period."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Check the staged diff and commit it with a good conventional commit message.",
+      "expected_output": "The assistant inspects the staged diff, derives a conventional commit message, and uses it for the requested commit without adding attribution trailers.",
+      "files": [],
+      "assertions": [
+        "Uses git diff --cached to derive the message from staged changes.",
+        "Uses a valid conventional commit header in the git commit message.",
+        "Does not include Co-authored-by or any other attribution trailer.",
+        "Does not substitute unstaged changes when staged changes exist."
+      ]
+    }
+  ]
+}

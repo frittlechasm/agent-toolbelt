@@ -1,17 +1,20 @@
 ---
 name: commit-msg
-description: Generate conventional commit messages from uncommitted changes. ALWAYS use this skill for ANY request to produce, write, draft, suggest, propose, create, or generate a git commit message — including "commit", "commit message", "commit msg", "generate/write/draft/suggest a commit message", "what should the commit message be", "message for this commit", "git commit message", "check changes and commit", or "now commit". Trigger whenever a commit message needs to be authored from staged or unstaged changes, regardless of exact wording.
+description: Generate Conventional Commit messages from staged or unstaged Git changes. Use whenever the user asks to write, draft, suggest, choose, or use a commit message, including requests to commit changes where a message must be authored. Do not trigger for explaining Conventional Commits generally unless a concrete message is needed.
 ---
 
 # Commit Message Generator
 
 ## Workflow
 
-1. Run `git diff --cached` to inspect staged changes (if nothing staged, run `git diff` for unstaged)
-2. Analyze the changes to determine the type, scope, and purpose
-3. Generate a commit message following the format below
-4. Output ONLY the commit message — do not run `git commit`
-5. Do NOT add any commit trailers or attribution lines such as `Co-authored-by:`
+1. Run `git diff --cached` to inspect staged changes.
+2. If staged changes exist, base the message only on the staged diff; otherwise run `git diff` for unstaged changes.
+3. If there are no staged or unstaged changes, say there are no changes to summarize.
+4. Analyze the changes to determine the type, scope, and purpose.
+5. Generate a commit message following the format below.
+6. If the user only asked for a message, output only the commit message.
+7. If the user explicitly asked to commit, use the generated message for the commit after normal repository checks.
+8. Do not add commit trailers or attribution lines such as `Co-authored-by:`.
 
 ## Format
 
@@ -23,7 +26,7 @@ description: Generate conventional commit messages from uncommitted changes. ALW
 
 - **Subject**: 50 chars max, imperative mood, lowercase, no period
 - **Scope**: component or area affected (optional but preferred)
-- **Body**: include only if changes are complex — explain WHAT and WHY
+- **Body**: include only if changes are complex; explain what changed and why
 - **Breaking change**: add `!` before colon — `feat(auth)!: remove OAuth 1.0`
 - **Trailers**: do not include `Co-authored-by:` or any other commit trailer
 

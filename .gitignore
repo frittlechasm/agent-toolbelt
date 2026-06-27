@@ -1,6 +1,10 @@
 # macOS
 .DS_Store
 
-# skill eval scratch
+# Python
+__pycache__/
+*.py[cod]
+
+# generated skill scratch output
 skills/skills-eval-workspace/
 skills/*-workspace/
