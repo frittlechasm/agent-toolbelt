@@ -16,7 +16,7 @@ git status --short
 git stash list
 ```
 
-If there are tracked or untracked changes, stash them and remember that you did:
+If there are tracked or untracked changes, do not overwrite them. If the user clearly asked for the sync to proceed, stash them and remember that you did. Otherwise collect confirmation with `request_user_input` or the environment's equivalent user-input tool when available; if not, ask a concise question before stashing.
 
 ```bash
 git stash push -u -m "sync-upstream temporary stash"
@@ -142,6 +142,12 @@ git push origin dev --force-with-lease
 ## Commit messages
 
 Never add a `Co-Authored-By` trailer attributing yourself (the AI agent) to any commit made during this workflow. All commits (manual conflict resolutions, rebase continuations, merge commits) must contain only the original message — no AI attribution lines.
+
+## Gotchas
+
+- Rebasing feature branches rewrites history. Use `--force-with-lease` for rewritten branches and report every branch that was rewritten.
+- Do not force-update `main`. If `main` diverged from `upstream/main`, stop and show both sides of the divergence.
+- Conflict guidance files are hints, not commands. Use them to understand intent, then preserve both upstream changes and the branch's purpose when possible.
 
 ## Step 5 — Restore stash and report
 
