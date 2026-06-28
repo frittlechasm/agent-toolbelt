@@ -17,7 +17,7 @@ Before drafting, decide which language to anchor explanations to, in this strict
 
 1. **Prompt.** If the request names the language to compare with — "I know Python", "explain this in C# terms", "our team comes from Kotlin" — use that. The prompt always wins.
 2. **Memory.** If the prompt is silent and your environment has a stored preference (a memory recording the user's most-familiar language), use that.
-3. **Ask.** Only when *neither* the prompt nor memory specifies, ask the user — e.g. *"Which language are you most familiar with? I'll explain the change in those terms."* — and wait for the answer before drafting. Do not guess a default.
+3. **Ask.** Only when *neither* the prompt nor memory specifies, collect the comparison language with `request_user_input` or the environment's equivalent user-input tool when available; otherwise ask a concise question and wait. Do not guess a default.
 
 After resolving, **record the choice in persistent memory** (if supported) so future documents skip the question. A one-off language named in the prompt overrides memory for that document only — don't silently overwrite a stored general preference; when in doubt, keep it and ask.
 
@@ -45,15 +45,15 @@ The usual trigger is *"explain what the agent changed this session,"* not a hand
 Use these visible headings inside each Lesson; keep the names reader-facing and skip only when truly irrelevant:
 
 1. **Title and Trust** — title plus one badge: `Idiomatic`, `Works, but unusual`, or `Risky`. Choose the badge from the actual target-language/platform behavior explained in the Lesson; if the code has a gotcha, name it in **Terms You Need** or the relevant syntax callout.
-2. **The Bug In Plain English** — A very simple explanation of the issue and why the changes were required.
+2. **The Change In Plain English** — A very simple explanation of what this change does and why it was needed. When the change fixes a bug, title this *"The Bug In Plain English"* and state the bug and what triggered it; for a feature or refactor, describe the motivation instead. Match the heading to the actual change — don't force bug framing onto non-bug work.
 3. **Terms You Need** — brief definitions for target/platform vocabulary the reader needs before the code.
-4. **Before The Fix** — A very simple explanation of the old behavior and its implications. Use a 3–6 step timeline for event-driven, async, UI, cross-process, distributed, or lifecycle bugs.
+4. **Before** — A very simple explanation of the old behavior or code and its implications (for a bug, what went wrong; for a refactor, the prior shape). Title it *"Before The Fix"* only when the change is a fix. Use a 3–6 step timeline for event-driven, async, UI, cross-process, distributed, or lifecycle changes.
 5. **What Changed** — short bullets; use subheads for compound fixes.
 6. **Why It Matters** — the user-visible, runtime, or safety effect before any architecture framing.
 7. **Code Comparison** — before/after panels from `html-document` (**Code extensions**), never a unified diff.
 8. **Line-By-Line Walkthrough** — the heart:
 
-For every meaningful line of the After code (group boilerplate together; never skip silently):
+For focused snippets, explain every meaningful line of the After code. For larger changes, group boilerplate and repeated patterns so the document teaches the change without becoming a transcript; call out what was grouped.
 
 - **Quote** the line in monospace.
 - Explain the target-language syntax by breaking the line into meaningful pieces.
@@ -88,3 +88,9 @@ Each callout should have five fields: **Name**, **Minimal syntax**, **Semantic**
 - As simple language as possible
 - Tie every explanation to a quoted snippet — no abstract lectures.
 - Prefer short sentences; if a sentence needs several target/platform terms, split it and define them first.
+
+## Gotchas
+
+- Do not explain constructs the reader already knows from the comparison language unless the target language behaves differently.
+- Preserve changed code exactly in code blocks. Any simplification belongs in prose, not in the quoted source.
+- The goal is teaching, not proving coverage. Skip generated, vendored, or mechanical churn after noting that it was skipped.
