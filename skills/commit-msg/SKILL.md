@@ -10,11 +10,17 @@ description: Generate Conventional Commit messages from staged or unstaged Git c
 1. Run `git diff --cached` to inspect staged changes.
 2. If staged changes exist, base the message only on the staged diff; otherwise run `git diff` for unstaged changes.
 3. If there are no staged or unstaged changes, say there are no changes to summarize.
-4. Analyze the changes to determine the type, scope, and purpose.
+4. Choose the type, optional scope, and subject from the actual behavioral intent of the diff.
 5. Generate a commit message following the format below.
-6. If the user only asked for a message, output only the commit message.
+6. If the user only asked for a message, lead with the message itself and keep surrounding prose to nothing — at most one short line before it, and only to flag something the user genuinely needs to act on the message safely (e.g. nothing was staged so it is based on unstaged changes, or the diff mixes unrelated changes that may belong in separate commits). Don't add a recap of the diff, a body the user didn't ask for, alternative phrasings, or `git add`/`git commit` instructions — the user knows how to commit.
 7. If the user explicitly asked to commit, use the generated message for the commit after normal repository checks.
 8. Do not add commit trailers or attribution lines such as `Co-authored-by:`.
+
+## Gotchas
+
+- Staged changes win. Do not mix in unstaged changes unless the user asks for a message covering the whole working tree.
+- Prefer the narrowest accurate type. A dependency bump that fixes a bug can be `fix`; routine metadata churn is usually `chore`.
+- If the diff combines unrelated changes, suggest one message only when they are intentionally being committed together; otherwise mention that separate commits would be clearer.
 
 ## Format
 

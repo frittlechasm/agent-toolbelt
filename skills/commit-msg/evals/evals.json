@@ -8,7 +8,7 @@
       "files": [],
       "assertions": [
         "Inspects staged changes before unstaged changes.",
-        "Outputs only the commit message, with no explanatory prose.",
+        "Leads with the commit message; no diff recap, unrequested body, alternatives, or how-to-commit prose (at most one short caveat line allowed).",
         "Uses a valid conventional commit header with type, optional scope, colon, and imperative lowercase subject.",
         "Does not include Co-authored-by or other commit trailers."
       ]
@@ -20,7 +20,7 @@
       "files": [],
       "assertions": [
         "Falls back to unstaged changes only after confirming there are no staged changes.",
-        "Outputs only the commit message text.",
+        "Leads with the commit message; at most one short caveat line (e.g. 'nothing staged'), with no body/alternatives/how-to-commit prose.",
         "Chooses a type that reflects the change purpose rather than defaulting to chore.",
         "Keeps the subject concise, imperative, lowercase, and without a trailing period."
       ]
