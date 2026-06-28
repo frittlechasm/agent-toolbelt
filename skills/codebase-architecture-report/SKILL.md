@@ -1,6 +1,6 @@
 ---
 name: codebase-architecture-report
-description: Generate source-aware architecture reports for existing codebases — system structure, key flows, design decisions, security controls, and gaps, with every claim tagged by an evidence label (source-backed, inferred, unclear, gap). Use this whenever the user wants to understand, explain, document, or report on how a codebase works — architecture overviews, onboarding docs, client- or audit-facing implementation write-ups, "map the auth/billing/sync flows", "document our architecture decisions", "how does this repo work and what are the risks", or a source-aware HTML architecture report. Triggers even when the user never says "architecture" — any request to map a system's moving parts, trace flows through real code, or surface decisions and gaps with file-level evidence. Use improve-codebase-architecture instead for finding refactoring opportunities, and security-review instead for a standalone security audit with no report.
+description: Generate source-aware architecture reports for existing codebases — system structure, key flows, design decisions, security controls, and gaps, with every claim tagged by an evidence label (source-backed, inferred, unclear, gap). Use this whenever the user wants to understand, explain, document, or report on how a codebase works — architecture overviews, onboarding docs, client- or audit-facing implementation write-ups, "map the auth/billing/sync flows", "document our architecture decisions", "how does this repo work and what are the risks", or a source-aware HTML architecture report. Triggers even when the user never says "architecture" — any request to map a system's moving parts, trace flows through real code, or surface decisions and gaps with file-level evidence. Use improve-codebase-architecture instead for finding refactoring opportunities, and a dedicated security scan/review workflow for a standalone security audit with no architecture report.
 ---
 
 # Codebase Architecture Report
@@ -12,7 +12,7 @@ Gather source-backed evidence from a codebase and produce an architecture report
 - This skill owns **content and evidence**: what was read, what was found, what is claimed, what is gap, what is recommendation.
 - It does **not** own presentation. For HTML output, delegate to [`html-document`](../html-document/SKILL.md) with the report content, evidence, diagrams to include, and document type `ARCHITECTURE REPORT · <project>`.
 - Use `improve-codebase-architecture` instead when the primary task is to find refactoring opportunities or propose deeper modules.
-- Use `security-review` instead when the user asks for a standalone security review without needing an architecture report.
+- Use the relevant security scan/review workflow instead when the user asks for a standalone security review without needing an architecture report.
 
 ## Principles
 
@@ -42,6 +42,8 @@ Identify:
 - audience: internal, onboarding, client, audit, proposal, or engineering review
 - output format: Markdown or HTML
 - focus: whole system, subsystem, security posture, architecture decisions, or selected flows
+
+If any of these are missing and materially affect the report, collect them with `request_user_input` or the environment's equivalent user-input tool when available; otherwise make a reasonable default explicit and proceed.
 
 For large repos, say what will be covered and what will only be sampled.
 
@@ -103,19 +105,7 @@ For each decision:
 
 Skip this step if the user asked for a pure architecture overview. Include it when the audience is audit, client, or security-oriented, or when the user explicitly requests security coverage.
 
-Assess source-backed controls and gaps for:
-
-- authentication and session handling
-- authorization and role/permission checks
-- tenant/account isolation
-- secrets and config handling
-- input validation and output encoding
-- CSRF/CORS and browser security controls
-- audit logging and observability
-- rate limits, abuse controls, and replay protections
-- dependency/build/deployment hardening
-- sensitive data storage, logging, and export
-- tests covering security-sensitive paths
+When included, read `references/security-controls.md` for the checklist. Keep the architecture-report posture: identify source-backed controls and residual gaps; do not run a standalone vulnerability scan unless the user asks for one.
 
 ### 7. Validate Claims
 
@@ -193,3 +183,9 @@ For large repos:
 - create a subsystem map and mark uninspected areas
 - validate high-impact claims with direct source reads
 - label broad claims as `Inferred` unless backed by docs/code
+
+## Gotchas
+
+- Do not fill gaps with generic architecture knowledge. If the repo does not show a component, integration, or control, label it `Unclear` or `Gap`.
+- File names can imply intent, but source-backed claims need code, docs, config, tests, or deployment evidence.
+- Keep recommendations tied to observed gaps. Broad best-practice advice belongs only when it addresses something found in this repo.
