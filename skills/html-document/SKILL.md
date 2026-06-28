@@ -5,11 +5,11 @@ description: Create or refine standalone HTML documents for human reading, print
 
 # HTML Document
 
-Generate standalone `.html` files: single column, dark, minimal, the same base CSS for every document — no project-specific styling. When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, switch to the opt-in PDF-Ready Mode (`references/pdf-ready.md`). Wanting to *export, save, or print to PDF* is **not** that request — a flowing document already produces a clean PDF through the browser; stay in the default mode unless the user wants each page deliberately composed.
+Generate standalone `.html` files for document-style reading: single column, dark, minimal, and consistent. Treat the base CSS as the default house style when the user has not provided a brand, template, or target design system. When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, switch to the opt-in PDF-Ready Mode (`references/pdf-ready.md`). Wanting to *export, save, or print to PDF* is not enough by itself — a flowing document already produces a clean PDF through the browser; stay in the default mode unless the user wants each page deliberately composed.
 
 ## Scope
 
-Standalone `.html` documents: reports, explainers, proposals, plans, memos, architecture notes, PR write-ups, incident timelines, status reports, research explainers, code-teaching documents. Not for web apps, dashboards, marketing pages, or product UI — those want a distinctive, decorative aesthetic, which is the opposite of this skill's restrained document style; use `frontend-design` for them instead.
+Standalone `.html` documents: reports, explainers, proposals, plans, memos, architecture notes, PR write-ups, incident timelines, status reports, research explainers, code-teaching documents. Not for web apps, dashboards, marketing pages, or product UI; those need product-specific interaction and visual direction, so use `frontend-design` or the repo's existing UI patterns instead.
 
 ## Base CSS
 
@@ -66,13 +66,13 @@ a { color: var(--link); }
 }
 ```
 
-Use this CSS verbatim. Extend it only when the document needs elements not covered by base HTML (diffs, badges, stat cards, diagrams) — see `references/elements.md`.
+Use this CSS as the baseline for unbranded documents. Extend it only when the document needs elements not covered by base HTML (diffs, badges, stat cards, diagrams) — see `references/elements.md`.
 
 ## Design rules
 
-- Dark only. No light mode, no theme toggle.
+- Default to the dark document style unless the user supplies a different template, brand system, or accessibility requirement.
 - System fonts only. Zero downloads.
-- No decoration — no gradients, no shadows, no border-radius on containers, no images unless informational.
+- Avoid decoration for its own sake: no gradients, shadows, or decorative imagery in the default document style. Use images only when they carry information.
 - No syntax highlighting. Code is monochrome `var(--code)` on `var(--code-bg)`.
 - Sections separated by `h2` border-top lines. Not cards, not boxes, not background changes.
 - Body text is `var(--muted)` (gray). Headings and `<strong>` are `var(--text)` (white). Hierarchy through color contrast.
@@ -112,9 +112,15 @@ Default documents are flowing HTML: they print cleanly, but browser pagination d
 
 When the user explicitly asks for PDF-ready, print-ready, page-perfect, deck-style, slide-style, or fixed-page output, read `references/pdf-ready.md` and follow it — fixed page geometry, one job per page, composed to fit, verified with an `agent-browser` check. Not for ordinary flowing documents, and **not** merely because the user mentions exporting/saving/printing to PDF — forcing short content into fixed pages leaves large empty gaps. When unsure, prefer the default flowing mode; it prints and exports to PDF cleanly on its own.
 
+## Gotchas
+
+- This skill is for document presentation, not app UI. If the output needs navigation, state, forms, or repeated interactive use, switch to the appropriate frontend workflow.
+- Do not turn every report into a showcase page. The default document should make dense reading easy.
+- A standalone HTML file should not depend on external CSS, fonts, or assets unless the user explicitly wants that dependency.
+
 ## Checklist
 
-- Single standalone `.html` file, base CSS verbatim.
+- Single standalone `.html` file, using the base CSS unless the user supplied a different template or design system.
 - `<h1>` and subtitle visible on first screen; sections use `<h2>` (carries the border-top separator).
 - Readable on mobile; no horizontal *page* scroll to ~320px (panels stack, code wraps, media scrolls in `.scroll-x`).
 - Printable.
