@@ -13,9 +13,10 @@ description: Generate Conventional Commit messages. Use whenever the user asks t
 - If the user only asked for a message, lead with the message itself
 - If the user explicitly asked to commit, use the generated message for the commit after normal repository checks.
 - Generate a commit message following the format below.
-- Choose the type, optional scope, and subject from the actual behavioral intent of the diff.
-- Do not add commit trailers or attribution lines such as `Co-authored-by:`.
+- Choose the type and optional scope from the actual behavioral intent of the diff.
+- Generate the subject based on the diff and actual intent of the change based on user's original prompt.
 - Always write a concise, human-readable subject that explains why the change matters.
+- Do not add commit trailers or attribution lines such as `Co-authored-by:`.
 - Add `!` before colon — `feat(auth)!: remove OAuth 1.0` for breaking changes.
 
 ## Gotchas
