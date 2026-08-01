@@ -1,0 +1,35 @@
+{
+  "skill_name": "code-change-explainer-html",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create an HTML explainer that walks me through the changes in this commit. I know Java better than Swift.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Explain what the agent changed this session and teach me the unfamiliar Rust syntax.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Turn this diff into a line-by-line implementation explainer for a Python developer.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Review this pull request for bugs and regressions.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Summarize the five most recent commits.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Teach me the basics of Rust ownership.",
+      "should_trigger": false
+    }
+  ]
+}

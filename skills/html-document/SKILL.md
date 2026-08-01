@@ -1,6 +1,6 @@
 ---
 name: html-document
-description: Create or refine standalone HTML documents for human reading, printing, and PDF export. Use when generating, editing, beautifying, or converting .html reports, explainers, proposals, plans, memos, technical summaries, PR write-ups, incident timelines, code-change explainers, or any document-like HTML artifact. Also use whenever another skill needs to emit HTML — this skill owns presentation. Trigger on any request for polished HTML output, document generation, or "make this into a nice HTML page."
+description: Create standalone HTML documents. Use when the user asks to generate, edit, or convert reports, explainers, proposals, plans, or other documents as HTML, or when another skill requires HTML output.
 ---
 
 # HTML Document

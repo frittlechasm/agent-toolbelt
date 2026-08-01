@@ -1,6 +1,6 @@
 ---
 name: codebase-architecture-report
-description: Generate source-aware architecture reports for existing codebases — system structure, key flows, design decisions, security controls, and gaps, with every claim tagged by an evidence label (source-backed, inferred, unclear, gap). Use this whenever the user wants to understand, explain, document, or report on how a codebase works — architecture overviews, onboarding docs, client- or audit-facing implementation write-ups, "map the auth/billing/sync flows", "document our architecture decisions", "how does this repo work and what are the risks", or a source-aware HTML architecture report. Triggers even when the user never says "architecture" — any request to map a system's moving parts, trace flows through real code, or surface decisions and gaps with file-level evidence. Use improve-codebase-architecture instead for finding refactoring opportunities, and a dedicated security scan/review workflow for a standalone security audit with no architecture report.
+description: Create source-aware architecture reports for existing codebases. Use when the user asks to map or document a codebase's structure, key flows, design decisions, security controls, or architecture gaps.
 ---
 
 # Codebase Architecture Report

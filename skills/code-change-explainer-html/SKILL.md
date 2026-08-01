@@ -1,6 +1,6 @@
 ---
 name: code-change-explainer-html
-description: 'Create standalone HTML that goes over the code changes done in a commit or session, line by line — anchored to a comparison language the reader already knows, with callouts on the non-obvious syntax of the language the code is written in. Use to *teach* what changed and why (not to track work): refactors, before/after walkthroughs, PR explainers, or understanding what an AI agent changed in an unfamiliar language. Triggers: "explain this code change", "walk me through what the agent did", "explain this in terms of a language I know", "implementation explainer". Extends `html-document` for presentation.'
+description: Create HTML explainers that teach code changes using a language the reader knows. Use when the user asks to explain, walkthrough, or teach changes from a commit, diff, or coding session.
 ---
 
 # Code Change Explainer HTML

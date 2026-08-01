@@ -1,0 +1,35 @@
+{
+  "skill_name": "html-document",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Turn this technical summary into a polished standalone HTML document.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Beautify this HTML architecture report and make it print cleanly.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Convert this markdown implementation plan into an HTML explainer.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Build an interactive analytics dashboard in React.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Create a marketing landing page for our new product.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Export this existing Word document to PDF.",
+      "should_trigger": false
+    }
+  ]
+}
