@@ -58,6 +58,20 @@ class AlignTableTests(unittest.TestCase):
         self.assertEqual(output[1], "|-------|-----|----------|\n")
         self.assertNotIn(":", output[1])
 
+    def test_optional_outer_pipes_preserve_all_cells(self):
+        variants = [
+            ["Name | Status\n", "--- | ---\n", "API | Ready\n"],
+            ["| Name | Status\n", "| --- | ---\n", "| API | Ready\n"],
+            ["Name | Status |\n", "--- | --- |\n", "API | Ready |\n"],
+        ]
+
+        for source in variants:
+            with self.subTest(header=source[0].rstrip()):
+                output = align_table_module.align_table(source, strip=True)
+
+                self.assertEqual(output[0], "| Name | Status |\n")
+                self.assertEqual(output[2], "| API  | Ready  |\n")
+
     def test_stdout_mode_does_not_mutate_input_file(self):
         original = "| Name | Status | Version |\n|---|---|---|\n| **Alpha** | ✅ Good | `1.2.0` |\n"
 

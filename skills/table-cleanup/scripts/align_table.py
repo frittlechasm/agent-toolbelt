@@ -40,16 +40,23 @@ def strip_non_table_markdown(line: str) -> str:
 def align_table(lines: list[str], strip: bool = False) -> list[str]:
     """Return table-aligned lines without mutating the source file."""
 
-    # Identify table lines (start with |)
+    # Identify pipe-delimited table lines. Markdown outer pipes are optional.
     table_indices = []
     table_rows = []
     non_table = {}
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if stripped.startswith("|"):
+        if "|" in stripped:
             cells = [c.strip() for c in stripped.split("|")]
-            cells = cells[1:-1]  # drop empty first/last from leading/trailing pipes
+            if stripped.startswith("|"):
+                cells = cells[1:]
+            if stripped.endswith("|"):
+                cells = cells[:-1]
+
+            if len(cells) < 2:
+                non_table[i] = strip_non_table_markdown(line) if strip else line
+                continue
 
             # Check if this is a separator row
             if cells and all(re.match(r"^[-:]+$", c) for c in cells):
