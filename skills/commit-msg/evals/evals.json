@@ -6,7 +6,7 @@
       "prompt": "Write a commit message for the staged changes in this repo. Do not commit it.",
       "expected_output": "A conventional commit message based on git diff --cached, with only the message text and no git commit execution or attribution trailer.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "Inspects staged changes before unstaged changes.",
         "Leads with the commit message; no diff recap, unrequested body, alternatives, or how-to-commit prose (at most one short caveat line allowed).",
         "Uses a valid conventional commit header with type, optional scope, colon, and imperative lowercase subject.",
@@ -18,7 +18,7 @@
       "prompt": "Nothing is staged yet, but I want a commit msg for my current local changes. Please just suggest the message.",
       "expected_output": "A conventional commit message based on git diff because no staged diff exists, with an appropriate type/scope and no extra explanation.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "Falls back to unstaged changes only after confirming there are no staged changes.",
         "Leads with the commit message; at most one short caveat line (e.g. 'nothing staged'), with no body/alternatives/how-to-commit prose.",
         "Chooses a type that reflects the change purpose rather than defaulting to chore.",
@@ -30,7 +30,7 @@
       "prompt": "Check the staged diff and commit it with a good conventional commit message.",
       "expected_output": "The assistant inspects the staged diff, derives a conventional commit message, and uses it for the requested commit without adding attribution trailers.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "Uses git diff --cached to derive the message from staged changes.",
         "Uses a valid conventional commit header in the git commit message.",
         "Does not include Co-authored-by or any other attribution trailer.",

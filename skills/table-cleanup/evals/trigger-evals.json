@@ -1,0 +1,35 @@
+{
+  "skill_name": "table-cleanup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Format this markdown table so I can paste it into Slack.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Simplify this table for readable plain-text output.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Remove the markdown formatting and align the columns in this table.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Create a markdown table from this CSV.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Clean up this SQL table schema.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Make this HTML table responsive on mobile.",
+      "should_trigger": false
+    }
+  ]
+}

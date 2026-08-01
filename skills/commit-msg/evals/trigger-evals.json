@@ -1,0 +1,35 @@
+{
+  "skill_name": "commit-msg",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Can you write a commit message for what I've staged?",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Commit these staged changes.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Suggest a Conventional Commit subject for this diff.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "What is the Conventional Commits specification?",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Review my staged diff for bugs.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Show me the five most recent commit messages.",
+      "should_trigger": false
+    }
+  ]
+}

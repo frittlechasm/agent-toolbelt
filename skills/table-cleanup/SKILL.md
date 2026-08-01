@@ -1,6 +1,6 @@
 ---
 name: table-cleanup
-description: Clean up markdown tables for plain-text sharing (email, chat, Slack). Use when the user asks to "clean up a table", "format table for email", "remove markdown from table", "make table plain text", "align table columns", "fix table formatting", or any request involving stripping markdown syntax from tables and aligning columns for readable plain-text output.
+description: Clean up markdown tables for plain-text sharing. Use when the user asks to "format table", "simplify table", or any request involving simplifying markdown table for readable plain-text output.
 ---
 
 # Table Cleanup

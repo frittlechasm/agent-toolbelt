@@ -1,6 +1,6 @@
 ---
 name: commit-msg
-description: Generate Conventional Commit messages from staged or unstaged Git changes. Use whenever the user asks to write, draft, suggest, choose, or use a commit message, including requests to commit changes where a message must be authored. Do not trigger for explaining Conventional Commits generally unless a concrete message is needed.
+description: Generate Conventional Commit messages. Use whenever the user asks to write, draft, suggest commit messages or when committing changes.
 ---
 
 # Commit Message Generator

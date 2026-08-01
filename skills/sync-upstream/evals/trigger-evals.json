@@ -1,0 +1,40 @@
+{
+  "skill_name": "sync-upstream",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Sync this fork with upstream.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Bring this repo up to date with the original project.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Update from upstream, but preserve my local main commits.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "/sync-upstream",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "What does a Git remote named upstream mean?",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Fetch the latest changes from origin.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Rebase my current branch onto main.",
+      "should_trigger": false
+    }
+  ]
+}

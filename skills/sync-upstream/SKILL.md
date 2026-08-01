@@ -1,6 +1,6 @@
 ---
 name: sync-upstream
-description: Sync a forked repository with its upstream parent: fast-forward local main from upstream/main, rebase every feature branch, and rebuild dev from the rebased branches. Use this skill whenever the user says "sync upstream", "sync with upstream", "pull from upstream", "update from upstream", "keep branches in sync", "sync the repo", runs /sync-upstream, or asks to bring a fork up to date with the original project.
+description: Sync a forked repo with its upstream. Use when the user asks to "sync with upstream", "update from upstream", "keep branches in sync", or asks to bring the repo up to date with the original project.
 ---
 
 # sync-upstream
