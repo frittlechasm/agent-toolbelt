@@ -9,8 +9,11 @@ Produce clean, aligned plain-text tables for email, chat, Slack, or documents.
 
 ## Output
 
-Reply with only the cleaned table/content unless the user asks for explanation.
-Do not edit source files unless the user explicitly asks you to update a file.
+- Reply with only the cleaned table/content unless the user asks for explanation.
+- Do not edit source files unless the user explicitly asks you to update a file.
+- Preserve values the user explicitly identifies as placeholders or test data.
+- If the input appears to contain a live password, API key, access token, private key, or other credential, replace the entire value with `[REDACTED]` before replying unless specifically asked.
+- If the user asks to retain a value that appears to be a live credential, warn without quoting it and ask for confirmation before reproducing it.
 
 ## Cleanup Rules
 
@@ -24,7 +27,8 @@ Do not edit source files unless the user explicitly asks you to update a file.
 
 ## Gotchas
 
-- Preserve the user's data exactly. Cleanup changes presentation, not values, labels, order, or meaning.
+- Preserve the user's non-sensitive data exactly. Cleanup changes presentation, not values, labels, order, or meaning. Credential redaction under **Output** is the only exception.
+- Do not mistake ordinary identifiers such as version numbers, commit hashes, or UUIDs for credentials.
 - Do not remove symbols that carry meaning, such as checkmarks, warning markers, currency, units, or version prefixes.
 - If the input mixes table and prose, clean the table and keep the prose readable instead of forcing everything into a table.
 
