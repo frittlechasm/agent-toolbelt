@@ -1,6 +1,6 @@
 ---
 name: table-cleanup
-description: Clean up markdown tables for plain-text sharing. Use when the user asks to "format table", "simplify table", or any request involving simplifying markdown table for readable plain-text output.
+description: Cleans up only markdown tables for plain-text sharing. Use only when the user asks to format, strip formatting from, or to simplify markdown tables for readable output. Not to be used for creation.
 ---
 
 # Table Cleanup
