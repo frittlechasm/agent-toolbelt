@@ -1,191 +1,91 @@
 ---
 name: codebase-architecture-report
-description: Create source-aware architecture reports for existing codebases. Use when the user asks to map or document a codebase's structure, key flows, design decisions, security controls, or architecture gaps.
+description: Creates source-aware architecture reports explaining existing codebase's structure, flows, design decisions & security controls. Use only for architecture documentation and onboarding.
 ---
 
 # Codebase Architecture Report
 
-Gather source-backed evidence from a codebase and produce an architecture report that explains how the system works, what decisions shaped it, what controls exist, and where the gaps are.
+Create a clear architecture report that explains how a codebase works using evidence from the repository.
 
-## Boundaries and dependencies
+## Goal
 
-- This skill owns **content and evidence**: what was read, what was found, what is claimed, what is gap, what is recommendation.
-- It does **not** own presentation. For HTML output, delegate to [`html-document`](../html-document/SKILL.md) with the report content, evidence, diagrams to include, and document type `ARCHITECTURE REPORT · <project>`.
-- Use `improve-codebase-architecture` instead when the primary task is to find refactoring opportunities or propose deeper modules.
-- Use the relevant security scan/review workflow instead when the user asks for a standalone security review without needing an architecture report.
+- Use the simplest language that remains accurate for the intended audience.
+- Explain the system's purpose, major parts, important runtime flows, and boundaries.
+- Support important claims with source files. Clearly distinguish facts from inference or missing information.
+- Focus on what helps the reader understand the system. Do not force sections, labels, tables, or diagrams that add no value.
+- Do not invent components, integrations, controls, decisions, or failure behavior.
 
-## Principles
+## Scope the report
 
-- Separate **source-backed facts** from **inferences**, **unclear areas**, and **gaps**.
-- Prefer repo-local evidence over generic architecture assumptions.
-- Keep scope explicit. For large repos, produce a high-level map first, then deep-dive selected flows.
-- Do not claim a system is secure; identify concrete controls and residual gaps.
-- Cite files for important claims using file path and line number when possible.
-- Do not invent components, controls, integrations, or diagrams not present in the source.
+- Determine the repository, audience, output format, focus, and desired depth from the request and available context.
+- Ask only when a missing choice would materially change the report; otherwise state a reasonable assumption and proceed.
+- For a large repository, begin with a high-level map and inspect a representative set of important flows. State what was covered, sampled, or left uninspected.
 
-## Evidence Labels
+## Gather evidence
 
-Tag claims throughout the report:
+Start with repository guidance and architecture clues, then read only what the scope requires:
+- README, project guidance, architecture docs, and ADRs
+- build, dependency, framework, and runtime configuration
+- application entry points, routes, schemas, migrations, jobs, and integrations
+- authentication, authorization, storage, messaging, and error-handling code when relevant
+- deployment, infrastructure, CI/CD, and environment examples
+- tests that confirm important behavior or boundaries
 
-- `Source-backed` — directly supported by code, docs, config, tests, or deployment files.
-- `Inferred` — likely based on source structure, naming, or usage, but not explicitly documented.
-- `Unclear` — needs human confirmation or missing source context.
-- `Gap` — missing, inconsistent, risky, or under-documented based on evidence.
+Use fast file discovery and targeted searches. Keep a working list of the files read and what each one supports.
 
-## Workflow
+## Explain the architecture
 
-### 1. Scope
+Cover the parts that matter for the requested scope:
+- system purpose and users
+- runtime boundaries such as frontend, backend, workers, CLIs, scheduled jobs, and queues
+- major modules, their responsibilities, interfaces, and dependencies
+- data stores, schema shape, caches, and ownership of reads and writes
+- external services, APIs, webhooks, and integration owners
+- deployment topology and cross-cutting concerns such as configuration, logging, audit, and error handling
 
-Identify:
+Trace important flows from real source. For each selected flow, explain its trigger, entry point, main modules, data access, external calls and failure handling when the repository supplies that evidence.
+If a step cannot be verified, say so.
 
-- repo path
-- audience: internal, onboarding, client, audit, proposal, or engineering review
-- output format: Markdown or HTML
-- focus: whole system, subsystem, security posture, architecture decisions, or selected flows
+### Diagrams
+- Use a diagram only when relationships or sequence are materially clearer visually.
+- Every node and connection must be supported by the source or explicitly marked as inferred.
+- One system diagram may be enough; add flow diagrams only when they improve understanding.
 
-If any of these are missing and materially affect the report, collect them with `request_user_input` or the environment's equivalent user-input tool when available; otherwise make a reasonable default explicit and proceed.
+## Handle evidence honestly
 
-For large repos, say what will be covered and what will only be sampled.
+Make the confidence of important claims clear in natural language or concise labels:
+- **Source-backed** — directly supported by code, documentation, configuration, tests, or deployment files.
+- **Inferred** — a likely interpretation of source structure or usage.
+- **Unclear** — the available repository evidence cannot confirm it.
+- **Gap** — something missing, inconsistent, risky, or under-documented for a stated reason.
 
-### 2. Discover Source Material
+Do not label every sentence mechanically. Cite important source-backed claims with file paths and line numbers when practical.
+Before finalizing, recheck high-impact claims and downgrade anything the source does not support.
 
-Read only what is needed for the scope. Start with:
+When the report concludes that a requested component or flow is absent, summarize the files, directories, or search scope checked so the absence is auditable.
 
-- `README*`, `CONTEXT.md`, `AGENTS.md`
-- `docs/`, `docs/adr/`, architecture/security/design docs
-- package/build/framework config files
-- route/API entrypoints
-- database schemas and migrations
-- auth, billing, sync, provisioning, webhook, import/export, job, and integration modules
-- deployment files: Dockerfile, compose, Helm, Terraform, CI/CD, env examples
-- relevant tests
+## Decisions, security, and gaps
 
-Use fast file discovery and content search tools available in the environment, then read targeted files. Build an evidence index as you go — track every file you read and what you found in it.
+Prefer documented architecture decisions. When a decision is inferred from code, say so and explain the evidence, tradeoff, and consequence without inventing intent.
 
-### 3. Map Architecture
+Include security controls when the request, audience, or scope calls for them. Read [references/security-controls.md](references/security-controls.md) for that review. Describe concrete controls and residual gaps; never claim that the system is secure. Do not turn an architecture report into a standalone vulnerability review unless requested.
 
-Identify (marking each as source-backed or inferred):
+Separate unclear areas from demonstrated gaps. Explain why each gap matters and the evidence or absence behind it. Keep recommendations narrow, actionable, and tied to a specific observed gap.
 
-- system purpose
-- runtime boundaries: frontend, backend, workers, CLIs, cron/jobs, queues
-- major modules and ownership boundaries
-- data stores and schema shape
-- external integrations and APIs
-- deployment topology
-- cross-cutting concerns: auth, audit, logging, config, error handling
+## Assemble the report
 
-### 4. Trace Key Flows
+Choose the smallest structure that communicates the findings. A complete report commonly includes:
 
-Trace real flows from source, not generic ones. Good candidates:
+- an executive summary that stands on its own
+- system purpose and scope
+- architecture map and major modules
+- data and external integration boundaries
+- selected key flows
+- important architecture decisions
+- security controls when in scope
+- gaps, risks, and corresponding recommendations
+- an evidence index or equivalent source-reference trail
 
-- authentication and authorization
-- tenant/account selection
-- provisioning or SCIM sync
-- billing, seat, pricing, and usage calculation
-- CSV/import/export
-- webhook handling
-- background jobs
-- document/report generation
-- deployment/build pipeline
+Omit sections that are irrelevant or unsupported. Do not pad the report with generic architecture advice.
 
-For each flow, capture: trigger, entrypoints, main modules, data writes/reads, external calls, failure paths, and tests.
-
-### 5. Capture Decisions
-
-Prefer explicit ADRs and docs. If decisions are inferred from code, label them `Inferred`.
-
-For each decision:
-
-- decision summary
-- evidence (files, commits, docs)
-- tradeoff or consequence
-- related gaps if any
-
-### 6. Review Security Controls (when scope includes security)
-
-Skip this step if the user asked for a pure architecture overview. Include it when the audience is audit, client, or security-oriented, or when the user explicitly requests security coverage.
-
-When included, read `references/security-controls.md` for the checklist. Keep the architecture-report posture: identify source-backed controls and residual gaps; do not run a standalone vulnerability scan unless the user asks for one.
-
-### 7. Validate Claims
-
-Before assembling the report:
-
-- re-check high-impact facts against source files
-- downgrade unsupported claims to `Inferred` or `Unclear`
-- ensure gaps include evidence or a clear reason why the absence matters
-- ensure the evidence index has enough file references for a reviewer to audit the report
-
-## Report Content
-
-The report should contain these sections. Omit sections that have no relevant content for the scope.
-
-### Executive Summary
-
-2-3 sentences on what the system does, key architectural characteristics, and the most important findings. This should stand alone — a reader who only reads this paragraph should get the essential picture.
-
-### System Purpose
-
-What the system does, who uses it, and what problem it solves. Source-backed from README, docs, or code.
-
-### Architecture Map
-
-Runtime boundaries, major modules, data stores, and how they connect. This section should include a diagram — an architecture map showing the system's moving parts and their relationships.
-
-### Major Modules
-
-For each significant module or subsystem: purpose, interface surface, key files, and what it depends on. Flag modules that are tightly coupled or have unclear boundaries.
-
-### Data Model and Storage
-
-Database tables/collections, key schemas, migration state, and how data flows between stores. Include the storage technology and any caching layers.
-
-### External Integrations
-
-Third-party services, APIs, webhooks, and OAuth providers. For each: what it does, how it connects, and which modules own the integration.
-
-### Key Flows
-
-Each traced flow gets its own subsection with: trigger, step-by-step path through the code, data reads/writes, external calls, failure handling, and test coverage. Flows should have diagrams showing the request/data path.
-
-### Architecture Decisions
-
-Each decision as a card-like block: summary, evidence, tradeoff, and related gaps. Prefer ADRs when they exist; label inferred decisions clearly.
-
-### Security Controls (when in scope)
-
-Source-backed controls and residual gaps organized by category. Do not claim the system is secure — list what exists and what is missing.
-
-### Gaps and Risks
-
-Separate from unclear areas. Each gap should include: what is missing, why it matters, evidence for the absence, and suggested severity.
-
-### Recommendations
-
-Narrow, actionable items tied to specific gaps or risks. Each recommendation should reference the gap it addresses.
-
-### Evidence Index
-
-A list of all files read during the investigation, grouped by area (docs, config, auth, billing, deployment, tests, etc.). This is the provenance trail that lets a reviewer verify the report.
-
-## Output Formats
-
-**Markdown**: clean heading hierarchy, fenced code blocks for file references, and tables for structured data (decisions, controls, gaps). The document should read well in any Markdown renderer.
-
-**HTML**: invoke `html-document` for presentation. Pass it the report content and document type (`ARCHITECTURE REPORT · <project>`). Use its *Architecture report* scaffold; do not redefine presentation patterns here.
-
-## Large Codebases
-
-For large repos:
-
-- inventory first; do not read every file
-- select 2-5 key flows unless the user requests full coverage
-- create a subsystem map and mark uninspected areas
-- validate high-impact claims with direct source reads
-- label broad claims as `Inferred` unless backed by docs/code
-
-## Gotchas
-
-- Do not fill gaps with generic architecture knowledge. If the repo does not show a component, integration, or control, label it `Unclear` or `Gap`.
-- File names can imply intent, but source-backed claims need code, docs, config, tests, or deployment evidence.
-- Keep recommendations tied to observed gaps. Broad best-practice advice belongs only when it addresses something found in this repo.
+For Markdown, use a clean heading hierarchy and only the tables or code blocks that aid comparison. For HTML, pass the finished report content and useful diagrams to the `html-document` skill when available; let it decide the presentation.

@@ -1,9 +1,6 @@
 # Security Controls Checklist
 
-Read this only when the architecture report includes security posture, audit/client readiness, or explicitly requested security coverage. This is not a standalone vulnerability scan; it is a source-backed inventory of controls and gaps.
-
-Assess evidence for:
-
+Assess source-backed evidence for:
 - authentication and session handling
 - authorization and role/permission checks
 - tenant/account isolation
@@ -16,11 +13,4 @@ Assess evidence for:
 - sensitive data storage, logging, and export
 - tests covering security-sensitive paths
 
-For each area, report only what the source supports:
-
-- `Source-backed`: concrete controls in code, config, tests, or deployment files
-- `Inferred`: likely behavior from structure or naming, with uncertainty stated
-- `Unclear`: source is missing or ambiguous
-- `Gap`: missing or inconsistent control with a reason it matters
-
-Do not claim the system is secure. Say which controls exist, which were not found, and what evidence supports that conclusion.
+For unsupported areas, state what was checked and whether the result is unclear or a relevant gap.
