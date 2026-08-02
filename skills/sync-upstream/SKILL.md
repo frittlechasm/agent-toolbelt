@@ -1,6 +1,6 @@
 ---
 name: sync-upstream
-description: Sync a forked repo with its upstream. Use when the user asks to "sync with upstream", "update from upstream", "keep branches in sync", or asks to bring the repo up to date with the original project.
+description: Sync an entire fork (all branches) with its upstream. Use only when the user asks to sync with upstream, update from upstream, keep branches in sync, or bring a fork up to date with the original project. Not to use for fetching origin or rebasing current branch.
 ---
 
 # sync-upstream
