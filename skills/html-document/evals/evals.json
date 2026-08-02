@@ -3,20 +3,44 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Generate a polished standalone HTML document from this technical summary so I can export it as a PDF for a client.",
-      "expected_output": "A single-file flowing HTML document using the base CSS, no frameworks or external assets, no table of contents, clean print styles with @page and break-inside rules, responsive layout without horizontal page scroll, and no decorative elements. The document should not switch into fixed-page PDF-ready mode merely because the user wants to export it as a PDF.",
+      "prompt": "Generate a polished standalone HTML document from this technical summary so I can export it as a PDF for a client. Use the title `API Gateway Rollout Brief`, omit the client name intentionally, use the skill's default neutral styling, and show the rollout date as August 12, 2026. Summary: The API gateway validates OIDC access tokens, caches issuer signing keys for 10 minutes, and returns HTTP 503 when issuer metadata is unavailable.",
+      "expected_output": "A restrained, self-contained, flowing HTML document that follows references/print.md, remains readable at narrow and desktop widths, and passes screen and print visual QA. PDF export does not activate fixed-page composition.",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "Refine this architecture report HTML. Add flow diagrams, decision explainers, better evidence sections, and make it print cleanly.",
-      "expected_output": "An improved standalone HTML document that uses the architecture-report scaffold from elements.md, adds informational SVG diagrams for complex flows, decision sections with evidence badges, evidence provenance, responsive overflow handling, and clean print styles. Interactive elements should appear only where they materially improve the document.",
+      "prompt": "Render this architecture report as HTML. System flow: Client requests pass through the API Gateway to the Orders Service, which reads and writes Postgres. Deployment options: single-region is simpler but has regional downtime risk; multi-region improves regional resilience but adds replication and operational complexity. Warning: the multi-region failover path has not been verified. Include the specified system diagram, simultaneous option comparison, and warning.",
+      "expected_output": "The requested primary content is preserved and rendered well: an accessible legible diagram, a responsive simultaneous comparison, and a restrained warning callout. The HTML skill improves presentation without inventing architecture content or replacing the requested elements.",
       "files": []
     },
     {
       "id": 3,
-      "prompt": "Convert this markdown implementation plan into a high-quality HTML document with interactive sections explaining why each decision was made.",
-      "expected_output": "A single-file HTML document using the base document style, with decision sections that explain tradeoffs, appropriate extended elements from elements.md only when needed, keyboard-accessible interactions if used, responsive behavior down to narrow widths, and clean print output.",
+      "prompt": "Create an HTML setup guide from this supplied content. The reader follows exactly one platform path. macOS path: install with `brew install tool`; configure credentials with `tool config set credential-store keychain`; then run `tool login --profile staging`. Linux path: install with `apt install tool`; configure credentials with `tool config set credential-store secret-service`; then run `tool login --profile staging`. Shared reusable command: `tool deploy --dry-run`. Reusable prompt: `Review this deployment plan for rollback risks.` Example terminal output (not reusable input): `Authenticated as release-bot` followed by `Dry run completed: 0 errors`.",
+      "expected_output": "Supporting interactions are added where useful: raw-payload copy controls for the reusable commands and prompt, and accessible tabs for the independent platform variants. Terminal output is not treated as reusable input. All interactions pass pointer, keyboard, and screen visual QA.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Create an HTML incident summary from these supplied facts: availability was 99.7%; deployment began at 14:02; errors rose at 14:06; rollback began at 14:31; recovery completed at 14:49; final status was Recovered.",
+      "expected_output": "The document may improve scanning by surfacing the supplied availability metric, chronology, and status as restrained supporting elements. It preserves every value and event, invents no metrics or states, and keeps the main incident narrative readable.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Create an HTML deployment guide from these supplied sequential steps: Prepare — run `deployctl validate release.yaml`; Deploy — run `deployctl apply release.yaml`; Verify — run `deployctl status`; Roll back — run `deployctl rollback`. Follow the steps with this terminal output log (not reusable input): `Validation passed`, `Release applied`, `Status: healthy`.",
+      "expected_output": "The sequential process remains visible as ordered steps rather than tabs. Reusable commands receive raw-payload copy controls, while the terminal output log receives none. Presentation enhancements do not hide content or misrepresent output as reusable input.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Turn this supplied requirements table into HTML and make it easy to copy into Excel while preserving blank response cells. Table: `Requirement | Response`; `SAML 2.0 support | `; `Audit log export | `.",
+      "expected_output": "A semantic responsive table with an accessible TSV copy control because spreadsheet transfer was requested. TSV preserves blank cells and rectangular shape, and clipboard behavior is verified without adding unrelated document controls.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Turn this supplied executive briefing into a page-perfect A4 HTML handout with one deliberately composed page per section. Objective: reduce release lead time from five days to two. Current state: approvals are collected in email and production checks are manual. Proposal: add an approval workflow and automated preflight checks. Risks: workflow outages could delay releases; automation may initially miss uncommon checks. Rollout: pilot with the Identity team in August, then expand after four successful releases. Decision requested: approve the August pilot and assign one platform engineer.",
+      "expected_output": "The explicit fixed-page request follows references/pdf-ready.md: A4 is stated, pages are deliberately composed, every page is checked for overflow and clipping, and dense pages plus print preview are visually inspected before delivery.",
       "files": []
     }
   ]
