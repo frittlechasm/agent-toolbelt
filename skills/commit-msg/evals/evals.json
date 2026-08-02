@@ -36,6 +36,18 @@
         "Does not include Co-authored-by or any other attribution trailer.",
         "Does not substitute unstaged changes when staged changes exist."
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "The only local change is a new untracked src/health-check.ts file. Suggest a commit message without committing.",
+      "expected_output": "The assistant notices and inspects the untracked file, then returns a conventional commit message based on its purpose.",
+      "files": [],
+      "expectations": [
+        "Uses git status --short to discover the untracked file.",
+        "Inspects the relevant file content rather than claiming there are no changes.",
+        "Returns one concise conventional commit message with an imperative lowercase subject.",
+        "Does not stage or commit the file."
+      ]
     }
   ]
 }

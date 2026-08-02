@@ -3,40 +3,86 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Run /sync-upstream in this fork. It has origin plus a GitHub parent repo, local main is behind upstream/main, and there are two feature branches plus dev. Keep all branches synced and tell me what happened.",
-      "expected_output": "The assistant follows the full workflow: detects or configures upstream, fast-forwards main, rebases every non-main/non-dev local branch, pushes rebased branches with --force-with-lease, rebuilds dev from main by merging feature branches, restores any stash, and reports a branch summary plus dev graph.",
+      "prompt": "Run /sync-upstream in this fork. It has origin plus a GitHub parent repo, local main is behind upstream/main, and there are two feature branches plus dev. Keep all local branches synced and tell me what happened.",
+      "expected_output": "The assistant records the starting state, fast-forwards main, rebases and safely pushes feature branches, verifies dev has no unique work, rebuilds dev, restores the starting branch and stash, and reports the result.",
       "files": [],
       "expectations": [
-        "Checks working tree status before modifying branches.",
-        "Fetches upstream main and updates local main only with a fast-forward merge.",
-        "Excludes main and dev when selecting feature branches to rebase.",
-        "Uses --force-with-lease for rewritten feature branches and dev.",
-        "Reports per-branch results and shows the dev graph."
+        "Records the starting branch and checks for dirty files or unfinished Git operations before switching branches.",
+        "Updates main only by fast-forward and pushes rewritten branches only with --force-with-lease.",
+        "Checks local and remote dev for unique patches before replacing it, ignoring old merge commits and patch-equivalent rebased work.",
+        "Returns to the starting branch before restoring its stash and reports every branch plus the dev graph."
       ]
     },
     {
       "id": 2,
-      "prompt": "sync upstream for this fork, but main has local-only commits and upstream/main also has new commits. Do not lose my local main work.",
-      "expected_output": "The assistant stops when main cannot fast-forward, does not force merge or reset, shows both sides of the divergence, and asks the user how to proceed.",
+      "prompt": "Sync upstream for this fork, but main has local-only commits and upstream/main also has new commits. Do not lose my local main work.",
+      "expected_output": "The assistant stops when main cannot fast-forward, shows both sides of the divergence, and leaves all branches and stashes intact.",
       "files": [],
       "expectations": [
-        "Attempts or verifies fast-forward-only update of main.",
-        "Does not run git reset, non-fast-forward merge, or force push main.",
+        "Attempts or verifies a fast-forward-only update of main.",
+        "Does not reset, rebase, force-merge, or force-push main.",
         "Shows commits in main..upstream/main and upstream/main..main.",
         "Stops before rebasing feature branches or rebuilding dev."
       ]
     },
     {
       "id": 3,
-      "prompt": "Bring my fork up to date. One feature branch conflicts during rebase; there is a PATCH.md and docs/branch-auth-refresh.md with conflict guidance. Preserve the branch intent if you can, but skip it if it cannot be resolved safely.",
-      "expected_output": "The assistant reads the intent documents before resolving conflicts, applies branch-specific guidance where possible, continues the rebase and pushes with --force-with-lease, or aborts and reports the skipped branch with clear manual next steps.",
+      "prompt": "Bring my fork up to date. One feature branch conflicts during rebase; PATCH.md and docs/branch-auth-refresh.md contain conflict guidance. Preserve the branch intent if safe, otherwise skip it.",
+      "expected_output": "The assistant reads the intent files, resolves and continues the rebase safely or aborts it and reports the skipped branch.",
       "files": [],
       "expectations": [
-        "Reads PATCH.md or docs/PATCH.md before conflict resolution when present.",
-        "Reads docs/branch-auth-refresh.md before resolving that branch.",
-        "Preserves upstream and branch intent when resolving conflicts.",
-        "Uses git rebase --abort and reports the branch if the conflict is not safely resolvable.",
-        "Does not add AI Co-Authored-By trailers."
+        "Reads general and branch-specific intent guidance before resolving the conflict.",
+        "Uses git rebase --continue only after staging a safe resolution.",
+        "Uses git rebase --abort when resolution is unsafe and continues from the base branch.",
+        "Never manually reconstructs a missing rebase state or adds AI attribution trailers."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Sync the whole fork. I am currently on feature/payments with uncommitted tracked and untracked work.",
+      "expected_output": "The assistant records the current branch, stashes all work, performs the sync, returns to feature/payments, and restores only the recorded stash there.",
+      "files": [],
+      "expectations": [
+        "Records feature/payments as the starting branch before stashing.",
+        "Stashes tracked and untracked files without discarding them.",
+        "Returns to feature/payments before applying the recorded stash.",
+        "Drops the stash only after a clean apply and otherwise keeps it for recovery."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Rebuild dev while syncing this fork, but local dev and origin/dev each contain non-merge patches with no patch-equivalent commit on main or any feature branch.",
+      "expected_output": "The assistant reports the unique dev patches and stops before deleting or force-pushing dev.",
+      "files": [],
+      "expectations": [
+        "Checks both local dev and origin/dev with patch-equivalence-aware comparison.",
+        "Shows the unique patches clearly while ignoring old dev merge commits.",
+        "Does not delete local dev or create a replacement dev branch.",
+        "Does not force-push origin/dev."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Sync the fork. Rebases succeed, but merging a feature branch into the rebuilt dev branch conflicts and cannot be resolved safely.",
+      "expected_output": "The assistant uses merge-specific recovery, preserves the rebuilt dev state, and reports the skipped merge.",
+      "files": [],
+      "expectations": [
+        "Reads available intent guidance before deciding the merge conflict is unsafe.",
+        "Runs git merge --abort rather than any rebase command.",
+        "Does not push a conflicted dev branch.",
+        "Reports the skipped branch and manual next steps."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Continue syncing this fork after Git reports that no rebase is in progress even though stale rebase metadata remains.",
+      "expected_output": "The assistant stops and reports the corrupt rebase state without staging, committing, cherry-picking, or moving branch refs.",
+      "files": [],
+      "expectations": [
+        "Treats missing or corrupt rebase state as unsafe.",
+        "Does not assume conflicted files are already correct.",
+        "Does not create a manual replacement commit or cherry-pick guessed commits.",
+        "Does not force-move any branch reference."
       ]
     }
   ]

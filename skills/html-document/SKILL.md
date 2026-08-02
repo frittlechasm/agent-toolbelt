@@ -35,7 +35,7 @@ Read only what the selected content requires:
 - `references/elements.md` — supporting layouts and visual emphasis.
 - `references/interactions.md` — when content includes reusable code, prompts, commands, payloads, or configuration; independent alternate views; or an explicit request.
 - `references/diagrams.md` — selected diagrams.
-- `references/tables.md` — only when content contains data table, the user requests tabular presentation, or CSV/TSV transfer is requested. Ignore for prose comparisons, option panels, or layout grids.
+- `references/tables.md` — only for data tables, tabular presentation, or spreadsheet transfer. Ignore for prose comparisons, option panels, or layout grids.
 - `references/print.md` — requested printing, PDF export, or print-preview QA for flowing HTML.
 - `references/pdf-ready.md` — requested fixed pages, decks, or page-perfect output.
 

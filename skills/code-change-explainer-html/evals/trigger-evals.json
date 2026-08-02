@@ -8,7 +8,7 @@
     },
     {
       "id": 2,
-      "prompt": "Explain what the agent changed this session and teach me the unfamiliar Rust syntax.",
+      "prompt": "Create an HTML explainer of what the agent changed this session and teach me the unfamiliar Rust syntax.",
       "should_trigger": true
     },
     {
@@ -29,6 +29,16 @@
     {
       "id": 6,
       "prompt": "Teach me the basics of Rust ownership.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Explain what changed in this session, but just reply here.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Explain this function to me; there is no diff or change to review.",
       "should_trigger": false
     }
   ]

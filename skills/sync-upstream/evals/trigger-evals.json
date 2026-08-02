@@ -35,6 +35,16 @@
       "id": 7,
       "prompt": "Rebase my current branch onto main.",
       "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Rebase my current branch on upstream/main.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Update only my fork's main branch from upstream.",
+      "should_trigger": false
     }
   ]
 }

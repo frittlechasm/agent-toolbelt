@@ -30,6 +30,16 @@
       "id": 6,
       "prompt": "Show me the five most recent commit messages.",
       "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Commit this.",
+      "should_trigger": true
+    },
+    {
+      "id": 8,
+      "prompt": "Write a pull request description for these changes.",
+      "should_trigger": false
     }
   ]
 }

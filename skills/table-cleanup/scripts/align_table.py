@@ -1,145 +1,174 @@
 #!/usr/bin/env python3
-"""Align columns in a pipe-delimited plain-text table.
+"""Strip Markdown and align pipe tables without changing the source by default."""
 
-Usage:
-    python3 align_table.py [--strip] [--in-place] <file_path|->
-
-Reads the file, finds all pipe-delimited table rows, aligns columns
-to uniform width, and prints the result to stdout by default.
-"""
-
+import argparse
 import re
 import sys
+import unicodedata
 
 
 def strip_markdown(text: str) -> str:
-    """Remove common markdown formatting from text."""
-    # Remove bold
+    """Remove supported Markdown while preserving cell values."""
     text = text.replace("**", "")
-    # Remove inline code markers while preserving the code/value text
     text = re.sub(r"`([^`]+)`", r"\1", text)
-    # Remove markdown reference links like ([label][ref])
     text = re.sub(r"\s*\(\[.*?\]\[.*?\]\)", "", text)
-    # Remove inline markdown links [text](url) -> text
     text = re.sub(r"\[(.*?)\]\(.*?\)", r"\1", text)
-    # Remove italic (single *) but not inside words like don't
     text = re.sub(r"(?<!\w)\*([^*]+)\*(?!\w)", r"\1", text)
-    # Note: emoji are intentionally preserved. A ✅/❌ in a Status column is
-    # the cell's meaning, not markdown. Deciding whether an emoji is decorative
-    # is a judgment call left to the caller, not a blanket replace here.
     return text.strip()
 
 
 def strip_non_table_markdown(line: str) -> str:
-    """Remove markdown artifacts from non-table lines while preserving content."""
+    """Remove supported Markdown from prose and reference definitions."""
     if re.match(r"^\s*\[[^\]]+\]:\s+\S+", line):
         return ""
-    return strip_markdown(line.rstrip("\n")) + ("\n" if line.endswith("\n") else "")
+    newline = "\n" if line.endswith("\n") else ""
+    return strip_markdown(line.rstrip("\n")) + newline
+
+
+def split_row(line: str) -> list[str] | None:
+    """Split unescaped pipes outside inline code."""
+    text = line.strip()
+    cells = [""]
+    in_code = False
+    escaped = False
+    trailing_delimiter = False
+
+    for char in text:
+        if escaped:
+            cells[-1] += char
+            escaped = False
+            trailing_delimiter = False
+        elif char == "\\":
+            cells[-1] += char
+            escaped = True
+            trailing_delimiter = False
+        elif char == "`":
+            cells[-1] += char
+            in_code = not in_code
+            trailing_delimiter = False
+        elif char == "|" and not in_code:
+            cells.append("")
+            trailing_delimiter = True
+        else:
+            cells[-1] += char
+            trailing_delimiter = False
+
+    if text.startswith("|"):
+        cells.pop(0)
+    if trailing_delimiter and cells:
+        cells.pop()
+
+    cells = [cell.strip() for cell in cells]
+    return cells if len(cells) >= 2 else None
+
+
+def is_separator(cells: list[str]) -> bool:
+    return all(re.fullmatch(r":?-+:?", cell) for cell in cells)
+
+
+def display_width(text: str) -> int:
+    """Return terminal width for common Unicode text."""
+    width = 0
+    for char in text:
+        if unicodedata.category(char) in {"Mn", "Me", "Cf"}:
+            continue
+        width += 2 if unicodedata.east_asian_width(char) in {"W", "F"} else 1
+    return width
+
+
+def pad(text: str, width: int) -> str:
+    return text + " " * (width - display_width(text))
+
+
+def find_tables(rows: list[list[str] | None]) -> list[tuple[int, int]]:
+    """Find Markdown tables anchored by a header separator row."""
+    tables = []
+    claimed_until = -1
+
+    for index, row in enumerate(rows):
+        if index <= claimed_until or row is None or not is_separator(row):
+            continue
+
+        header = rows[index - 1] if index else None
+        if header is None or is_separator(header) or len(header) != len(row):
+            continue
+
+        end = index
+        while end + 1 < len(rows):
+            next_row = rows[end + 1]
+            if next_row is None or is_separator(next_row) or len(next_row) != len(row):
+                break
+            following_row = rows[end + 2] if end + 2 < len(rows) else None
+            if following_row is not None and is_separator(following_row) and len(following_row) == len(row):
+                break
+            end += 1
+
+        tables.append((index - 1, end))
+        claimed_until = end
+
+    return tables
 
 
 def align_table(lines: list[str], strip: bool = False) -> list[str]:
-    """Return table-aligned lines without mutating the source file."""
+    """Return aligned Markdown tables while preserving surrounding prose."""
+    rows = [split_row(line) for line in lines]
+    tables = find_tables(rows)
+    if not tables:
+        return lines
 
-    # Identify pipe-delimited table lines. Markdown outer pipes are optional.
-    table_indices = []
-    table_rows = []
-    non_table = {}
+    output = [strip_non_table_markdown(line) if strip else line for line in lines]
 
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if "|" in stripped:
-            cells = [c.strip() for c in stripped.split("|")]
-            if stripped.startswith("|"):
-                cells = cells[1:]
-            if stripped.endswith("|"):
-                cells = cells[:-1]
+    for start, end in tables:
+        table_rows = [rows[index] for index in range(start, end + 1)]
+        normalized = {}
+        for index in range(start, end + 1):
+            row = rows[index]
+            assert row is not None
+            if is_separator(row):
+                continue
+            if strip:
+                row = [strip_markdown(cell) for cell in row]
+            normalized[index] = [re.sub(r"(?<!\\)\|", r"\\|", cell) for cell in row]
 
-            if len(cells) < 2:
-                non_table[i] = strip_non_table_markdown(line) if strip else line
+        data_rows = list(normalized.values())
+        widths = [max(display_width(row[column]) for row in data_rows) for column in range(len(data_rows[0]))]
+
+        for index in range(start, end + 1):
+            row = rows[index]
+            assert row is not None
+            newline = "\n" if lines[index].endswith("\n") else ""
+
+            if is_separator(row):
+                output[index] = "|" + "|".join("-" * (width + 2) for width in widths) + "|" + newline
                 continue
 
-            # Check if this is a separator row
-            if cells and all(re.match(r"^[-:]+$", c) for c in cells):
-                table_indices.append(i)
-                table_rows.append(None)  # sentinel for separator
-            else:
-                if strip:
-                    cells = [strip_markdown(c) for c in cells]
-                table_indices.append(i)
-                table_rows.append(cells)
-        else:
-            non_table[i] = strip_non_table_markdown(line) if strip else line
+            row = normalized[index]
+            output[index] = "|" + "|".join(f" {pad(cell, widths[column])} " for column, cell in enumerate(row)) + "|" + newline
 
-    if not table_rows:
-        return lines
-
-    # Calculate column widths from non-separator rows
-    data_rows = [r for r in table_rows if r is not None]
-    if not data_rows:
-        return lines
-
-    num_cols = max(len(r) for r in data_rows)
-    col_widths = [0] * num_cols
-    for row in data_rows:
-        for j, cell in enumerate(row):
-            col_widths[j] = max(col_widths[j], len(cell))
-
-    # Rebuild lines
-    def format_row(cells):
-        parts = []
-        for j in range(num_cols):
-            cell = cells[j] if j < len(cells) else ""
-            parts.append(" " + cell.ljust(col_widths[j]) + " ")
-        return "|" + "|".join(parts) + "|"
-
-    def format_separator():
-        parts = ["-" * (w + 2) for w in col_widths]
-        return "|" + "|".join(parts) + "|"
-
-    output_lines = [""] * len(lines)
-
-    # Place non-table lines
-    for i, line in non_table.items():
-        output_lines[i] = line
-
-    # Place table lines
-    for idx, row in zip(table_indices, table_rows):
-        if row is None:
-            output_lines[idx] = format_separator() + "\n"
-        else:
-            output_lines[idx] = format_row(row) + "\n"
-
-    return output_lines
+    return output
 
 
-def main():
-    args = sys.argv[1:]
-    strip = "--strip" in args
-    in_place = "--in-place" in args
-    paths = [arg for arg in args if not arg.startswith("--")]
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--strip", action="store_true")
+    parser.add_argument("--in-place", action="store_true")
+    parser.add_argument("file_path")
+    args = parser.parse_args()
 
-    if len(paths) != 1:
-        print("Usage: python3 align_table.py [--strip] [--in-place] <file_path|->", file=sys.stderr)
-        sys.exit(1)
-
-    file_path = paths[0]
-    if file_path == "-":
+    if args.file_path == "-":
+        if args.in_place:
+            parser.error("--in-place requires a file path")
         lines = sys.stdin.readlines()
     else:
-        with open(file_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+        with open(args.file_path, encoding="utf-8") as source:
+            lines = source.readlines()
 
-    output_lines = align_table(lines, strip=strip)
-
-    if in_place:
-        if file_path == "-":
-            print("--in-place requires a file path, not stdin", file=sys.stderr)
-            sys.exit(1)
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.writelines(output_lines)
-        return
-
-    sys.stdout.writelines(output_lines)
+    output = align_table(lines, strip=args.strip)
+    if args.in_place:
+        with open(args.file_path, "w", encoding="utf-8") as target:
+            target.writelines(output)
+    else:
+        sys.stdout.writelines(output)
 
 
 if __name__ == "__main__":

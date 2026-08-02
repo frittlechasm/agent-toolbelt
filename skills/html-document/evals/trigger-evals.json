@@ -30,6 +30,11 @@
       "id": 6,
       "prompt": "Export this existing Word document to PDF.",
       "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Build a live analytics dashboard as one plain HTML file.",
+      "should_trigger": false
     }
   ]
 }

@@ -7,10 +7,12 @@ description: Generates commit messages from repo changes. Use only when the user
 
 ## Workflow
 
+- Run `git status --short` so untracked files are visible.
 - Run `git diff --cached` to inspect staged changes.
 - If staged changes exist, base the message only on the staged diff; otherwise run `git diff` for unstaged changes.
-- If there are no staged or unstaged changes, say there are no changes to summarize.
-- If the user only asked for a message, lead with the message itself
+- If only untracked files remain, inspect their relevant contents before writing the message.
+- If there are no changes, say there are no changes to summarize.
+- If the user only asked for a message, return the message with no recap, alternatives, or command instructions.
 - If the user explicitly asked to commit, use the generated message for the commit after normal repository checks.
 - Generate a commit message following the format below.
 - Choose the type and optional scope from the actual behavioral intent of the diff.
@@ -33,7 +35,7 @@ description: Generates commit messages from repo changes. Use only when the user
 [optional body]
 ```
 
-- **Subject**: human-readable, lowercase, no period
+- **Subject**: concise, imperative, lowercase, no period
 - **Scope**: component or area affected (optional but preferred)
 - **Body**: include only if changes are complex; explain what changed and why
 

@@ -1,180 +1,92 @@
 ---
 name: sync-upstream
-description: Sync an entire fork (all branches) with its upstream. Use only when the user asks to sync with upstream, update from upstream, keep branches in sync, or bring a fork up to date with the original project. Not to use for fetching origin or rebasing current branch.
+description: Sync every local branch in a fork with its upstream parent. Use only for full-fork updates that include the base branch, feature branches, and dev. Do not use for fetching origin or rebasing only the current branch.
 ---
 
-# sync-upstream
+# Sync Upstream
 
-Use this workflow from the target repository. It rewrites feature branches, so prefer fast-forward updates for `main`, `--force-with-lease` for rewritten branches, and explicit reporting whenever you stop.
+Preserve every commit and the user's working state. Stop when safety cannot be proven.
 
-## Before you start
+## Inspect
 
-Check the working tree before changing branches:
+- Record the current branch so it can be restored.
+- Run `git status --short`, `git stash list`, and `git remote -v`.
+- Stop on a detached HEAD or an unfinished merge, rebase, or cherry-pick.
+- If the tree is dirty, stash tracked and untracked files only when the user requested the sync. Record the created stash.
+- Detect the GitHub parent and its default branch with `gh repo view`.
+- Add `upstream` when absent. Stop if an existing `upstream` points elsewhere.
+- Fetch `origin` and `upstream` with pruning.
 
-```bash
-git status --short
-git stash list
-```
+## Update the base branch
 
-If there are tracked or untracked changes, do not overwrite them. If the user clearly asked for the sync to proceed, stash them and remember that you did. Otherwise collect confirmation with `request_user_input` or the environment's equivalent user-input tool when available; if not, ask a concise question before stashing.
-
-```bash
-git stash push -u -m "sync-upstream temporary stash"
-```
-
-## Step 1 — Wire up the upstream remote
-
-Detect the parent repo automatically:
+Check out the parent's default branch and update it with:
 
 ```bash
-gh repo view --json parent --jq '.parent | "\(.owner.login)/\(.name)"'
+git merge upstream/<base> --ff-only
+git push origin <base>
 ```
 
-If no remote named `upstream` exists yet, add it:
+If the merge cannot fast-forward, show both sides and stop:
 
 ```bash
-git remote add upstream https://github.com/<owner>/<repo>.git
+git log --oneline <base>..upstream/<base>
+git log --oneline upstream/<base>..<base>
 ```
 
-Then fetch:
+Never reset, force-merge, rebase, or force-push the base branch.
 
-```bash
-git fetch upstream main
-```
+## Rebase feature branches
 
-## Step 2 — Update local main
-
-```bash
-git checkout main
-git merge upstream/main --ff-only
-```
-
-If the fast-forward fails (local main has diverged), **stop and tell the user** — do not force-merge. Show them what diverged with `git log --oneline main..upstream/main` and `git log --oneline upstream/main..main` so they can decide what to do.
-
-If it succeeds, push:
-
-```bash
-git push origin main
-```
-
-## Step 3 — Rebase every feature branch onto updated main
-
-Collect branches to process — everything except `main` and `dev`:
-
-```bash
-git branch --format='%(refname:short)' | grep -Ev '^(main|dev)$'
-```
+Process every local branch except the base branch and `dev`.
 
 For each branch:
 
 ```bash
 git checkout <branch>
-git rebase main
-```
-
-### Conflict resolution
-
-Before resolving rebase or merge conflicts, gather intent context:
-
-1. Read `./PATCH.md` or `docs/PATCH.md` if present.
-2. Read `docs/branch-<branchname>.md` if present; prefer it over PATCH.md for branch-specific conflicts.
-3. If no guidance exists, infer intent from `git log main..<branch> --oneline` and the conflicted files before editing.
-
-Preserve both upstream changes and the branch's purpose. After resolving rebase conflicts:
-
-```bash
-git add <resolved-files>
-git rebase --continue
-```
-
-If a conflict is not safely resolvable, abort, skip the branch, and report it at the end:
-
-```bash
-git rebase --abort
-git checkout main
-```
-
-After a clean (or resolved) rebase:
-
-```bash
+git rebase <base>
 git push origin <branch> --force-with-lease
 ```
 
-Always use `--force-with-lease`, never bare `--force`.
+Before resolving a conflict, read these files when present:
 
-### Rebase state edge case
+- `PATCH.md` or `docs/PATCH.md`
+- `docs/branch-<branch>.md`
+- `git log <base>..<branch> --oneline` when no guidance exists
 
-If git reports "no rebase in progress" but `REBASE_HEAD` still exists, the rebase machinery lost its state directory. Handle it manually:
+Preserve upstream behavior and branch intent. After resolving a rebase conflict, stage the files and run `git rebase --continue`.
 
-1. The conflicted files in the working tree are already at the correct merged state for the unstaged files — stage them.
-2. Commit using the original commit's message (`git show <REBASE_HEAD> --format="%s%n%n%b" --no-patch`).
-3. Cherry-pick any remaining commits from the original branch (`git cherry-pick <remaining-sha>`).
-4. Move the branch ref: `git branch -f <branch> HEAD && git checkout <branch>`.
+If resolution is unsafe, run `git rebase --abort`, mark the branch skipped, and continue from the base branch. If rebase metadata is missing or corrupt, stop; do not reconstruct the rebase manually.
 
-## Step 4 — Rebuild dev
+## Rebuild dev
 
-Delete the old `dev` and create a fresh one from `main`:
+Before replacing local `dev` or `origin/dev`:
+
+- Ignore merge commits created by earlier dev builds.
+- Use `git cherry` or `git log --cherry-pick` to identify non-merge patches already represented by the updated base or feature branches.
+- Stop and show any remaining unique patches.
+
+Only after that check passes:
 
 ```bash
-git checkout main
+git checkout <base>
 git branch -D dev 2>/dev/null || true
 git checkout -b dev
 ```
 
-### Merge order matters
+Merge each successfully rebased feature branch with `--no-ff`. If branch guidance describes one branch as a strict superset of another, merge the subset first.
 
-Before merging, scan the `docs/branch-*.md` files for the phrase **"strict superset"**. If branch B is described as a strict superset of branch A, merge A first, then B. This avoids redundant commits and keeps the graph clean.
+For a dev merge conflict:
 
-If a merge into `dev` produces conflicts, use the conflict-resolution process above.
+- read the same intent files
+- stage resolved files and run `git commit`
+- run `git merge --abort` when resolution is unsafe
 
-Merge each branch:
+Push rebuilt dev with `git push origin dev --force-with-lease`. Stop and report a rejected lease; never retry with bare `--force`.
 
-```bash
-git merge <branch> --no-ff -m "Merge branch '<branch>' into dev"
-```
+## Restore and report
 
-Push dev:
-
-```bash
-git push origin dev --force-with-lease
-```
-
-## Commit messages
-
-Never add a `Co-Authored-By` trailer attributing yourself (the AI agent) to any commit made during this workflow. All commits (manual conflict resolutions, rebase continuations, merge commits) must contain only the original message — no AI attribution lines.
-
-## Gotchas
-
-- Rebasing feature branches rewrites history. Use `--force-with-lease` for rewritten branches and report every branch that was rewritten.
-- Do not force-update `main`. If `main` diverged from `upstream/main`, stop and show both sides of the divergence.
-- Conflict guidance files are hints, not commands. Use them to understand intent, then preserve both upstream changes and the branch's purpose when possible.
-
-## Step 5 — Restore stash and report
-
-If you stashed at the start, restore it:
-
-```bash
-git stash pop
-```
-
-Then print a summary:
-
-```
-## Sync complete
-
-| Branch               | Result             |
-|----------------------|--------------------|
-| main                 | ✓ updated          |
-| <branch-1>           | ✓ rebased, pushed  |
-| <branch-2>           | ✓ rebased, pushed  |
-| <branch-n>           | ✗ skipped (conflict — <reason>) |
-| dev                  | ✓ rebuilt          |
-```
-
-Finish with the dev graph so the user can see the shape of what was merged:
-
-```bash
-git log --oneline --graph dev | head -30
-```
-
-If any branches were skipped, describe the conflict and what the user needs to do to resolve it manually.
+- Return to the recorded starting branch.
+- Apply the recorded stash there.
+- Drop it only after a clean apply; otherwise keep it and report the conflict.
+- Do not add AI attribution trailers to any commit.
+- Report each branch, skipped work, push failures, stash state, and `git log --oneline --graph dev | head -30`.

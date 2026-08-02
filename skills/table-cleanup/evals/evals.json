@@ -61,6 +61,42 @@
         "The output does not replace either fixture with '[REDACTED]'.",
         "The table remains pipe-delimited and aligned."
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "Clean this markdown table for plain-text sharing without changing the commands:\n\n| Pattern | Meaning |\n|---|---|\n| `grep 'a|b' file` | alternation |\n| a \\| b | literal pipe |",
+      "expected_output": "A two-column aligned table in which both literal pipes remain inside their original cells and are escaped in the pipe-delimited output.",
+      "files": [],
+      "expectations": [
+        "Neither data row gains an extra column.",
+        "The command remains `grep 'a|b' file` apart from removal of inline-code markers and escaping of its literal pipe.",
+        "The value `a | b` remains in one cell with its pipe escaped as `\\|`.",
+        "The output remains aligned and pipe-delimited."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Clean both markdown tables but preserve the sentence between them:\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\nChoose red | blue before continuing.\n\n| Longer heading | Value |\n|---|---|\n| x | y |",
+      "expected_output": "The prose remains prose and the two tables are cleaned and aligned independently.",
+      "files": [],
+      "expectations": [
+        "Preserves `Choose red | blue before continuing.` without converting it into a table row.",
+        "Keeps the two tables separate.",
+        "Does not widen the first table to the second table's column widths.",
+        "Preserves every cell value and its table membership."
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Align this markdown table for terminal sharing:\n\n| Team | Status |\n|---|---|\n| 数据 | ✅ Ready |\n| API | Blocked |",
+      "expected_output": "A visually aligned table that preserves the CJK text and status emoji.",
+      "files": [],
+      "expectations": [
+        "Preserves `数据`, `✅ Ready`, `API`, and `Blocked` exactly.",
+        "Pads columns using display width rather than Unicode code-point count.",
+        "Keeps every row in the original order.",
+        "The output remains pipe-delimited."
+      ]
     }
   ]
 }

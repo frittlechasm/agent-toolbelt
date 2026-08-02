@@ -37,6 +37,7 @@ The script prints to stdout by default. Use `--in-place` only when the user expl
 Review the result for cleanup that requires judgment:
 
 - The script preserves every emoji. Remove marker emoji only when they are pure decoration, such as a 🔹 prefixing every row; keep emoji that carry meaning, such as ✅/❌ in a Status column.
+- Keep literal cell pipes escaped as `\|` so they are not confused with column separators.
 - Remove Markdown forms the script does not handle, such as `_underscore_` emphasis or `~~strikethrough~~`.
 
 ## Gotchas

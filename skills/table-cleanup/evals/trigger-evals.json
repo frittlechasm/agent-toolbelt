@@ -30,6 +30,16 @@
       "id": 6,
       "prompt": "Make this HTML table responsive on mobile.",
       "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Clean the markdown table in rollout.md and save it back to the file.",
+      "should_trigger": true
+    },
+    {
+      "id": 8,
+      "prompt": "Convert this markdown table to CSV.",
+      "should_trigger": false
     }
   ]
 }

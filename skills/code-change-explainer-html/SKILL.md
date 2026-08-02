@@ -1,6 +1,6 @@
 ---
 name: code-change-explainer-html
-description: Creates HTML explainers that teach code changes using a language the reader knows. Use only when the user asks to explain, walkthrough, or teach changes from a commit, diff, or coding session.
+description: Creates standalone HTML explainers that teach code changes using a language the reader knows. Use only when the user explicitly requests an HTML walkthrough or explainer for a commit, diff, or coding session.
 ---
 
 # Code Change Explainer HTML

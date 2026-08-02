@@ -30,6 +30,5 @@ npx skills add frittlechasm/agent-toolbelt --skill <skill-name> -y
 | `codebase-architecture-report` | Maps an existing codebase into a source-aware architecture report with evidence labels, key flows, decisions, controls, and gaps. |
 | `commit-msg` | Generates concise conventional commit messages from staged or unstaged git changes. |
 | `html-document` | Creates polished standalone HTML documents for reports, explainers, proposals, plans, and other document-like outputs. |
-| `sync-repos` | Mirrors tracked files from one local git repo to another while preserving the target repo's `deploy.yml`. |
 | `sync-upstream` | Keeps a fork current with its upstream parent, rebases feature branches, and rebuilds `dev`. |
 | `table-cleanup` | Strips markdown formatting from tables and aligns them for readable plain-text sharing. |

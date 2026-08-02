@@ -6,7 +6,7 @@
       "prompt": "Generate a source-aware architecture overview of this repo. Include key flows, architecture decisions, security controls, gaps, and file references.",
       "expected_output": "A clear report that explains the system and its important parts using repository evidence, traces selected real flows, distinguishes confirmed facts from inference or missing information, and ties gaps and recommendations to source findings.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "Explains the system purpose, major runtime parts, and important boundaries in plain language appropriate for an architecture overview.",
         "Traces selected flows from repository evidence and clearly identifies any important step that is inferred or cannot be verified.",
         "Describes only concrete security controls found in the repository, notes residual gaps, and does not make a blanket claim that the system is secure.",
@@ -18,7 +18,7 @@
       "prompt": "Create an HTML architecture report for this codebase that I can share with a client.",
       "expected_output": "A client-readable HTML report that explains the architecture simply, supports important claims with source evidence, communicates uncertainty honestly, and uses diagrams or other presentation elements only when they improve understanding.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "Uses clear client-readable language and provides an executive summary that conveys the system's purpose, shape, and most important findings.",
         "Keeps architecture claims traceable to repository evidence and clearly distinguishes source-backed facts from inference, unclear areas, and gaps without mechanically labeling every sentence.",
         "Includes only useful diagrams whose components and connections are source-backed or explicitly identified as inferred; it does not require a separate diagram for every flow.",
@@ -30,7 +30,7 @@
       "prompt": "Map the auth and billing flows in this repo and tell me which parts are source-backed, inferred, unclear, or gaps.",
       "expected_output": "A focused report that traces the auth and billing paths through real source, clearly states what is confirmed or unknown, records the search scope when an implementation is absent, and identifies evidence-based gaps without expanding into an unrelated whole-system review.",
       "files": [],
-      "assertions": [
+      "expectations": [
         "Keeps the report focused on authentication and billing rather than forcing every section of a full architecture report.",
         "For each flow, explains the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests when evidence is available.",
         "Clearly distinguishes source-backed steps, reasonable inferences, unclear areas, and demonstrated gaps without inventing missing flow details.",

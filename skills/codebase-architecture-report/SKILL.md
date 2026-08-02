@@ -43,7 +43,7 @@ Cover the parts that matter for the requested scope:
 - external services, APIs, webhooks, and integration owners
 - deployment topology and cross-cutting concerns such as configuration, logging, audit, and error handling
 
-Trace important flows from real source. For each selected flow, explain its trigger, entry point, main modules, data access, external calls and failure handling when the repository supplies that evidence.
+Trace important flows from real source. When evidence exists, cover the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests.
 If a step cannot be verified, say so.
 
 ### Diagrams

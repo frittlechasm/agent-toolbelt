@@ -30,6 +30,16 @@
       "id": 6,
       "prompt": "Fix the failing authentication tests.",
       "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Explain how authentication works in this codebase with source evidence.",
+      "should_trigger": true
+    },
+    {
+      "id": 8,
+      "prompt": "Document the request and response fields for this API endpoint.",
+      "should_trigger": false
     }
   ]
 }
