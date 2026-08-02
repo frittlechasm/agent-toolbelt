@@ -1,6 +1,6 @@
 ---
 name: commit-msg
-description: Generate Conventional Commit messages. Use whenever the user asks to write, draft, suggest commit messages or when committing changes.
+description: Generates commit messages from repo changes. Use only when the user asks to write, draft or suggest commit messages, or when committing changes.
 ---
 
 # Commit Message Generator
@@ -24,7 +24,7 @@ description: Generate Conventional Commit messages. Use whenever the user asks t
 - Staged changes win. Do not mix in unstaged changes unless the user asks for a message covering the whole working tree.
 - Prefer the narrowest accurate type. A dependency bump that fixes a bug can be `fix`; routine metadata churn is usually `chore`.
 - If the diff combines unrelated changes, suggest one message only when they are intentionally being committed together; otherwise mention that separate commits would be clearer.
-:wq
+
 ## Format
 
 ```
