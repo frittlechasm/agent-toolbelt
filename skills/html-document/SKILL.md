@@ -20,7 +20,7 @@ Follow any supplied template, brand, or design system; otherwise use the restrai
 
 ## Default
 
-- Use a flowing, single-column layout around 920px wide with system fonts, a near-black screen theme, high-contrast text, muted secondary text, and thin separators.
+- Use a flowing, single-column layout around 920px wide with system fonts, a near-black screen theme, high-contrast text, and muted secondary text. Use thin separators sparingly and at most once per content boundary.
 - Avoid gradients, shadows, decorative cards, imagery without informational value, navigation, and a table of contents unless requested.
 - Keep HTML, CSS, and required JavaScript in the file. Add no frameworks, web fonts, CDN assets, or other external dependencies unless requested.
 - Generate only the styles and behavior the document needs.
@@ -42,5 +42,5 @@ Read only what the selected content requires:
 ## Verify
 
 - Render every result in an available browser and visually inspect it at narrow and desktop widths.
-- Check hierarchy, readability, clipping, page overflow, interactions, semantics, and visible focus.
+- Check hierarchy, readability, clipping, page overflow, interactions, semantics, and visible focus. Confirm section transitions have no duplicate or stranded separators.
 - Fix issues before delivery. Perform print-preview QA only when print or fixed-page output was requested.

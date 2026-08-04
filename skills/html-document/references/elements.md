@@ -5,6 +5,7 @@ They must not introduce facts or impose a structure that changes the content's m
 
 - **TL;DR:** Summarize a long document's supported conclusion near the top; omit it when the document is already short or has no clear conclusion.
 - **Stat panels:** Surface a small set of important existing metrics in a flat aligned layout. Show each value with its label, unit, and relevant period. Keep incidental numbers in prose or tables.
+- **Numbered section markers:** When numbered sections benefit from easier scanning, frame each ordinal in a compact, consistently sized rectangular marker beside its heading. Do not frame incidental numbers.
 - **Badges:** Mark repeated categorical states such as status, risk, severity, or confidence. Keep labels compact, use consistent terms, and pair color with text.
 - **Timeline:** Present an existing dated or timestamped sequence as a semantic ordered list with a compact time column. Use steps when order matters but time does not.
 - **Comparison:** Give peers or before/after content matching structure and visual weight. Keep simultaneous comparisons visible and stack them at narrow widths; use tabs for independent alternatives viewed one at a time.
