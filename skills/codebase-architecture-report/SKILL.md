@@ -1,6 +1,6 @@
 ---
 name: codebase-architecture-report
-description: Creates source-aware architecture reports explaining existing codebase's structure, flows, design decisions & security controls. Use only for architecture documentation and onboarding.
+description: Creates source-aware architecture reports explaining a codebase's structure, flows, design decisions, and security controls. Use only for architecture documentation and onboarding.
 ---
 
 # Codebase Architecture Report
@@ -20,11 +20,12 @@ Create a clear architecture report that explains how a codebase works using evid
 - Determine the repository, audience, output format, focus, and desired depth from the request and available context.
 - Ask only when a missing choice would materially change the report; otherwise state a reasonable assumption and proceed.
 - For a large repository, begin with a high-level map and inspect a representative set of important flows. State what was covered, sampled, or left uninspected.
+- When the user explicitly requests architecture-improvement recommendations, follow any direction they provide; absent such direction, inspect roughly the last 20 commit messages and use recent churn only to prioritize which areas to examine more deeply.
 
 ## Gather evidence
 
 Start with repository guidance and architecture clues, then read only what the scope requires:
-- README, project guidance, architecture docs, and ADRs
+- README, project guidance, `CONTEXT.md` when present, architecture docs, and ADRs
 - build, dependency, framework, and runtime configuration
 - application entry points, routes, schemas, migrations, jobs, and integrations
 - authentication, authorization, storage, messaging, and error-handling code when relevant

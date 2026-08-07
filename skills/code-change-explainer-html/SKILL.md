@@ -20,7 +20,7 @@ Create a standalone `.html` document that teaches what changed in code and why.
 Anchor unfamiliar concepts to the language the reader knows best:
 
 1. Use the language named in the prompt.
-2. Otherwise use a stored preference when available. Check Memory.
+2. Otherwise use a stored preference when available.
 3. Otherwise ask the user.
 
 Explain unfamiliar target-language behavior through that comparison. Do not teach syntax the reader already knows.
@@ -28,7 +28,9 @@ Explain unfamiliar target-language behavior through that comparison. Do not teac
 ## Gather the change
 
 - Read the real before and after from `git diff`, `git diff --staged`, the requested commit, or the supplied source.
-- Understand the changes made and why they were made. Check the interaction , prompts and decisions made in the session.
+- Read `CONTEXT.md` when present and use its established domain terms unless the source contradicts them.
+- Understand the changes and their motivation. Check the interaction, prompts, and decisions from the session when available.
+- Clearly distinguish observed behavior, stated intent or specification, and inferred rationale.
 - When only the prompt contains the change, use only those facts and label any reconstructed surrounding code as illustrative.
 - Skip generated, vendored, lockfile, formatting-only, and import-order churn. Briefly note material omissions.
 - Group related changes by concept or runtime flow when that is clearer than file order.
