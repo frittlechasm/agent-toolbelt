@@ -32,3 +32,4 @@ npx skills add frittlechasm/agent-toolbelt --skill <skill-name> -y
 | `html-document` | Creates polished standalone HTML documents for reports, explainers, proposals, plans, and other document-like outputs. |
 | `sync-upstream` | Keeps a fork current with its upstream parent, rebases feature branches, and rebuilds `dev`. |
 | `table-cleanup` | Strips markdown formatting from tables and aligns them for readable plain-text sharing. |
+| `ui-mocks` | Creates standalone HTML comparisons of distinct, fully styled UI mock variants. |

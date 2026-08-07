@@ -1,0 +1,40 @@
+{
+  "skill_name": "ui-mocks",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create three UI mocks for this account settings screen so I can choose a direction.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Show me several static layout variants for a permissions editor, labeled for easy selection.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Mock up a few different designs for our mobile checkout flow.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Implement the selected permissions editor as a production React component.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Create a marketing landing page for our new product.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Turn this architecture report into a polished HTML document.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Create three static UI mock variants for our analytics dashboard.",
+      "should_trigger": true
+    }
+  ]
+}

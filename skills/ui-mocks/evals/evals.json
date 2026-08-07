@@ -1,0 +1,31 @@
+{
+  "skill_name": "ui-mocks",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create UI mocks for a desktop team-members screen. Every variant must show the same title, a search field, an Invite member button, and a table with Name, Role, and Status columns. Use these rows: Ana / Owner / Active; Dev / Viewer / Invited. I want to choose a visual direction.",
+      "expected_output": "One self-contained HTML comparison containing three genuinely different, fully styled static UI directions. The variants are stacked, visibly labeled A, B, and C, preserve identical requirements and data, and contain no descriptive substitute for rendered UI.",
+      "files": [],
+      "expectations": [
+        "Renders three actual styled UI mocks rather than descriptions, feature lists, or annotated placeholders.",
+        "Stacks the variants in alphabetical order and labels them visibly as A, B, and C without direction names or rationale.",
+        "Preserves the same title, search field, Invite member button, columns, and supplied rows in every variant.",
+        "Makes the variants meaningfully different design or layout directions rather than cosmetic color, type, or spacing changes.",
+        "Keeps the comparison usable at narrow and desktop widths and verifies it for clipping, horizontal page overflow, and ambiguous labels."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create four static mobile checkout UI mock variants and lay them out side by side. Each must show Order summary, Shipping address, Payment method, a total of $84.00, and a Place order button. Label the options for selection and do not include design commentary.",
+      "expected_output": "One self-contained HTML comparison containing four equally sized mobile mock surfaces arranged side by side as explicitly requested and labeled A through D. Each is a distinct rendered design direction with identical supplied checkout content and no rationale or application behavior.",
+      "files": [],
+      "expectations": [
+        "Honors the requested count and labels the rendered variants A, B, C, and D.",
+        "Uses the requested side-by-side comparison instead of the default stacked layout.",
+        "Preserves every supplied checkout element and the $84.00 total in all four variants.",
+        "Shows actual styled mobile UI with meaningful design differences and no variant names, rationale, or descriptive prose.",
+        "Keeps the containing page usable without silently changing the mobile target viewport."
+      ]
+    }
+  ]
+}
