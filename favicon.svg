@@ -1,6 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="12" fill="#050505"/>
-  <rect x="2" y="2" width="124" height="124" rx="10" fill="none" stroke="#333" stroke-width="3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Agent Toolbelt blueprint icon">
+  <defs>
+    <linearGradient id="blueprint" x1="24" y1="0" x2="104" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#159BFF"/>
+      <stop offset="0.55" stop-color="#0870F3"/>
+      <stop offset="1" stop-color="#183ECC"/>
+    </linearGradient>
+    <pattern id="minor-grid" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M8 0H0V8" fill="none" stroke="#D9F3FF" stroke-width="0.35" opacity="0.3"/>
+    </pattern>
+    <pattern id="major-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="url(#minor-grid)"/>
+      <path d="M32 0H0V32" fill="none" stroke="#EAF9FF" stroke-width="0.55" opacity="0.38"/>
+    </pattern>
+    <clipPath id="frame">
+      <rect width="128" height="128" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="128" height="128" fill="url(#blueprint)"/>
+    <rect width="128" height="128" fill="url(#major-grid)"/>
+
+    <g fill="none" stroke="#E2F7FF" stroke-linecap="square">
+      <path d="M10 25H45M10 22V28M45 22V28" stroke-width="0.8" opacity="0.7"/>
+      <path d="M82 102H116M82 99V105M116 99V105" stroke-width="0.8" opacity="0.7"/>
+      <path d="M113 35A20 20 0 0 0 93 15" stroke-width="0.7" opacity="0.55"/>
+      <path d="M17 91A20 20 0 0 0 37 111" stroke-width="0.7" opacity="0.55"/>
+      <path d="M103 15V35M93 25H113M17 91V111M7 101H27" stroke-width="0.45" stroke-dasharray="3 3" opacity="0.45"/>
+    </g>
+
+    <g fill="#EAF9FF" opacity="0.8">
+      <path d="M16 8h2v6h6v2h-6v6h-2v-6h-6v-2h6V8Z"/>
+      <path d="M110 105h2v6h6v2h-6v6h-2v-6h-6v-2h6v-6Z"/>
+    </g>
+
+    <rect x="2" y="2" width="124" height="124" rx="10" fill="none" stroke="#EAF9FF" stroke-width="1" opacity="0.45"/>
+  </g>
+
   <path
     fill="#fff"
     fill-rule="evenodd"
