@@ -8,3 +8,6 @@ __pycache__/
 # generated skill scratch output
 skills/skills-eval-workspace/
 skills/*-workspace/
+
+# Private local-only skills
+/skills/private/
