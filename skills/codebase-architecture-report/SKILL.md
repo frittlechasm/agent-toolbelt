@@ -20,7 +20,9 @@ Create a clear architecture report that explains how a codebase works using evid
 - Determine the repository, audience, output format, focus, and desired depth from the request and available context.
 - Ask only when a missing choice would materially change the report; otherwise state a reasonable assumption and proceed.
 - For a large repository, begin with a high-level map and inspect a representative set of important flows. State what was covered, sampled, or left uninspected.
-- When the user explicitly requests architecture-improvement recommendations, follow any direction they provide; absent such direction, inspect roughly the last 20 commit messages and use recent churn only to prioritize which areas to examine more deeply.
+- When the user explicitly requests architecture-improvement recommendations, follow any direction they provide; absent such direction: 
+  - inspect roughly the last 20 commit messages
+  - use recent churn only to prioritize which areas to examine more deeply
 
 ## Gather evidence
 
@@ -44,8 +46,9 @@ Cover the parts that matter for the requested scope:
 - external services, APIs, webhooks, and integration owners
 - deployment topology and cross-cutting concerns such as configuration, logging, audit, and error handling
 
-Trace important flows from real source. When evidence exists, cover the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests.
-If a step cannot be verified, say so.
+Trace important flows from real source. When evidence exists: 
+- cover the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests.
+- if a step cannot be verified, say so.
 
 ### Diagrams
 - Use a diagram only when relationships or sequence are materially clearer visually.
@@ -69,9 +72,12 @@ When the report concludes that a requested component or flow is absent, summariz
 
 Prefer documented architecture decisions. When a decision is inferred from code, say so and explain the evidence, tradeoff, and consequence without inventing intent.
 
-Include security controls when the request, audience, or scope calls for them. Read [references/security-controls.md](references/security-controls.md) for that review. Describe concrete controls and residual gaps; never claim that the system is secure. Do not turn an architecture report into a standalone vulnerability review unless requested.
+Include security controls when the request, audience, or scope calls for them. Read [references/security-controls.md](references/security-controls.md) for that review. 
+Describe concrete controls and residual gaps; never claim that the system is secure. 
+Do not turn an architecture report into a standalone vulnerability review unless requested.
 
-Separate unclear areas from demonstrated gaps. Explain why each gap matters and the evidence or absence behind it. Keep recommendations narrow, actionable, and tied to a specific observed gap.
+Separate unclear areas from demonstrated gaps. Explain why each gap matters and the evidence or absence behind it. 
+Keep recommendations narrow, actionable, and tied to a specific observed gap.
 
 ## Assemble the report
 
@@ -89,4 +95,5 @@ Choose the smallest structure that communicates the findings. A complete report 
 
 Omit sections that are irrelevant or unsupported. Do not pad the report with generic architecture advice.
 
-For Markdown, use a clean heading hierarchy and only the tables or code blocks that aid comparison. For HTML, pass the finished report content and useful diagrams to the `html-document` skill when available; let it decide the presentation.
+For Markdown, use a clean heading hierarchy and only the tables or code blocks that aid comparison. 
+For HTML, pass the finished report content and useful diagrams to the `html-document` skill when available; let it decide the presentation.
