@@ -1,6 +1,7 @@
 ---
 name: sync-upstream
 description: Sync every local branch in a fork with its upstream parent. Use only for full-fork updates that include the base branch, feature branches, and dev. Do not use for fetching origin or rebasing only the current branch.
+disable-model-invocation: true
 ---
 
 # Sync Upstream

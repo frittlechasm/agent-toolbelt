@@ -4,17 +4,17 @@
     {
       "id": 1,
       "prompt": "Sync this fork with upstream.",
-      "should_trigger": true
+      "should_trigger": false
     },
     {
       "id": 2,
       "prompt": "Bring this repo up to date with the original project.",
-      "should_trigger": true
+      "should_trigger": false
     },
     {
       "id": 3,
       "prompt": "Update from upstream, but preserve my local main commits.",
-      "should_trigger": true
+      "should_trigger": false
     },
     {
       "id": 4,
@@ -45,6 +45,11 @@
       "id": 9,
       "prompt": "Update only my fork's main branch from upstream.",
       "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "$sync-upstream",
+      "should_trigger": true
     }
   ]
 }
