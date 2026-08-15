@@ -1,0 +1,4 @@
+interface:
+  display_name: "Table Cleanup"
+  short_description: "Clean Markdown tables for plain-text sharing"
+  default_prompt: "Use $table-cleanup to clean this Markdown table for plain-text sharing."

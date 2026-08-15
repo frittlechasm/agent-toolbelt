@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Mocks"
+  short_description: "Compare distinct static UI design directions"
+  default_prompt: "Use $ui-mocks to create static UI design directions for this screen."

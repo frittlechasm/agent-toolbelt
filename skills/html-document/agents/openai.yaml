@@ -1,0 +1,4 @@
+interface:
+  display_name: "HTML Document"
+  short_description: "Create polished standalone HTML documents"
+  default_prompt: "Use $html-document to turn this content into a standalone HTML document."

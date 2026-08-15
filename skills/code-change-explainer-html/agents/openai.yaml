@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Change Explainer"
+  short_description: "Teach code changes through standalone HTML"
+  default_prompt: "Use $code-change-explainer-html to explain this code change as a standalone HTML document."
