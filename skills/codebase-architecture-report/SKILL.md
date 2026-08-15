@@ -9,11 +9,16 @@ Create a clear architecture report that explains how a codebase works using evid
 
 ## Goal
 
-- Use the simplest language that remains accurate for the intended audience.
+- Give the intended audience the smallest complete explanation of the system without stripping away important boundaries or caveats.
 - Explain the system's purpose, major parts, important runtime flows, and boundaries.
 - Support important claims with source files. Clearly distinguish facts from inference or missing information.
 - Focus on what helps the reader understand the system. Do not force sections, labels, tables, or diagrams that add no value.
 - Do not invent components, integrations, controls, decisions, or failure behavior.
+- Begin with a practical system mental model and the conclusions that matter most, then add detail progressively.
+- Define unfamiliar project or platform terms once, near first use, and keep terminology stable afterward.
+- Prefer concrete runtime behavior, real module and symbol names, and source-backed examples over generic architecture language.
+- Include a focused code or configuration example when it demonstrates an important boundary or mechanism more clearly than prose.
+- Do not add snippets merely because source is available.
 
 ## Scope the report
 
@@ -71,6 +76,10 @@ When the report concludes that a requested component or flow is absent, summariz
 ## Decisions, security, and gaps
 
 Prefer documented architecture decisions. When a decision is inferred from code, say so and explain the evidence, tradeoff, and consequence without inventing intent.
+
+When explaining why a design exists, distinguish current mechanism from historical intent.
+Inspect local git history and, when available, linked PRs, issues, ADRs, and long-form documentation.
+Treat code shape alone as evidence of what exists, not proof of why it was chosen.
 
 Include security controls when the request, audience, or scope calls for them. Read [references/security-controls.md](references/security-controls.md) for that review. 
 Describe concrete controls and residual gaps; never claim that the system is secure. 

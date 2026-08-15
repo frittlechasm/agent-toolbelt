@@ -10,7 +10,8 @@
         "Explains the system purpose, major runtime parts, and important boundaries in plain language appropriate for an architecture overview.",
         "Traces selected flows from repository evidence and clearly identifies any important step that is inferred or cannot be verified.",
         "Describes only concrete security controls found in the repository, notes residual gaps, and does not make a blanket claim that the system is secure.",
-        "Supports important findings with file references and ties each recommendation to an observed gap rather than generic best-practice advice."
+        "Supports important findings with file references and ties each recommendation to an observed gap rather than generic best-practice advice.",
+        "Begins with a practical system mental model, develops detail progressively, and uses stable project terminology."
       ]
     },
     {
@@ -22,7 +23,8 @@
         "Uses clear client-readable language and provides an executive summary that conveys the system's purpose, shape, and most important findings.",
         "Keeps architecture claims traceable to repository evidence and clearly distinguishes source-backed facts from inference, unclear areas, and gaps without mechanically labeling every sentence.",
         "Includes only useful diagrams whose components and connections are source-backed or explicitly identified as inferred; it does not require a separate diagram for every flow.",
-        "Delegates HTML presentation to the html-document skill when available while retaining the architecture report's evidence, scope, and content decisions."
+        "Delegates HTML presentation to the html-document skill when available while retaining the architecture report's evidence, scope, and content decisions.",
+        "Uses a standalone summary and concrete source-backed examples to explain the system to the client."
       ]
     },
     {
@@ -34,7 +36,8 @@
         "Keeps the report focused on authentication and billing rather than forcing every section of a full architecture report.",
         "For each flow, explains the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests when evidence is available.",
         "Clearly distinguishes source-backed steps, reasonable inferences, unclear areas, and demonstrated gaps without inventing missing flow details.",
-        "Provides file references or a concise search and inventory trail for important findings, and makes any recommendations specific to observed auth or billing gaps."
+        "Provides file references or a concise search and inventory trail for important findings, and makes any recommendations specific to observed auth or billing gaps.",
+        "Explains each flow from a practical trigger through its runtime path, uses lists or diagrams only when they clarify sequence, and states uncertainty candidly."
       ]
     }
   ]

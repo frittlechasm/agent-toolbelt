@@ -11,7 +11,8 @@
         "Briefly clarifies unfamiliar terms such as local/global monitors, keyDown, or flagsChanged near where they are used.",
         "Accurately states that keyDown monitors apply to both triggers, flagsChanged monitors apply only to hotkey sessions, and local/global events use shared handlers.",
         "Includes useful before/after code and does not invent a specific missed key event, bug, or consequence that the prompt does not supply.",
-        "Uses a concise Java comparison to explain at least one unfamiliar Swift or AppKit concept."
+        "Uses a concise Java comparison to explain at least one unfamiliar Swift or AppKit concept.",
+        "Leads with the practical behavioral change and adds mechanism and line-level detail progressively without repeating the same conclusion across sections."
       ]
     },
     {
@@ -24,7 +25,8 @@
         "Separates the timeout change and empty-title change as sub-fixes or clearly distinct sections.",
         "Explains that timeout setup failure is logged but does not stop the window read.",
         "Points to the displayTitle fallback or equivalent fallback so keeping empty titles is shown to be safe, and includes useful before/after code.",
-        "Uses a concise Java comparison to explain at least one unfamiliar Swift or AppKit concept."
+        "Uses a concise Java comparison to explain at least one unfamiliar Swift or AppKit concept.",
+        "Uses concrete source terms consistently and separates the two ideas so their behavior and evidence remain easy to compare."
       ]
     },
     {
@@ -37,7 +39,8 @@
         "Accurately states that activation failure is logged, while AX raise is attempted when application lookup fails and its failure is logged separately.",
         "Explains that main and focused attributes are still set after either lookup branch.",
         "Does not claim that the old activation order definitely undid the earlier raise or introduce another unsupported failure mechanism.",
-        "Uses a concise Java comparison to explain at least one unfamiliar Swift or AppKit concept."
+        "Uses a concise Java comparison to explain at least one unfamiliar Swift or AppKit concept.",
+        "Begins with the practical activation-order mental model and does not repeat the same conclusion across the summary and walkthrough."
       ]
     },
     {
