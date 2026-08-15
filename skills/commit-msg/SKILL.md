@@ -1,6 +1,10 @@
 ---
 name: commit-msg
 description: Generates commit messages from repo changes. Use only when the user asks to write, draft or suggest commit messages, or when committing changes.
+metadata:
+  scope: global
+  agents: all
+  machines: all
 ---
 
 # Commit Message Generator

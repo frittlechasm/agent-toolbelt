@@ -1,6 +1,10 @@
 ---
 name: codebase-architecture-report
 description: Creates source-aware architecture reports explaining a codebase's structure, flows, design decisions, and security controls. Use only for architecture documentation and onboarding.
+metadata:
+  scope: global
+  agents: all
+  machines: all
 ---
 
 # Codebase Architecture Report

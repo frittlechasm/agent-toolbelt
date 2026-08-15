@@ -1,6 +1,10 @@
 ---
 name: html-document
 description: Create standalone HTML documents for reports, explainers, proposals, plans, and other document-style reading. Use only when the user asks to generate, edit, or convert document content as HTML, or when another skill requires HTML output. Do not use for websites, landing pages, web apps, React apps, dashboards, or product UI.
+metadata:
+  scope: global
+  agents: all
+  machines: all
 ---
 
 # HTML Document

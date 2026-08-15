@@ -1,6 +1,10 @@
 ---
 name: ui-mocks
 description: Create standalone HTML comparisons of static, fully styled UI mocks. Use for UI mockups, screen designs, layout variants, or visual directions—not production implementation or application behavior.
+metadata:
+  scope: global
+  agents: all
+  machines: all
 ---
 
 # UI Mocks

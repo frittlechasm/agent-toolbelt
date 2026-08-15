@@ -1,6 +1,10 @@
 ---
 name: table-cleanup
 description: Cleans up only markdown tables for plain-text sharing. Use only when the user asks to format, strip formatting from, or to simplify markdown tables for readable output. Not to be used for creation.
+metadata:
+  scope: global
+  agents: all
+  machines: all
 ---
 
 # Table Cleanup
