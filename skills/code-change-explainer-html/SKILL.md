@@ -58,6 +58,7 @@ For each distinct concept:
 - Show aligned Before and After code panels when code is available; do not use a unified diff.
 - Walk through every meaningful changed line in a focused snippet. Group boilerplate or repetition in larger changes and say what was grouped.
 - Quote the relevant line, explain unfamiliar syntax or semantics, and compare it with the reader's language only when useful.
+- When an unfamiliar protocol or platform feature drives the change, show one small request/response or input/output example.
 - Explain tradeoffs or failure behavior only when supported by the evidence.
 
 ## Preserve source code

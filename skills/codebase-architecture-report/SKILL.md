@@ -37,6 +37,7 @@ Create a clear architecture report that explains how a codebase works using evid
 
 Start with repository guidance and architecture clues, then read only what the scope requires:
 - README, project guidance, `CONTEXT.md` when present, architecture docs, and ADRs
+- local setup, run, and test instructions when the report is for onboarding
 - build, dependency, framework, and runtime configuration
 - application entry points, routes, schemas, migrations, jobs, and integrations
 - authentication, authorization, storage, messaging, and error-handling code when relevant
@@ -49,6 +50,7 @@ Use fast file discovery and targeted searches. Keep a working list of the files 
 
 Cover the parts that matter for the requested scope:
 - system purpose and users
+- the shortest verified path to run the system locally when the report is for onboarding
 - runtime boundaries such as frontend, backend, workers, CLIs, scheduled jobs, and queues
 - major modules, their responsibilities, interfaces, and dependencies
 - data stores, schema shape, caches, and ownership of reads and writes
