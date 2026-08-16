@@ -34,36 +34,15 @@ API_BASE = "https://api.bitbucket.org/2.0"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_DIR = os.path.dirname(SCRIPT_DIR)
+REAL_SKILL_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 # Credentials, loaded from a .env file (the only credential source).
 CREDS = {}
 
 
-def load_env_file(explicit_path=None):
-    """Read credentials from a .env file into CREDS.
-
-    The .env file is the single source of credentials — environment variables
-    are intentionally not consulted, so behaviour is the same regardless of how
-    the shell happens to be configured. Search order (first file that exists
-    wins): an explicit --env-file, then .env in the current directory, then
-    .env in the skill directory.
-    """
-    candidates = []
-    if explicit_path:
-        if not os.path.isfile(explicit_path):
-            die(f"--env-file not found: {explicit_path}")
-        candidates.append(explicit_path)
-    candidates.append(os.path.join(os.getcwd(), ".env"))
-    candidates.append(os.path.join(SKILL_DIR, ".env"))
-
-    path = next((p for p in candidates if os.path.isfile(p)), None)
-    if not path:
-        die(
-            "no .env file found. Copy .env.example to .env and fill in your "
-            "Bitbucket credentials, or pass --env-file <path>.\n"
-            f"Looked in: {os.getcwd()} and {SKILL_DIR}"
-        )
-
+def read_env_file(path):
+    """Return variables parsed from one .env file."""
+    values = {}
     with open(path, encoding="utf-8") as fh:
         for raw in fh:
             line = raw.strip()
@@ -75,7 +54,62 @@ def load_env_file(explicit_path=None):
             key = key.strip()
             value = value.strip().strip('"').strip("'")
             if key:
-                CREDS[key] = value
+                values[key] = value
+    return values
+
+
+def has_bitbucket_credentials(values):
+    return bool(
+        values.get("BITBUCKET_USERNAME")
+        and values.get("BITBUCKET_APP_PASSWORD")
+    )
+
+
+def load_env_file(explicit_path=None):
+    """Read credentials from the first usable .env file into CREDS.
+
+    The .env file is the single source of credentials. Environment variables
+    are intentionally not consulted. An explicit file must be complete. During
+    automatic discovery, incomplete or unrelated .env files are skipped so a
+    valid skill-level file can still be used.
+    """
+    CREDS.clear()
+
+    if explicit_path:
+        if not os.path.isfile(explicit_path):
+            die(f"--env-file not found: {explicit_path}")
+        values = read_env_file(explicit_path)
+        if not has_bitbucket_credentials(values):
+            die(
+                "the --env-file must define BITBUCKET_USERNAME and "
+                "BITBUCKET_APP_PASSWORD"
+            )
+        CREDS.update(values)
+        return
+
+    candidates = [
+        os.path.join(os.getcwd(), ".env"),
+        os.path.join(SKILL_DIR, ".env"),
+    ]
+    real_skill_env = os.path.join(REAL_SKILL_DIR, ".env")
+    if real_skill_env not in candidates:
+        candidates.append(real_skill_env)
+
+    for path in candidates:
+        if not os.path.isfile(path):
+            continue
+        values = read_env_file(path)
+        if has_bitbucket_credentials(values):
+            CREDS.update(values)
+            return
+
+    locations = ", ".join(dict.fromkeys(os.path.dirname(p) for p in candidates))
+    die(
+        "no usable .env file found. Copy .env.example to .env and define "
+        "BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD, or pass "
+        "--env-file <path>.\n"
+        f"Looked in: {locations}"
+    )
 
 # Matches both the human URL (.../pull-requests/42) and minor variants
 # (trailing slash, /diff, /commits, query strings, optional www).
