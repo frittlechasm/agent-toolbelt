@@ -1,0 +1,316 @@
+#!/usr/bin/env python3
+"""Check or apply metadata-aware skill installs locally or over SSH."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import shlex
+import shutil
+import socket
+import subprocess
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+RSYNC_OPTIONS = (
+    "-rlpc",
+    "--delete-after",
+    "--delete-excluded",
+    "--exclude=.DS_Store",
+    "--exclude=__pycache__/",
+    "--exclude=*.pyc",
+)
+
+
+def metadata(path: Path) -> dict[str, str]:
+    """Read routing metadata from a skill's YAML frontmatter."""
+    lines = (path / "SKILL.md").read_text().splitlines()
+    if not lines or lines[0] != "---":
+        return {}
+
+    values: dict[str, str] = {}
+    in_metadata = False
+    for line in lines[1:]:
+        if line == "---":
+            break
+        if line == "metadata:":
+            in_metadata = True
+        elif in_metadata and line.startswith("  ") and ":" in line:
+            key, value = line.strip().split(":", 1)
+            values[key] = value.strip()
+        elif in_metadata and line and not line.startswith(" "):
+            in_metadata = False
+    return values
+
+
+def skills_for(machine: str) -> list[tuple[Path, str]]:
+    """Select public and private skills assigned to the target machine."""
+    roots = [REPO_ROOT / "skills"]
+    private = REPO_ROOT / "skills/private"
+    if private.is_dir():
+        roots.append(private)
+
+    selected: dict[str, tuple[Path, str]] = {}
+    for root in roots:
+        for skill in sorted(root.iterdir()):
+            if not skill.is_dir() or not (skill / "SKILL.md").is_file() or skill.name == "private":
+                continue
+            if not SKILL_NAME.fullmatch(skill.name):
+                raise SystemExit(f"invalid skill name: {skill.name}")
+            info = metadata(skill)
+            missing = {key for key in ("agents", "machines") if not info.get(key)}
+            if missing:
+                raise SystemExit(f"{skill.name}: missing metadata: {', '.join(sorted(missing))}")
+            machines = {item.strip() for item in info["machines"].split(",")}
+            if "all" not in machines and machine not in machines:
+                continue
+            if skill.name in selected:
+                raise SystemExit(f"duplicate skill name: {skill.name}")
+            selected[skill.name] = (skill, info["agents"])
+    return list(selected.values())
+
+
+def destinations(skill: Path, agents: str) -> dict[str, str]:
+    """Map a skill to its primary install path and compatibility links."""
+    names = {item.strip() for item in agents.split(",")}
+    if "all" in names:
+        return {
+            "primary": f".agents/skills/{skill.name}",
+            "claude_link": f".claude/skills/{skill.name}",
+        }
+    if names == {"claude"}:
+        return {"primary": f".claude/skills/{skill.name}"}
+    if names == {"codex"}:
+        return {"primary": f".codex/skills/{skill.name}"}
+    raise SystemExit(f"unsupported agents metadata for {skill.name}: {agents}")
+
+
+def expected_claude_link(skill_name: str) -> str:
+    """Return Claude's relative link to a shared skill."""
+    return f"../../.agents/skills/{skill_name}"
+
+
+def remote_path(relative: str) -> str:
+    """Quote a home-relative path for use in a remote shell script."""
+    return f'"$HOME"/{shlex.quote(relative)}'
+
+
+def run_ssh(host: str, script: str) -> subprocess.CompletedProcess:
+    """Run a non-interactive shell script on an SSH host."""
+    try:
+        return subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "--", host, "sh", "-s"],
+            input=script.encode(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+    except OSError as error:
+        raise SystemExit(f"{host}: could not start SSH: {error}") from error
+
+
+def require_remote_rsync(host: str) -> None:
+    """Fail before changes if rsync is missing locally or remotely."""
+    if shutil.which("rsync") is None:
+        raise SystemExit("rsync is required on this machine but was not found in PATH")
+    result = run_ssh(host, "command -v rsync >/dev/null 2>&1\n")
+    if result.returncode:
+        raise SystemExit(f"{host}: rsync is required but was not found in PATH")
+
+
+def remote_state(host: str, selected: list[tuple[Path, str]]) -> dict[str, tuple[str, str]]:
+    """Read the type and link target of selected remote install paths."""
+    lines = ["set -eu"]
+    for skill, agents in selected:
+        for kind, relative in destinations(skill, agents).items():
+            key = f"{skill.name}:{kind}"
+            path = remote_path(relative)
+            lines.append(
+                f"if [ -L {path} ]; then "
+                f"printf '%s\\tL\\t%s\\n' {shlex.quote(key)} \"$(readlink {path})\"; "
+                f"elif [ -e {path} ]; then printf '%s\\tE\\t\\n' {shlex.quote(key)}; fi"
+            )
+    result = run_ssh(host, "\n".join(lines) + "\n")
+    if result.returncode:
+        raise SystemExit(result.stderr.decode(errors="replace").strip())
+    state = {}
+    for line in result.stdout.decode(errors="replace").splitlines():
+        key, entry_type, target = line.split("\t", 2)
+        state[key] = (entry_type, target)
+    return state
+
+
+def rsync_skill(skill: Path, host: str, destination: str, dry_run: bool) -> bool:
+    """Check or copy one skill with rsync and report whether it differs."""
+    command = [
+        "rsync",
+        *RSYNC_OPTIONS,
+        "--itemize-changes",
+    ]
+    if dry_run:
+        command.append("--dry-run")
+    command.extend(("--", f"{skill}/", f"{host}:{destination}/"))
+    env = os.environ.copy()
+    env["RSYNC_RSH"] = "ssh -o BatchMode=yes"
+    result = subprocess.run(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    if result.returncode:
+        error = result.stderr.decode(errors="replace").strip()
+        raise SystemExit(f"{skill.name}: rsync failed: {error}")
+    return bool(result.stdout.strip())
+
+
+def prepare_remote(host: str, selected: list[tuple[Path, str]]) -> None:
+    """Create remote parent directories and remove legacy primary links."""
+    lines = ["set -eu"]
+    parents = set()
+    for skill, agents in selected:
+        primary = destinations(skill, agents)["primary"]
+        parents.add(str(Path(primary).parent))
+        path = remote_path(primary)
+        lines.append(f"if [ -L {path} ]; then rm -- {path}; fi")
+    for parent in sorted(parents):
+        lines.append(f"mkdir -p -- {remote_path(parent)}")
+    result = run_ssh(host, "\n".join(lines) + "\n")
+    if result.returncode:
+        raise SystemExit(result.stderr.decode(errors="replace").strip())
+
+
+def update_remote_links(host: str, selected: list[tuple[Path, str]]) -> None:
+    """Create or repair Claude links for shared remote skills."""
+    lines = ["set -eu"]
+    for skill, agents in selected:
+        paths = destinations(skill, agents)
+        for kind, relative in paths.items():
+            if kind == "primary":
+                continue
+            path = remote_path(relative)
+            target = expected_claude_link(skill.name)
+            lines.append(f"mkdir -p -- {remote_path(str(Path(relative).parent))}")
+            lines.append(
+                f"if [ ! -L {path} ] || "
+                f"[ \"$(readlink {path} 2>/dev/null || true)\" != {shlex.quote(target)} ]; then "
+                f"rm -rf -- {path}; ln -s -- {shlex.quote(target)} {path}; fi"
+            )
+    result = run_ssh(host, "\n".join(lines) + "\n")
+    if result.returncode:
+        raise SystemExit(result.stderr.decode(errors="replace").strip())
+
+
+def replace_with_link(destination: Path, target: str) -> None:
+    """Replace one local install path with the requested symlink."""
+    if destination.is_symlink() and os.readlink(destination) == target:
+        return
+    if destination.is_dir() and not destination.is_symlink():
+        shutil.rmtree(destination)
+    elif destination.exists() or destination.is_symlink():
+        destination.unlink()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.symlink_to(target)
+
+
+def check_local(selected: list[tuple[Path, str]]) -> bool:
+    """Report whether local skill links match the selected sources."""
+    clean = True
+    home = Path.home()
+    for skill, agents in selected:
+        paths = destinations(skill, agents)
+        primary = home / paths["primary"]
+        primary_ok = primary.is_symlink() and primary.resolve() == skill.resolve()
+        status = "OK" if primary_ok else ("LINK" if primary.exists() or primary.is_symlink() else "MISSING")
+        print(f"{status:7} {skill.name} -> {primary}")
+        clean = clean and primary_ok
+        for kind, relative in paths.items():
+            if kind == "primary":
+                continue
+            link = home / relative
+            link_ok = link.is_symlink() and os.readlink(link) == expected_claude_link(skill.name)
+            print(f"{'OK' if link_ok else 'LINK':7} {skill.name} -> {link}")
+            clean = clean and link_ok
+    return clean
+
+
+def apply_local(selected: list[tuple[Path, str]]) -> None:
+    """Install selected local skills as links to this checkout."""
+    home = Path.home()
+    for skill, agents in selected:
+        paths = destinations(skill, agents)
+        replace_with_link(home / paths["primary"], str(skill.resolve()))
+        for kind, relative in paths.items():
+            if kind != "primary":
+                replace_with_link(home / relative, expected_claude_link(skill.name))
+        print(f"UPDATED {skill.name}")
+
+
+def check_remote(host: str, selected: list[tuple[Path, str]]) -> bool:
+    """Report missing, changed, or incorrectly linked remote skills."""
+    state = remote_state(host, selected)
+    clean = True
+    for skill, agents in selected:
+        paths = destinations(skill, agents)
+        primary_key = f"{skill.name}:primary"
+        primary = state.get(primary_key)
+        if primary is None:
+            status = "MISSING"
+        elif primary[0] == "L":
+            status = "LINK"
+        else:
+            status = "DRIFT" if rsync_skill(skill, host, paths["primary"], dry_run=True) else "OK"
+        print(f"{status:7} {skill.name} -> {host}:~/{paths['primary']}")
+        clean = clean and status == "OK"
+        for kind, relative in paths.items():
+            if kind == "primary":
+                continue
+            link_ok = state.get(f"{skill.name}:{kind}") == ("L", expected_claude_link(skill.name))
+            print(f"{'OK' if link_ok else 'LINK':7} {skill.name} -> {host}:~/{relative}")
+            clean = clean and link_ok
+    return clean
+
+
+def apply_remote(host: str, selected: list[tuple[Path, str]]) -> None:
+    """Probe rsync, copy selected remote skills, and repair their links."""
+    state = remote_state(host, selected)
+    for skill, agents in selected:
+        paths = destinations(skill, agents)
+        if f"{skill.name}:primary" in state:
+            rsync_skill(skill, host, paths["primary"], dry_run=True)
+            break
+    prepare_remote(host, selected)
+    for skill, agents in selected:
+        rsync_skill(skill, host, destinations(skill, agents)["primary"], dry_run=False)
+        print(f"UPDATED {skill.name}")
+    update_remote_links(host, selected)
+
+
+def main() -> int:
+    """Parse arguments and run the requested local or remote operation."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=("check", "apply"))
+    parser.add_argument("--host", help="SSH host; omit for this machine")
+    parser.add_argument("--machine", help="machine metadata name; defaults to host or local hostname")
+    args = parser.parse_args()
+
+    if args.host and args.host.startswith("-"):
+        parser.error("--host cannot start with '-'")
+    machine = args.machine or args.host or socket.gethostname().split(".")[0]
+    selected = skills_for(machine)
+    if not selected:
+        raise SystemExit(f"no skills selected for machine: {machine}")
+    print(f"Target: {args.host or 'local'} ({machine}); selected skills: {len(selected)}")
+
+    if args.host:
+        require_remote_rsync(args.host)
+        if args.action == "apply":
+            apply_remote(args.host, selected)
+        clean = check_remote(args.host, selected)
+    else:
+        if args.action == "apply":
+            apply_local(selected)
+        clean = check_local(selected)
+    return 0 if clean else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
