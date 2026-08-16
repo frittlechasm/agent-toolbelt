@@ -1,0 +1,6 @@
+interface:
+  display_name: "Agent History Audit"
+  short_description: "Find recurring friction in agent history"
+  default_prompt: "Use $agent-history-audit to audit recent and full Claude and Codex history and recommend evidence-backed instruction or skill changes."
+policy:
+  allow_implicit_invocation: false
