@@ -1,4 +1,4 @@
 interface:
   display_name: "Bitbucket PR Fetch"
-  short_description: "Fetch Bitbucket PR data for review"
-  default_prompt: "Use $bitbucket-pr-fetch to fetch this Bitbucket Cloud pull request for review."
+  short_description: "Fetch Bitbucket PR details"
+  default_prompt: "Use $bitbucket-pr-fetch to fetch Bitbucket Cloud PR details."
