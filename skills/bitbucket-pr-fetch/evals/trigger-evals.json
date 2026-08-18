@@ -1,0 +1,65 @@
+{
+  "skill_name": "bitbucket-pr-fetch",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review this Bitbucket PR: https://bitbucket.org/example-workspace/example-repo/pull-requests/42",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Fetch the diff and comments for Bitbucket Cloud PR #184 in the current repo.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "There are new comments on the Bitbucket pull request we reviewed earlier. Re-review it.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Summarize the commits in https://bitbucket.org/example-workspace/example-repo/pull-requests/57",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "$bitbucket-pr-fetch review https://bitbucket.org/example-workspace/example-repo/pull-requests/91",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "Review https://github.com/example-org/example-repo/pull/42",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Create a Bitbucket pull request for my current branch.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Merge Bitbucket PR #42 and delete its source branch.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "List every open pull request in my Bitbucket workspace.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Help me configure Bitbucket Pipelines for this repository.",
+      "should_trigger": false
+    },
+    {
+      "id": 11,
+      "prompt": "Review my current branch before I open a pull request.",
+      "should_trigger": false
+    },
+    {
+      "id": 12,
+      "prompt": "Post an LGTM comment on Bitbucket PR #42.",
+      "should_trigger": false
+    }
+  ]
+}
