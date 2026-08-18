@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Fetch a Bitbucket Cloud pull request for code review.
 
-Downloads everything a reviewer needs — PR metadata, the full unified diff,
-the changed-files list, and existing comments — and writes them into a folder
-under the system temp directory so a downstream review can read them.
+Downloads everything a reviewer needs and writes a validated bundle under
+~/.bitbucket-reviews. Later calls fetch only PR metadata and reuse an unchanged
+bundle across sessions. Use --refresh to force a complete download.
 
 Auth uses HTTP Basic with a Bitbucket app password, read from a .env file
 (copy .env.example to .env). The file must define:
@@ -17,13 +17,19 @@ Usage:
     python fetch_pr.py <pr-url>
     python fetch_pr.py https://bitbucket.org/myteam/myrepo/pull-requests/42
     python fetch_pr.py <pr-url> --output-dir /custom/path
+    python fetch_pr.py <pr-url> --refresh
 """
 
 import argparse
 import base64
+import contextlib
+import datetime
+import fcntl
+import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 import urllib.error
@@ -31,6 +37,16 @@ import urllib.parse
 import urllib.request
 
 API_BASE = "https://api.bitbucket.org/2.0"
+CACHE_SCHEMA_VERSION = 2
+ARTIFACT_NAMES = (
+    "summary.md",
+    "metadata.json",
+    "diff.patch",
+    "diffstat.json",
+    "comments.json",
+    "comments.raw.json",
+    "commits.json",
+)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_DIR = os.path.dirname(SCRIPT_DIR)
@@ -137,7 +153,11 @@ def parse_pr_url(url):
             "Expected something like "
             "https://bitbucket.org/<workspace>/<repo>/pull-requests/<id>"
         )
-    return match.group("workspace"), match.group("repo"), int(match.group("id"))
+    return (
+        cache_segment(match.group("workspace"), "workspace"),
+        cache_segment(match.group("repo"), "repository"),
+        int(match.group("id")),
+    )
 
 
 def auth_header():
@@ -193,16 +213,43 @@ def get_paginated(url):
     return results
 
 
-def slugify(value):
-    return re.sub(r"[^A-Za-z0-9._-]+", "-", value).strip("-")
+def cache_segment(value, label):
+    """Return one safe, canonical segment for the persistent cache path."""
+    segment = value.lower()
+    if (
+        segment in {".", ".."}
+        or not re.fullmatch(r"[a-z0-9][a-z0-9._-]*", segment)
+    ):
+        die(f"invalid {label} in PR URL: {value!r}")
+    return segment
 
 
-def fetch(workspace, repo, pr_id):
-    base = f"{API_BASE}/repositories/{workspace}/{repo}/pullrequests/{pr_id}"
+def default_output_dir(workspace, repo, pr_id):
+    cache_root = os.path.join(os.path.expanduser("~"), ".bitbucket-reviews")
+    os.makedirs(cache_root, mode=0o700, exist_ok=True)
+    try:
+        os.chmod(cache_root, 0o700)
+    except OSError as exc:
+        die(f"could not secure cache directory {cache_root}: {exc}")
+    return os.path.join(
+        cache_root,
+        cache_segment(workspace, "workspace"),
+        cache_segment(repo, "repository"),
+        f"pr-{pr_id}",
+    )
+
+
+def pr_api_url(workspace, repo, pr_id):
+    return f"{API_BASE}/repositories/{workspace}/{repo}/pullrequests/{pr_id}"
+
+
+def fetch(workspace, repo, pr_id, metadata=None):
+    base = pr_api_url(workspace, repo, pr_id)
 
     print(f"Fetching PR #{pr_id} from {workspace}/{repo} ...", file=sys.stderr)
 
-    metadata = get_json(base)
+    if metadata is None:
+        metadata = get_json(base)
     diff = request(f"{base}/diff", accept="text/plain")
     diffstat = get_paginated(f"{base}/diffstat?pagelen=100")
     comments = get_paginated(f"{base}/comments?pagelen=100")
@@ -252,7 +299,9 @@ def normalize_comments(comments):
             "id": c.get("id"),
             "user": (c.get("user") or {}).get("display_name"),
             "created_on": c.get("created_on"),
+            "updated_on": c.get("updated_on"),
             "content": (c.get("content") or {}).get("raw"),
+            "resolution": c.get("resolution"),
             "inline": {
                 "path": inline.get("path"),
                 "from": inline.get("from"),
@@ -274,6 +323,150 @@ def normalize_diffstat(diffstat):
             "new_path": (d.get("new") or {}).get("path"),
         })
     return out
+
+
+def freshness_fields(meta):
+    """Return the remote fields that determine whether a bundle is current."""
+    source = meta.get("source") or {}
+    destination = meta.get("destination") or {}
+    return {
+        "id": meta.get("id"),
+        "state": meta.get("state"),
+        "source_commit": (source.get("commit") or {}).get("hash"),
+        "destination_commit": (destination.get("commit") or {}).get("hash"),
+        "updated_on": meta.get("updated_on"),
+        "comment_count": meta.get("comment_count"),
+    }
+
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def read_manifest(out_dir):
+    path = os.path.join(out_dir, "manifest.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def cache_is_complete(out_dir, workspace, repo, pr_id, manifest):
+    if not manifest or manifest.get("schema_version") != CACHE_SCHEMA_VERSION:
+        return False
+    if manifest.get("pr") != {
+        "workspace": workspace,
+        "repository": repo,
+        "id": pr_id,
+    }:
+        return False
+
+    artifacts = manifest.get("artifacts")
+    if not isinstance(artifacts, dict) or set(artifacts) != set(ARTIFACT_NAMES):
+        return False
+
+    for name in ARTIFACT_NAMES:
+        details = artifacts.get(name)
+        path = os.path.join(out_dir, name)
+        if not isinstance(details, dict) or not os.path.isfile(path):
+            return False
+        try:
+            if os.path.getsize(path) != details.get("size"):
+                return False
+            if sha256_file(path) != details.get("sha256"):
+                return False
+        except OSError:
+            return False
+    return True
+
+
+@contextlib.contextmanager
+def pr_lock(out_dir):
+    """Serialize cache checks and writes for one output directory."""
+    lock_path = f"{out_dir}.lock"
+    os.makedirs(os.path.dirname(os.path.abspath(lock_path)), exist_ok=True)
+    with open(lock_path, "a+", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+def write_json(path, value):
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(value, fh, indent=2, ensure_ascii=False)
+
+
+def write_bundle(out_dir, workspace, repo, pr_id, data):
+    """Stage a complete bundle, then publish each artifact and manifest."""
+    summary = summarize_metadata(data["metadata"])
+    files = normalize_diffstat(data["diffstat"])
+    comments = normalize_comments(data["comments"])
+
+    parent = os.path.dirname(os.path.abspath(out_dir))
+    os.makedirs(parent, exist_ok=True)
+    staging = tempfile.mkdtemp(
+        prefix=f".{os.path.basename(out_dir)}-",
+        dir=parent,
+    )
+    try:
+        write_json(
+            os.path.join(staging, "metadata.json"),
+            {"summary": summary, "raw": data["metadata"]},
+        )
+        with open(os.path.join(staging, "diff.patch"), "w", encoding="utf-8") as fh:
+            fh.write(data["diff"])
+        write_json(os.path.join(staging, "diffstat.json"), files)
+        write_json(os.path.join(staging, "comments.json"), comments)
+        write_json(os.path.join(staging, "comments.raw.json"), data["comments"])
+        write_json(os.path.join(staging, "commits.json"), data["commits"])
+        write_summary(
+            os.path.join(staging, "summary.md"),
+            summary, files, comments, data["commits"],
+        )
+
+        artifacts = {}
+        for name in ARTIFACT_NAMES:
+            path = os.path.join(staging, name)
+            artifacts[name] = {
+                "size": os.path.getsize(path),
+                "sha256": sha256_file(path),
+            }
+
+        manifest = {
+            "schema_version": CACHE_SCHEMA_VERSION,
+            "fetched_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "pr": {
+                "workspace": workspace,
+                "repository": repo,
+                "id": pr_id,
+            },
+            "url": (
+                f"https://bitbucket.org/{workspace}/{repo}/pull-requests/{pr_id}"
+            ),
+            "freshness": freshness_fields(data["metadata"]),
+            "artifacts": artifacts,
+        }
+        write_json(os.path.join(staging, "manifest.json"), manifest)
+
+        os.makedirs(out_dir, exist_ok=True)
+        for name in ARTIFACT_NAMES:
+            os.replace(os.path.join(staging, name), os.path.join(out_dir, name))
+        # Publish the manifest last. Its hashes describe the files now in place.
+        os.replace(
+            os.path.join(staging, "manifest.json"),
+            os.path.join(out_dir, "manifest.json"),
+        )
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
+
+    return summary, files, comments
 
 
 def write_summary(path, summary, files, comments, commits):
@@ -331,6 +524,9 @@ def write_summary(path, summary, files, comments, commits):
 
 
 def main():
+    # Cached PR data can contain private source code and review comments.
+    os.umask(0o077)
+
     parser = argparse.ArgumentParser(
         description="Fetch a Bitbucket Cloud PR for code review."
     )
@@ -342,14 +538,19 @@ def main():
     )
     parser.add_argument(
         "--output-dir",
-        help="Directory to write into. Defaults to a folder under the system "
-             "temp directory.",
+        help="Directory to write into. Defaults to "
+             "~/.bitbucket-reviews/<workspace>/<repository>/pr-<id>.",
     )
     parser.add_argument(
         "--env-file",
         help="Path to the .env file with BITBUCKET_USERNAME / "
              "BITBUCKET_APP_PASSWORD. Defaults to .env in the current "
              "directory, then the skill directory.",
+    )
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Force a full download instead of reusing an unchanged cache.",
     )
     args = parser.parse_args()
 
@@ -362,44 +563,40 @@ def main():
             "https://bitbucket.org/<workspace>/<repo>/pull-requests/<id>")
 
     workspace, repo, pr_id = parse_pr_url(args.url)
-    data = fetch(workspace, repo, pr_id)
-
-    summary = summarize_metadata(data["metadata"])
-    files = normalize_diffstat(data["diffstat"])
-    comments = normalize_comments(data["comments"])
 
     if args.output_dir:
-        out_dir = args.output_dir
+        out_dir = os.path.abspath(os.path.expanduser(args.output_dir))
     else:
-        folder = f"bitbucket-pr-{slugify(workspace)}-{slugify(repo)}-{pr_id}"
-        out_dir = os.path.join(tempfile.gettempdir(), folder)
-    os.makedirs(out_dir, exist_ok=True)
+        out_dir = default_output_dir(workspace, repo, pr_id)
 
-    # Full raw metadata, for anything the summary leaves out.
-    with open(os.path.join(out_dir, "metadata.json"), "w", encoding="utf-8") as fh:
-        json.dump(
-            {"summary": summary, "raw": data["metadata"]},
-            fh, indent=2, ensure_ascii=False,
+    with pr_lock(out_dir):
+        manifest = read_manifest(out_dir)
+        complete = cache_is_complete(
+            out_dir, workspace, repo, pr_id, manifest,
+        )
+        remote_metadata = None
+        if complete and not args.refresh:
+            print(
+                f"Checking PR #{pr_id} for changes in {workspace}/{repo} ...",
+                file=sys.stderr,
+            )
+            remote_metadata = get_json(pr_api_url(workspace, repo, pr_id))
+            if manifest.get("freshness") == freshness_fields(remote_metadata):
+                print(f"\nReusing unchanged PR #{pr_id} cache", file=sys.stderr)
+                print(f"  Cached at: {manifest.get('fetched_at')}", file=sys.stderr)
+                print(f"\nSaved to: {out_dir}", file=sys.stderr)
+                print(out_dir)
+                return
+
+        data = fetch(workspace, repo, pr_id, metadata=remote_metadata)
+        summary, files, comments = write_bundle(
+            out_dir, workspace, repo, pr_id, data,
         )
 
-    with open(os.path.join(out_dir, "diff.patch"), "w", encoding="utf-8") as fh:
-        fh.write(data["diff"])
-
-    with open(os.path.join(out_dir, "diffstat.json"), "w", encoding="utf-8") as fh:
-        json.dump(files, fh, indent=2, ensure_ascii=False)
-
-    with open(os.path.join(out_dir, "comments.json"), "w", encoding="utf-8") as fh:
-        json.dump(comments, fh, indent=2, ensure_ascii=False)
-
-    write_summary(
-        os.path.join(out_dir, "summary.md"),
-        summary, files, comments, data["commits"],
-    )
-
-    print(f"\nFetched PR #{pr_id}: {summary['title']}", file=sys.stderr)
-    print(f"  {len(files)} changed file(s), {len(comments)} comment(s), "
-          f"{len(data['commits'])} commit(s)", file=sys.stderr)
-    print(f"\nSaved to: {out_dir}", file=sys.stderr)
+        print(f"\nFetched PR #{pr_id}: {summary['title']}", file=sys.stderr)
+        print(f"  {len(files)} changed file(s), {len(comments)} comment(s), "
+              f"{len(data['commits'])} commit(s)", file=sys.stderr)
+        print(f"\nSaved to: {out_dir}", file=sys.stderr)
     print(out_dir)  # stdout: the path, so callers can capture it
 
 
