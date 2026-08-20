@@ -1,19 +1,19 @@
 # Interactions
 
-Add tabs and copy controls when requested or when they clearly improve use of existing content.
-Prefer native HTML and add only the JavaScript required.
+Use interactions only when the user requests them. Prefer native HTML and add only the JavaScript required.
 
 ## Tabs
 
-- Automatically use tabs for substantial, mutually exclusive peer views normally read one at a time.
-- Examples where tabs might apply: platform, language, environment, scenario, or alternate instructions.
-- Keep sequential steps, short fragments, simultaneous comparisons, and essential sections visible without tabs.
-- Use semantic tab relationships, pointer and keyboard navigation, managed focus and selected state, and a usable fallback without JavaScript.
+- Use tabs only for long, mutually exclusive views that readers do not need to compare, search, or print together.
+- Keep short alternatives, sequential steps, comparisons, and essential content visible.
+- Implement semantic relationships, pointer and keyboard navigation, managed focus and selected state, and a fallback that keeps the content usable without JavaScript.
 
 ## Copy controls
 
-- Add copy controls to reusable code, prompts, shell commands, request payloads, and configuration.
+- Add copy controls only when the user explicitly asks for a copy control or equivalent interaction.
 - Omit them for logs, quotations, diffs, illustrative pseudocode, inline fragments, or content that is not useful to reuse.
-- Copy only the raw payload—not labels, line numbers, shell prompts, or explanation.
-- Give each control an accessible name, visible feedback, and an honest fallback when clipboard access fails.
-- Keep controls visually secondary and verify them with pointer and keyboard input.
+- Copy only the raw payload, not labels, line numbers, shell prompts, or explanation.
+- Give every control a unique accessible name that identifies its payload.
+- Place visible and announced feedback next to the control. Report clipboard failure honestly.
+- Initialize controls independently so one feature cannot disable another.
+- Keep controls visually secondary and verify their exact payload with pointer and keyboard input.
