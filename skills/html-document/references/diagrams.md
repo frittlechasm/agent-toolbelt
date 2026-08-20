@@ -1,25 +1,61 @@
 # Diagrams
 
-Read this after the user, invoking skill, or generating agent has selected a diagram.
-This reference governs rendering, not whether domain content requires one.
+Use inline SVG when a flow or architecture map communicates the supplied content more clearly than prose.
 
-## Choose the simplest format
+## Shared construction
 
-- Prefer inline SVG for small architecture maps and simple flows. It keeps the document standalone and can reuse the document's color tokens.
-- Use Mermaid only for dense UML, sequence, state, or branching diagrams and only when the user accepts its runtime or external dependency.
-- Because Mermaid cannot consume CSS custom properties directly, mirror the document theme with literal color values.
-- Verify print output only when printing was requested.
-- Use an existing informational image when it communicates the idea better than a recreated diagram.
+- Keep nodes on a simple grid with consistent dimensions. Leave at least 40px between nodes and enough room for arrowheads and labels.
+- Draw connectors before nodes so lines pass behind opaque node backgrounds.
+- Connect node borders rather than centers. Prefer straight or orthogonal routes and avoid crossings.
 
-## Compose clearly
+## Flow diagrams
 
-- Give the diagram one message and a logical reading direction.
-- Keep node labels short. Size nodes from their text, use consistent dimensions and spacing within a row, and connect node borders rather than centers.
-- Leave enough space for arrowheads and short edge labels. Avoid crossing edges; switch layout or format when the graph becomes dense.
-- Size the SVG view box to all content plus padding so labels and markers are not clipped.
-- Use document colors and typography. Avoid gradients, shadows, decorative illustrations, and color-only meaning.
-- Add a concise accessible name or nearby explanation. Do not duplicate a full prose description in both places.
+- Choose one reading direction. Use left to right for short flows and top to bottom when branching would make the diagram too wide.
+- Use capsules for start and end, diamonds for decisions, and rectangles for steps when those distinctions clarify the process.
+- Route retries and loops outside the main path. Place branch labels near their departure points.
+- Keep steps neutral unless color communicates a decision, state, failure, or rollback.
 
-Scale the diagram to the content column. If it becomes unreadable when reduced, give only the diagram a horizontal scroller.
-Inspect labels, edges, clipping, contrast, and narrow-width behavior.
-Inspect print output only when printing was requested.
+## Architecture maps
+
+- Arrange components by request path, dependency direction, or supplied system layers.
+- Do not impose flowchart shapes on architecture components.
+- Use boundaries only for supplied regions, trust zones, clusters, or ownership groups. Leave even internal padding and place legends outside boundaries.
+
+The following architecture palette assumes a near-black background.
+For another theme, preserve the category mapping but adjust every accent, including failure and rollback, to provide at least 3:1 contrast for meaningful lines and shapes and 4.5:1 for normal-size text.
+
+| Component category | Accent | Color |
+| --- | --- | --- |
+| Services | Emerald | `#34d399` |
+| Data stores | Violet | `#a78bfa` |
+| External systems | Slate | `#94a3b8` |
+| Security components | Rose | `#fb7185` |
+| Message brokers | Orange | `#fb923c` |
+
+## Typography
+
+Use JetBrains Mono for all SVG text. The stylesheet below is the diagram reference's one intentional external dependency:
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+```
+
+Set `font-family: "JetBrains Mono", ui-monospace, monospace` on the SVG root so every label inherits it.
+Use 14px for component names, 11px for secondary labels, and 10px for connector annotations. Increase them when scaled down.
+
+## Visual language
+
+- Use the document background or `#0a0a0a` for the SVG. Do not place the diagram in a decorative card.
+- Use one neutral node style by default. Add color only when it consistently distinguishes a supplied category, path, or state.
+- Use amber `#fbbf24` for failure or rollback paths. Pair color with text or line style.
+- Match arrowheads to the connector's color and line style.
+- Keep labels short. Put one muted secondary line inside the node and short protocol or transition labels near connectors.
+- Avoid icons, status dots, gradients, shadows, animation, decorative cards, summary panels, and legends that explain no meaningful encoding.
+
+## Fit and access
+
+- Trim the view box to the drawing plus a small even margin.
+- Do not leave large empty regions or scale the diagram beyond its natural readable size.
+- Give the SVG a concise `<title>` and `<desc>`. Do not repeat the same full description in nearby prose.
+- Let the SVG shrink to the content column. If labels become unreadable, give only the diagram a labelled keyboard-focusable horizontal scroller.
+- Inspect node spacing, connector endpoints, arrowheads, labels, boundaries, clipping, contrast, and narrow-width behavior.
