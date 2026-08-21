@@ -10,76 +10,63 @@ disable-model-invocation: true
 
 # Agent History Audit
 
-Audit agent history without changing session files, global instructions, installed skills, or remote machines.
-Find repeated model mistakes, recurring user corrections, and workflows that deserve better global instructions or reusable skills.
+Audit Claude and Codex history for repeated failures, corrections, and reusable workflows.
+Never modify history, global instructions, installed skills, or remote machines.
 
-## Set the scope
+## Scope and collect
 
-- Use the last 30 days for repeated errors and regressions unless the user gives another window.
-- Use full history to find repeated workflows that could become skills.
-- Include each named machine. If remote access is unavailable, report that gap instead of treating the missing history as clean.
-- Record the current global instruction files and installed skill inventories before making recommendations.
+- Review the last 30 days for regressions unless the user specifies another window.
+- Use full history to identify skill candidates.
+- Include every named machine. Report inaccessible history as a collection gap.
+- Before recommending changes, inventory global instructions and installed skills on each machine.
 
-## Collect safely
-
-Create a temporary directory with mode `0700` and remove it when the audit is complete.
-Run the bundled collector once; it uses event timestamps, redacts common credential forms, marks likely injected messages, excludes Claude subagent logs, and fingerprints duplicate sessions.
-It also emits normalized `usage` records with the model and the token fields available from each agent. Count Claude usage once per message ID and Codex usage once per token-count event.
-Keep vendor-specific cache and reasoning fields separate; do not present cross-vendor token totals as directly equivalent.
+Run the collector once into a `0700` temporary directory, then remove the directory:
 
 ```bash
 audit_dir=$(mktemp -d)
 chmod 700 "$audit_dir"
 trap 'rm -rf "$audit_dir"' EXIT
-python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --recent-days 14 --ssh-host mowork > "$audit_dir/history.jsonl"
+python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --recent-days 30 --ssh-host mowork > "$audit_dir/history.jsonl"
 ```
 
-Do not display raw history or unredacted command output. Inspect only the fields needed for the audit.
-If the collector cannot parse a history format, report the affected files and inspect a small redacted sample before changing it.
+The collector redacts credentials, marks injected messages, omits Claude subagents, fingerprints duplicates, and normalizes usage.
+Never expose raw or unredacted history. If parsing fails, report the files and inspect a minimal redacted sample before changing the collector.
 
-## Review recent history
+Count Claude usage once per message ID and Codex once per token-count event.
+Keep vendor-specific cache and reasoning fields separate; cross-vendor token totals are not equivalent.
 
-Look for a pattern in at least two independent user interactions before calling it repeated. For every candidate:
+## Analyze
 
-1. State the expected behavior and what happened instead.
-2. Classify it as a model error, user refinement, external/tool failure, or policy/permission gate.
-3. Check whether a later instruction or skill update already fixed it. Split evidence before and after that date.
-4. Cite the machine, session basename, and event timestamp. Do not cite only a filename date.
-5. Prefer direct user corrections and observable failed outcomes over inferred dissatisfaction.
+A repeated pattern needs at least two independent user interactions. For each finding, report:
 
-Do not count injected task notifications, local-command caveats, tool wrappers, Claude `subagents/` records, or duplicated snapshot/fork sessions as independent evidence.
-Treat sessions marked `delegated` as supporting evidence, not direct user feedback.
+- expected versus observed behavior
+- classification: model error, user refinement, external/tool failure, or policy/permission gate
+- machine, session basename, and event timestamp
+- evidence before and after any later instruction or skill fix
 
-## Mine full history for skills
+Prefer direct corrections and observed failures.
+Ignore injected messages, command caveats, tool wrappers, Claude subagent records, and duplicate snapshots or forks.
+Delegated sessions are supporting evidence, not direct feedback.
 
-Look for workflows the user repeats, especially those with stable inputs, ordered steps, verification, and predictable output.
-A new skill is justified when it would remove repeated prompting or prevent a demonstrated mistake.
-A one-off task or a discoverable fact is not enough.
-
-Before proposing a skill:
-
-- compare it with current global instructions and installed skills on every audited machine
-- prefer improving an existing skill when ownership is clear
-- keep broad preferences in global instructions and task-specific procedures in skills
-- name the trigger, boundary, required inputs, verification, and non-goals
+A skill candidate must be a repeated, stable workflow that would reduce prompting or prevent a demonstrated mistake.
+Prefer updating an existing skill. Keep broad preferences in global instructions.
+Reject one-offs and discoverable facts. Define the trigger, boundary, inputs, verification, and non-goals; compare these with every machine's inventory.
 
 ## Report
 
-Lead with a short prioritized list. For each recommendation include:
-
-- evidence and frequency
-- classification and confidence
-- the smallest proposed change and its owner: Claude instructions, Codex instructions, an existing skill, or a new skill
-- why the change is not already covered
-- any machine drift that would prevent the fix from taking effect
+Lead with prioritized recommendations.
+Give each recommendation's evidence, frequency, classification, confidence, smallest change, owner, current coverage gap, and machine drift.
+Owners are Claude instructions, Codex instructions, an existing skill, or a new skill.
 
 Separate confirmed findings from weak signals. Include a deferred list so low-value ideas do not look approved.
 
-For HTML reports, include:
+HTML reports also need:
 
-- a concise executive summary and prioritized recommendations
-- prompt and skill patterns that worked, not only failures
-- recurring corrections and errors with evidence and frequency
-- failure-mode counts grouped by model, with unknown models shown explicitly
-- token totals and inefficiency indicators by agent and model, including repeated context, low cache reuse, correction churn, and unusually high output for the observed task
-- collection gaps and metric limitations
+  - an executive summary
+  - successful patterns
+  - recurring errors
+  - failure counts by model
+  - token and inefficiency metrics by agent and model
+  - collection gaps
+  - metric limits
+Show unknown models and flag repeated context, low cache reuse, correction churn, and unusually high output.

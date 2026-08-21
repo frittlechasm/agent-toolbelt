@@ -326,7 +326,7 @@ def collect_remote(host: str) -> list[dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--recent-days", type=int, default=14)
+    parser.add_argument("--recent-days", type=int, default=30)
     parser.add_argument("--ssh-host", action="append", default=[])
     parser.add_argument("--machine")
     parser.add_argument("--claude-root", default="~/.claude")
