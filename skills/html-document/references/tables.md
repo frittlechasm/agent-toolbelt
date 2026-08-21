@@ -1,6 +1,6 @@
 # Tables
 
-Read this only when selected content already contains a data table, the user explicitly requests tabular presentation, or spreadsheet transfer is requested.
+Read this only when selected content already contains a data table, the user explicitly requests tabular presentation.
 Do not read it for prose comparisons, option panels, CSS grids, or other layouts that merely use rows or columns.
 
 ## Structure
