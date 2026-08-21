@@ -89,6 +89,9 @@ def make_record(
     timestamp: object,
     role: str,
     text: str,
+    *,
+    model: str | None = None,
+    usage: dict | None = None,
 ) -> dict:
     cleaned = redact(text)
     return {
@@ -100,7 +103,56 @@ def make_record(
         "timestamp": timestamp,
         "role": role,
         "text": cleaned,
+        "record_type": "message",
+        "model": model,
+        "usage": usage,
         "injected": any(marker in cleaned.lower() for marker in INJECTED_MARKERS),
+        "delegated": False,
+    }
+
+
+def normalized_usage(usage: object) -> dict | None:
+    if not isinstance(usage, dict):
+        return None
+    fields = (
+        "input_tokens",
+        "cached_input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "reasoning_output_tokens",
+        "total_tokens",
+    )
+    result = {field: usage[field] for field in fields if isinstance(usage.get(field), int)}
+    return result or None
+
+
+def make_usage_record(
+    agent: str,
+    machine: str,
+    path: Path,
+    history_root: Path,
+    line_number: int,
+    timestamp: object,
+    model: str | None,
+    usage: object,
+) -> dict | None:
+    cleaned_usage = normalized_usage(usage)
+    if cleaned_usage is None:
+        return None
+    return {
+        "agent": agent,
+        "machine": machine,
+        "session": path.name,
+        "session_path": path.relative_to(history_root).as_posix(),
+        "line": line_number,
+        "timestamp": timestamp,
+        "role": "usage",
+        "text": "",
+        "record_type": "usage",
+        "model": model,
+        "usage": cleaned_usage,
+        "injected": False,
         "delegated": False,
     }
 
@@ -113,6 +165,7 @@ def collect_claude(root: Path, machine: str) -> list[dict]:
     for path in projects.rglob("*.jsonl"):
         if "subagents" in path.parts:
             continue
+        seen_usage_ids = set()
         for line_number, item in read_jsonl(path):
             if item.get("type") not in {"user", "assistant"} or item.get("isMeta") is True:
                 continue
@@ -122,8 +175,34 @@ def collect_claude(root: Path, machine: str) -> list[dict]:
             text = content_text(message.get("content"))
             if text:
                 records.append(
-                    make_record("claude", machine, path, root, line_number, item.get("timestamp"), message["role"], text)
+                    make_record(
+                        "claude",
+                        machine,
+                        path,
+                        root,
+                        line_number,
+                        item.get("timestamp"),
+                        message["role"],
+                        text,
+                        model=message.get("model") if isinstance(message.get("model"), str) else None,
+                    )
                 )
+            message_id = message.get("id")
+            if message["role"] == "assistant" and message_id not in seen_usage_ids:
+                usage_record = make_usage_record(
+                    "claude",
+                    machine,
+                    path,
+                    root,
+                    line_number,
+                    item.get("timestamp"),
+                    message.get("model") if isinstance(message.get("model"), str) else None,
+                    message.get("usage"),
+                )
+                if usage_record is not None:
+                    records.append(usage_record)
+                    if message_id is not None:
+                        seen_usage_ids.add(message_id)
     return records
 
 
@@ -134,6 +213,7 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
         return records
     for path in sessions.rglob("*.jsonl"):
         delegated = False
+        current_model = None
         # session_meta may appear after messages, so apply delegation after reading the whole file.
         pending = []
         for line_number, item in read_jsonl(path):
@@ -144,6 +224,27 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
                 source_text = json.dumps(payload.get("source", "")).lower()
                 delegated = '"exec"' in source_text or "codex_exec" in source_text or "subagent" in source_text
                 continue
+            if item.get("type") == "turn_context":
+                model = payload.get("model")
+                if isinstance(model, str):
+                    current_model = model
+                continue
+            if item.get("type") == "event_msg" and payload.get("type") == "token_count":
+                info = payload.get("info")
+                usage = info.get("last_token_usage") if isinstance(info, dict) else None
+                usage_record = make_usage_record(
+                    "codex",
+                    machine,
+                    path,
+                    root,
+                    line_number,
+                    item.get("timestamp"),
+                    current_model,
+                    usage,
+                )
+                if usage_record is not None:
+                    pending.append(usage_record)
+                continue
             if item.get("type") != "response_item" or payload.get("type") != "message":
                 continue
             if payload.get("role") not in {"user", "assistant"}:
@@ -151,7 +252,17 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
             text = content_text(payload.get("content"))
             if text:
                 pending.append(
-                    make_record("codex", machine, path, root, line_number, item.get("timestamp"), payload["role"], text)
+                    make_record(
+                        "codex",
+                        machine,
+                        path,
+                        root,
+                        line_number,
+                        item.get("timestamp"),
+                        payload["role"],
+                        text,
+                        model=current_model if payload["role"] == "assistant" else None,
+                    )
                 )
         for record in pending:
             record["delegated"] = delegated
@@ -170,7 +281,9 @@ def mark_sessions(records: list[dict], recent_days: int) -> None:
 
     seen: dict[str, str] = {}
     for session_records in grouped.values():
-        material = "\n".join(f"{r['role']}:{r['text']}" for r in session_records)
+        material = "\n".join(
+            f"{r['role']}:{r['text']}" for r in session_records if r["record_type"] == "message"
+        )
         fingerprint = hashlib.sha256(material.encode()).hexdigest()
         session_name = session_records[0]["session"]
         duplicate_of = seen.get(fingerprint)

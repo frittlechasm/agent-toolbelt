@@ -24,6 +24,8 @@ Find repeated model mistakes, recurring user corrections, and workflows that des
 
 Create a temporary directory with mode `0700` and remove it when the audit is complete.
 Run the bundled collector once; it uses event timestamps, redacts common credential forms, marks likely injected messages, excludes Claude subagent logs, and fingerprints duplicate sessions.
+It also emits normalized `usage` records with the model and the token fields available from each agent. Count Claude usage once per message ID and Codex usage once per token-count event.
+Keep vendor-specific cache and reasoning fields separate; do not present cross-vendor token totals as directly equivalent.
 
 ```bash
 audit_dir=$(mktemp -d)
@@ -72,3 +74,12 @@ Lead with a short prioritized list. For each recommendation include:
 - any machine drift that would prevent the fix from taking effect
 
 Separate confirmed findings from weak signals. Include a deferred list so low-value ideas do not look approved.
+
+For HTML reports, include:
+
+- a concise executive summary and prioritized recommendations
+- prompt and skill patterns that worked, not only failures
+- recurring corrections and errors with evidence and frequency
+- failure-mode counts grouped by model, with unknown models shown explicitly
+- token totals and inefficiency indicators by agent and model, including repeated context, low cache reuse, correction churn, and unusually high output for the observed task
+- collection gaps and metric limitations
