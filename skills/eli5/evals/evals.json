@@ -1,0 +1,53 @@
+{
+  "skill_name": "eli5",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "ELI5 how DNS turns example.com into the server my browser connects to. Make it visual, but do not talk to me like a child.",
+      "expected_output": "One standalone visual HTML explainer for an intelligent beginner. It answers the question immediately, then uses a short picture-first sequence to show how a name becomes an IP address and then a browser connection.",
+      "files": [],
+      "expectations": [
+        "Creates one standalone HTML file rather than returning only prose, a raster image, or a UI mockup.",
+        "Answers the central DNS question near the beginning in plain adult language.",
+        "Uses a short sequence of spacious visual scenes, each with one teaching job, a large purposeful visual, and concise supporting text.",
+        "Uses progressive disclosure through a clear static sequence or, when it materially helps, one focused step-through or state-changing interaction.",
+        "Keeps supporting text sparse, lets visuals replace prose, and avoids needless repetition; a brief opening answer or final takeaway may reinforce the central point.",
+        "Uses the playful editorial visual system without decorative clutter and remains readable without clipping at narrow and desktop widths.",
+        "Keeps diagram elements proportional and prevents overlaps between text, nodes, icons, and other visual elements.",
+        "If connectors, connector labels, or arrowheads are used, they remain visually secondary, proportionate, and clear of labels and nodes; their absence is not a failure."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a picture explainer for an intelligent beginner showing why a Kubernetes Deployment creates ReplicaSets and Pods.",
+      "expected_output": "One standalone visual HTML explanation that distinguishes the desired-state controller, ReplicaSet, and Pods through a clear illustrated relationship and a concrete scaling or rollout example. The presentation is playful but technically credible.",
+      "files": [],
+      "expectations": [
+        "Uses a short picture-first sequence of large scenes rather than disconnected definitions or a dense all-in-one diagram.",
+        "Gives each scene one visual teaching job with minimal supporting text.",
+        "Uses a clear visual progression or, when it materially helps, one focused scale or rollout interaction to reveal the state change.",
+        "Visually distinguishes the Deployment, ReplicaSet, and Pods and makes their relationship clear.",
+        "Avoids childish wording, mascots, ornamental cards, and visuals that add no teaching value.",
+        "Uses semantic, accessible, responsive HTML and remains usable if an optional design dependency such as a web font fails.",
+        "Remains readable without clipping at narrow and desktop widths; any interactive controls are clearly labelled, keyboard accessible, and comfortably operable.",
+        "Keeps diagram elements proportional and prevents overlaps; if connectors or arrowheads are used, they remain visually secondary and clear of labels and nodes."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Explain public-key encryption like I'm five with playful illustrations. I understand locks, but I know nothing about cryptography.",
+      "expected_output": "One standalone visual HTML explainer that uses the reader's lock mental model in a short picture-first sequence, visually distinguishes public and private keys, and shows how a public key locks a message while the private key opens it.",
+      "files": [],
+      "expectations": [
+        "Uses a short picture-first sequence of large scenes and the supplied knowledge of locks without treating the reader as a literal child.",
+        "Uses a clear visual sequence or, when it materially helps, one focused interaction to reveal encryption and decryption.",
+        "Makes the public-key and private-key roles visually distinct and makes the lock-then-open operation flow clear through labels, captions, or the illustration itself.",
+        "Keeps supporting text sparse and uses plain adult language.",
+        "Keeps color meaningful and pairs it with labels or shapes rather than relying on color alone.",
+        "Adapts without clipping, page-level overflow, or ambiguous reading order at narrow and desktop widths; any interactive controls are clearly labelled and keyboard accessible.",
+        "Keeps illustration elements proportional and prevents overlaps between text and other visual elements.",
+        "If connectors, connector labels, or arrowheads are used, they remain visually secondary, proportionate, and clear of labels and nodes; their absence is not a failure."
+      ]
+    }
+  ]
+}

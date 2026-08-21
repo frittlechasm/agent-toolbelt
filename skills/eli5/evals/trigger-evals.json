@@ -1,0 +1,40 @@
+{
+  "skill_name": "eli5",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "ELI5 how a database index works with a visual example.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Make me a playful picture explainer for how OAuth redirects work.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Explain inflation to an intelligent beginner using illustrations and very little jargon.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Summarize this architecture document in five concise bullets.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Create three UI mock variants for our billing screen.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Walk me through the changes in this commit as a standalone HTML document.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Explain eventual consistency in simple terms.",
+      "should_trigger": false
+    }
+  ]
+}
