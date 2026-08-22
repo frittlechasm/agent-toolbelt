@@ -114,6 +114,19 @@
         "Inlines actual AWS SVG path data from awsicons.dev and the GitHub mark from svgl.app with adjacent source URL comments, uses a generic glyph only when the named asset is unavailable after lookup, centers visible artwork within 1px on both card axes, and permits connectors to terminate on labels that belong to their source or target nodes.",
         "Draws connectors behind nodes, places labels beside clear connector segments to keep paths continuous, and uses SVG knockout masks only where a connector must pass under a node, boundary, or connector label; unavoidable knockouts leave the canvas and translucent region visible instead of using an opaque label plate."
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "Create a standalone HTML explainer with an accessible flow diagram for this supplied support process: request received; triage the request; decide whether it is actionable; if yes, assign an owner and resolve it; if no, request more information and return to triage. Keep the retry outside the main path and make the result usable at desktop and phone widths.",
+      "expected_output": "A restrained inline SVG flow diagram with measured rendered typography, stable connectors and arrowheads, a clear retry route, and diagram-only narrow-width scrolling when the natural canvas exceeds the content width.",
+      "files": [],
+      "expectations": [
+        "Renders node titles at 13.5–14.5 CSS pixels, secondary labels at 10.5–11.5 CSS pixels, and connector labels at 9.5–10.5 CSS pixels after view box scaling at desktop and 320–375px widths.",
+        "Uses connector strokes near 1.5 rendered CSS pixels with non-scaling-stroke, explicit markerUnits=strokeWidth, orient=auto, and one marker-end whose arrowhead remains near 7–9 rendered CSS pixels at both widths.",
+        "Draws connectors before nodes, routes the retry outside the main path, and keeps every label clear of node boundaries, connector paths, bends, and arrowheads.",
+        "Ends every connector on the nearest target-node edge after a clear straight terminal segment; browser-coordinate verification shows each path endpoint meets that edge within 1 CSS pixel and every arrowhead follows the terminal path direction.",
+        "Keeps narrow-width overflow inside a labelled keyboard-focusable diagram scroller with no page-level horizontal overflow, and includes a concise SVG title and description."
+      ]
     }
   ]
 }

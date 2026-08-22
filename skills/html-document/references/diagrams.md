@@ -18,6 +18,12 @@ For an architecture map, read this reference and `architecture-diagrams.md`.
 - Use capsules for start and end, diamonds for decisions, and rectangles for steps when those distinctions clarify the process.
 - Route retries and loops outside the main path. Place branch labels near their departure points.
 - Keep steps neutral unless color communicates a decision, state, failure, or rollback.
+- At the chosen natural width, render node titles at 14 CSS pixels, secondary labels at 11 CSS pixels, and connector labels at 10 CSS pixels.
+- Compute `scale = rendered SVG width / viewBox width`, then set each SVG source font size to `target rendered size / scale`.
+- Use connector strokes near 1.5 rendered CSS pixels with `vector-effect="non-scaling-stroke"`.
+- Define terminal markers with `markerUnits="strokeWidth"`, `orient="auto"`, and one `marker-end`; size the marker to render near 7–9 CSS pixels.
+- Put the marker reference point at the arrow tip.
+- End each connector on the nearest target-node edge after a clear straight terminal segment, and keep the arrowhead clear of labels, bends, and unrelated nodes.
 
 ## Fit and access
 

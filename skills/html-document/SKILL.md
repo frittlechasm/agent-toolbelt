@@ -1,6 +1,10 @@
 ---
 name: html-document
-description: Create standalone HTML documents for reports, explainers, proposals, plans, and other document-style reading. Use only when the user asks to generate, edit, or convert document content as HTML, or when another skill requires HTML output. Do not use for websites, landing pages, web apps, React apps, dashboards, or product UI.
+description: Create standalone HTML documents. Use only when the user asks to generate, edit, or convert document content as HTML, or when another skill requires HTML output. Do not use for websites, landing pages, web apps, React apps, dashboards, or product UI.
+metadata:
+  scope: global
+  agents: all
+  machines: all
 ---
 
 # HTML Document
@@ -28,9 +32,16 @@ description: Create standalone HTML documents for reports, explainers, proposals
 
 ## Print and fixed pages
 
-- When print or PDF export is requested for a flowing document, add print styles with a light high-contrast palette, sensible page margins, hidden interactive controls, and practical break avoidance for compact grouped content. Let the browser paginate it.
-- Use fixed pages only when the user explicitly requests page-perfect or deliberately composed pages. Match the requested paper size with exact page containers, `@page`, and explicit page breaks.
-- Preserve fixed-page geometry at narrow widths by scaling each page inside its wrapper instead of reflowing its contents. Check every page for horizontal and vertical overflow.
+- When print or PDF export is requested for a flowing document:
+  - add print styles with a light high-contrast palette
+  - sensible page margins
+  - hidden interactive controls
+  - practical break avoidance for compact grouped content
+  - Let the browser paginate it.
+- Use fixed pages only when the user explicitly requests page-perfect or deliberately composed pages.
+- Match the requested paper size with exact page containers, `@page`, and explicit page breaks.
+- Preserve fixed-page geometry at narrow widths by scaling each page inside its wrapper instead of reflowing its contents.
+- Check every page for horizontal and vertical overflow.
 - For any requested print output, inspect print preview for paper size, page count, margins, breaks, contrast, clipping, and hidden controls before delivery.
 
 ## References
