@@ -6,7 +6,7 @@
       "prompt": "Use $agent-history-audit to audit only the synthetic Claude and Codex history under history/claude and history/codex. Review the last 30 days for repeated failures and recommend the smallest evidence-backed instruction or skill improvement. Do not inspect real home-directory history or contact remote machines.",
       "expected_output": "A concise audit that identifies the repeated commit-date failure from two independent Claude sessions, classifies it as a model error rather than user refinement, cites the fixture machine, session basenames, and timestamps, and recommends a narrow global commit-date instruction rather than a new skill. It should treat the successful Codex session as contrasting evidence and report that cross-machine comparison was outside the supplied fixture scope.",
       "files": [],
-      "setup": ["fixtures/setup_history.py"],
+      "fixture": "fixtures/history",
       "expectations": [
         "Runs the collector against only the supplied history/claude and history/codex roots.",
         "Uses two independent Claude sessions as evidence before calling the commit-date behavior repeated.",

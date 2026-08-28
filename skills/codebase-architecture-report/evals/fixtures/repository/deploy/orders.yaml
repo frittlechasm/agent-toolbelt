@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: api
+          image: example/orders-api:1.0.0
+          readinessProbe:
+            httpGet: {path: /ready, port: 3000}
+          envFrom:
+            - secretRef: {name: orders-api-secrets}

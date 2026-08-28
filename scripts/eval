@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""Prepare model-neutral trigger and workflow evaluations."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from checks.validate_evals import validate_evals
+from checks.validate_skills import skill_directories
+from evals.triggers import build_trigger_manifest
+from evals.workflows import build_workflow_manifest
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SKILLS_ROOT = REPO_ROOT / "skills"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    subparsers = parser.add_subparsers(dest="eval_type", required=True)
+
+    triggers = subparsers.add_parser("triggers", help="prepare trigger-routing evals")
+    triggers.add_argument("skills", nargs="*", help="skill names; defaults to all trigger evals")
+
+    workflows = subparsers.add_parser("workflows", help="prepare workflow evals")
+    workflows.add_argument("skills", nargs="*", help="skill names; defaults to all workflow evals")
+    workflows.add_argument(
+        "--case",
+        type=int,
+        action="append",
+        help="case id to prepare; repeat as needed",
+    )
+
+    return parser.parse_args()
+
+
+def select_skills(skills: list[Path], names: list[str], eval_file: str) -> list[Path]:
+    available = {skill.name: skill for skill in skills}
+    missing = [name for name in names if name not in available]
+    if missing:
+        raise RuntimeError(f"unknown skills: {', '.join(missing)}")
+
+    selected = [available[name] for name in names] if names else skills
+    selected = [skill for skill in selected if (skill / "evals" / eval_file).is_file()]
+    if not selected:
+        raise RuntimeError(f"no {eval_file} definitions found")
+    return selected
+
+
+def main() -> int:
+    args = parse_args()
+    skills = skill_directories(SKILLS_ROOT)
+    errors, _ = validate_evals(REPO_ROOT, skills)
+    if errors:
+        for error in errors:
+            print(f"ERROR {error}", file=sys.stderr)
+        return 2
+
+    try:
+        if args.eval_type == "triggers":
+            selected = select_skills(skills, args.skills, "trigger-evals.json")
+            manifest = build_trigger_manifest(selected)
+        else:
+            if args.case and len(args.skills) != 1:
+                raise RuntimeError("--case requires exactly one skill name")
+            selected = select_skills(skills, args.skills, "evals.json")
+            manifest = build_workflow_manifest(selected, args.case)
+    except (OSError, RuntimeError, KeyError, TypeError, json.JSONDecodeError) as error:
+        print(f"ERROR {error}", file=sys.stderr)
+        return 2
+
+    json.dump(manifest, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,3 @@
+{"type": "turn_context", "timestamp": "2026-08-27T12:00:00Z", "payload": {"model": "codex-fixture"}}
+{"type": "response_item", "timestamp": "2026-08-27T12:00:01Z", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Keep this commit on August 28 IST and after its parent."}]}}
+{"type": "response_item", "timestamp": "2026-08-27T12:01:00Z", "payload": {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Committed at 2026-08-28T20:00:00+05:30 after the parent."}]}}

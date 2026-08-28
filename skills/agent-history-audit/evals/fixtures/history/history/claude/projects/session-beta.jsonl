@@ -1,0 +1,3 @@
+{"type": "user", "timestamp": "2026-08-26T11:00:00Z", "message": {"role": "user", "content": [{"type": "text", "text": "Make the follow-up commit chronologically after its parent on August 28 IST."}]}}
+{"type": "assistant", "timestamp": "2026-08-26T11:01:00Z", "message": {"id": "msg-beta", "role": "assistant", "model": "claude-fixture", "content": [{"type": "text", "text": "Created the follow-up commit with today's timestamp."}], "usage": {"input_tokens": 20, "output_tokens": 8}}}
+{"type": "user", "timestamp": "2026-08-26T11:02:00Z", "message": {"role": "user", "content": [{"type": "text", "text": "That is August 29 again. Preserve August 28 and place it after the parent timestamp."}]}}

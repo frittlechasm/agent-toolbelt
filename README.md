@@ -55,24 +55,24 @@ Run the repository's deterministic checks with:
 The command validates skill metadata and eval JSON, then discovers and runs every nested Python unit test.
 Workflow and trigger evals require model execution, so the command reports those definitions without claiming to have run their behavior.
 
-Run trigger-routing evals explicitly with an authenticated Codex CLI and a chosen model:
+Prepare trigger-routing evals for the calling agent:
 
 ```bash
-./scripts/eval-triggers --model <model> [skill-name ...]
+./scripts/eval triggers [skill-name ...]
 ```
 
-The runner makes one isolated, read-only model call per skill and compares the structured classifications with `trigger-evals.json`.
-It is intentionally separate from `./scripts/check` because model evals have latency and usage costs.
+The command emits a JSON manifest containing subject inputs and expected classifications. The calling agent should keep `expected` away from the subject model, compare the returned classifications, and report every mismatch.
 
-Run isolated workflow cases with separate subject and judge models when desired:
+Prepare workflow evals in isolated workspaces:
 
 ```bash
-./scripts/eval-workflows --model <model> --judge-model <judge-model> <skill-name>
+./scripts/eval workflows [skill-name ...]
+./scripts/eval workflows commit-msg --case 1 --case 3
 ```
 
-Workflow evals may declare a trusted `setup` command array whose first item is a Python script relative to the skill's `evals` directory.
-The runner executes setup in a temporary workspace, runs the skill with write access only to that workspace, and grades the final response and resulting artifacts read-only.
-When setup creates `.eval/bin`, the runner prepends it to the subject's `PATH` and supplies the exact fixture executable paths so external commands cannot fall through to host installations. The judge keeps the normal host `PATH`.
+The command validates all eval definitions, prepares any required fixture state, and emits a JSON manifest for the calling agent. It does not invoke Codex, Claude, OpenCode, or a judge. The calling agent runs each subject inside the listed workspace, keeps the `judge` criteria away from the subject, inspects the result, and removes the workspace afterward.
+
+Data-only fixtures are checked-in directories copied into the workspace. Stateful fixtures use a trusted `setup` command whose first item is a Python script relative to the skill's `evals` directory. When setup creates `.eval/bin`, the manifest supplies exact fixture executable paths so the subject does not fall through to host installations.
 
 ## Skills
 

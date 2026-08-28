@@ -35,8 +35,8 @@ def main() -> int:
     missing_triggers = stats["missing_trigger_evals"]
     if missing_triggers:
         print(f"INFO skills without trigger evals: {', '.join(missing_triggers)}")
-    if stats["setup_cases"]:
-        print(f"INFO workflow cases with setup fixtures: {stats['setup_cases']}")
+    if stats["fixture_cases"]:
+        print(f"INFO workflow cases with fixtures: {stats['fixture_cases']}")
     model_cases = stats["workflow_cases"] + stats["trigger_cases"]
     if model_cases:
         print(f"INFO model-dependent cases validated but not executed: {model_cases}")

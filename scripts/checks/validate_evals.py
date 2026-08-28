@@ -22,7 +22,10 @@ EVAL_SCHEMAS = {
     },
 }
 OPTIONAL_EVAL_FIELDS = {
-    "evals.json": {"setup": "nonempty_string_list"},
+    "evals.json": {
+        "fixture": "string",
+        "setup": "nonempty_string_list",
+    },
     "trigger-evals.json": {},
 }
 
@@ -66,7 +69,7 @@ def validate_eval_file(path: Path, skill_name: str, repo_root: Path) -> tuple[li
     schema = EVAL_SCHEMAS[path.name]
     optional = OPTIONAL_EVAL_FIELDS[path.name]
     seen_ids = set()
-    setup_cases = 0
+    fixture_cases = 0
     for index, case in enumerate(cases):
         location = f"{relative}: evals[{index}]"
         if not isinstance(case, dict):
@@ -89,9 +92,22 @@ def validate_eval_file(path: Path, skill_name: str, repo_root: Path) -> tuple[li
             if case_id in seen_ids:
                 errors.append(f"{location}.id duplicates {case_id}")
             seen_ids.add(case_id)
-        if path.name == "evals.json" and "setup" in case:
-            setup_cases += 1
-    return errors, len(cases), setup_cases
+        if path.name == "evals.json" and ("fixture" in case or "setup" in case):
+            fixture_cases += 1
+        if path.name == "evals.json" and "fixture" in case and "setup" in case:
+            errors.append(f"{location} cannot contain both fixture and setup")
+
+        if path.name == "evals.json" and matches_type(case.get("fixture"), "string"):
+            fixture = (path.parent / case["fixture"]).resolve()
+            if path.parent.resolve() not in fixture.parents or not fixture.is_dir():
+                errors.append(f"{location}.fixture must name a directory under the evals directory")
+
+        setup = case.get("setup")
+        if path.name == "evals.json" and matches_type(setup, "nonempty_string_list"):
+            script = (path.parent / setup[0]).resolve()
+            if path.parent.resolve() not in script.parents or not script.is_file():
+                errors.append(f"{location}.setup[0] must name a file under the evals directory")
+    return errors, len(cases), fixture_cases
 
 
 def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict[str, int | list[str]]]:
@@ -99,7 +115,7 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
     errors: list[str] = []
     workflow_cases = 0
     trigger_cases = 0
-    setup_cases = 0
+    fixture_cases = 0
     eval_files = 0
     missing_workflow_evals = []
     missing_trigger_evals = []
@@ -114,11 +130,11 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
 
         for path in (path for path in eval_paths.values() if path.is_file()):
             eval_files += 1
-            file_errors, cases, file_setup_cases = validate_eval_file(path, skill.name, repo_root)
+            file_errors, cases, file_fixture_cases = validate_eval_file(path, skill.name, repo_root)
             errors.extend(file_errors)
             if path.name == "evals.json":
                 workflow_cases += cases
-                setup_cases += file_setup_cases
+                fixture_cases += file_fixture_cases
             else:
                 trigger_cases += cases
 
@@ -134,7 +150,7 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
         "eval_files": eval_files,
         "workflow_cases": workflow_cases,
         "trigger_cases": trigger_cases,
-        "setup_cases": setup_cases,
+        "fixture_cases": fixture_cases,
         "missing_workflow_evals": missing_workflow_evals,
         "missing_trigger_evals": missing_trigger_evals,
     }
