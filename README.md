@@ -72,7 +72,7 @@ Run isolated workflow cases with separate subject and judge models when desired:
 
 Workflow evals may declare a trusted `setup` command array whose first item is a Python script relative to the skill's `evals` directory.
 The runner executes setup in a temporary workspace, runs the skill with write access only to that workspace, and grades the final response and resulting artifacts read-only.
-When setup creates `.eval/bin`, the runner prepends it to the subject's `PATH` so fixtures can replace external commands without affecting the judge or the host machine.
+When setup creates `.eval/bin`, the runner prepends it to the subject's `PATH` and supplies the exact fixture executable paths so external commands cannot fall through to host installations. The judge keeps the normal host `PATH`.
 
 ## Skills
 

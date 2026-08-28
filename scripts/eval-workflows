@@ -95,12 +95,28 @@ def prepare_workspace(skill: Path, case: dict[str, Any], workspace: Path) -> Non
         raise RuntimeError(f"case {case['id']}: fixture setup failed: {detail}")
 
 
-def subject_prompt(skill: Path, case: dict[str, Any]) -> str:
+def fixture_command_instructions(workspace: Path) -> str:
+    """Bind external command names to deterministic fixture executables."""
+    fixture_bin = workspace / ".eval" / "bin"
+    if not fixture_bin.is_dir():
+        return ""
+    commands = "\n".join(
+        f"- {path.name}: {path}" for path in sorted(fixture_bin.iterdir()) if path.is_file()
+    )
+    return f"""Use these exact fixture executable paths whenever invoking the matching command name:
+{commands}
+Do not resolve or invoke another installation of those commands.
+
+"""
+
+
+def subject_prompt(skill: Path, case: dict[str, Any], workspace: Path) -> str:
     """Ask the subject model to perform one workflow with the target skill."""
     return f"""Use the skill at {skill / 'SKILL.md'} to complete the request below.
 Work only inside the current temporary workspace. Follow the skill's authorization boundaries and
 verify the observable result. Do not discuss this evaluation wrapper.
 
+{fixture_command_instructions(workspace)}
 User request:
 {case['prompt']}
 """
@@ -157,7 +173,7 @@ def run_case(
         workspace = Path(directory)
         prepare_workspace(skill, case, workspace)
         subject = invoke_with_trace(
-            subject_prompt(skill, case),
+            subject_prompt(skill, case, workspace),
             model,
             timeout,
             workspace,
