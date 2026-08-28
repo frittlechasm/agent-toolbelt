@@ -6,6 +6,7 @@
       "prompt": "Run /sync-upstream in this fork. It has origin plus a GitHub parent repo, local main is behind upstream/main, and there are two feature branches plus dev. Keep all local branches synced and tell me what happened.",
       "expected_output": "The assistant records the starting state, fast-forwards main, rebases and safely pushes feature branches, verifies dev has no unique work, rebuilds dev, restores the starting branch and stash, and reports the result.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "success"],
       "expectations": [
         "Records the starting branch and checks for dirty files or unfinished Git operations before switching branches.",
         "Updates main only by fast-forward and pushes rewritten branches only with --force-with-lease.",
@@ -18,6 +19,7 @@
       "prompt": "Sync upstream for this fork, but main has local-only commits and upstream/main also has new commits. Do not lose my local main work.",
       "expected_output": "The assistant stops when main cannot fast-forward, shows both sides of the divergence, and leaves all branches and stashes intact.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "diverged-main"],
       "expectations": [
         "Attempts or verifies a fast-forward-only update of main.",
         "Does not reset, rebase, force-merge, or force-push main.",
@@ -30,6 +32,7 @@
       "prompt": "Bring my fork up to date. One feature branch conflicts during rebase; PATCH.md and docs/branch-auth-refresh.md contain conflict guidance. Preserve the branch intent if safe, otherwise skip it.",
       "expected_output": "The assistant reads the intent files, resolves and continues the rebase safely or aborts it and reports the skipped branch.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "rebase-conflict"],
       "expectations": [
         "Reads general and branch-specific intent guidance before resolving the conflict.",
         "Uses git rebase --continue only after staging a safe resolution.",
@@ -42,6 +45,7 @@
       "prompt": "Sync the whole fork. I am currently on feature/payments with uncommitted tracked and untracked work.",
       "expected_output": "The assistant records the current branch, stashes all work, performs the sync, returns to feature/payments, and restores only the recorded stash there.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "dirty-worktree"],
       "expectations": [
         "Records feature/payments as the starting branch before stashing.",
         "Stashes tracked and untracked files without discarding them.",
@@ -54,6 +58,7 @@
       "prompt": "Rebuild dev while syncing this fork, but local dev and origin/dev each contain non-merge patches with no patch-equivalent commit on main or any feature branch.",
       "expected_output": "The assistant reports the unique dev patches and stops before deleting or force-pushing dev.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "unique-dev"],
       "expectations": [
         "Checks both local dev and origin/dev with patch-equivalence-aware comparison.",
         "Shows the unique patches clearly while ignoring old dev merge commits.",
@@ -66,6 +71,7 @@
       "prompt": "Sync the fork. Rebases succeed, but merging a feature branch into the rebuilt dev branch conflicts and cannot be resolved safely.",
       "expected_output": "The assistant uses merge-specific recovery, preserves the rebuilt dev state, and reports the skipped merge.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "dev-merge-conflict"],
       "expectations": [
         "Reads available intent guidance before deciding the merge conflict is unsafe.",
         "Runs git merge --abort rather than any rebase command.",
@@ -78,6 +84,7 @@
       "prompt": "Continue syncing this fork after Git reports that no rebase is in progress even though stale rebase metadata remains.",
       "expected_output": "The assistant stops and reports the corrupt rebase state without staging, committing, cherry-picking, or moving branch refs.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "corrupt-rebase"],
       "expectations": [
         "Treats missing or corrupt rebase state as unsafe.",
         "Does not assume conflicted files are already correct.",

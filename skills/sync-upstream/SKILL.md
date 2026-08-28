@@ -95,3 +95,5 @@ Push rebuilt dev with `git push origin dev --force-with-lease`. Stop and report 
 - Drop it only after a clean apply; otherwise keep it and report the conflict.
 - Do not add AI attribution trailers to any commit.
 - Report each branch, skipped work, push failures, stash state, and `git log --oneline --graph dev | head -30`.
+- For every skipped rebase or dev merge, explain why it was unsafe and give the smallest concrete
+  manual step needed before the branch can be integrated or pushed.
