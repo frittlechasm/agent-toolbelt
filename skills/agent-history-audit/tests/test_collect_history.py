@@ -18,6 +18,30 @@ def write_jsonl(path: Path, records: list[dict]) -> None:
 
 
 class CollectHistoryTests(unittest.TestCase):
+    def test_redact_masks_passwords_in_uri_authority(self):
+        cases = (
+            (
+                "postgres://audit:database-password@db.internal/history",
+                "postgres://audit:[REDACTED]@db.internal/history",
+            ),
+            (
+                "mongodb+srv://audit:database-password@cluster.internal/history",
+                "mongodb+srv://audit:[REDACTED]@cluster.internal/history",
+            ),
+            (
+                "https://audit:web-password@example.internal/history",
+                "https://audit:[REDACTED]@example.internal/history",
+            ),
+            (
+                "postgres://audit@db.internal/history",
+                "postgres://audit@db.internal/history",
+            ),
+        )
+
+        for value, expected in cases:
+            with self.subTest(value=value):
+                self.assertEqual(expected, collect_history.redact(value))
+
     def test_claude_captures_model_and_deduplicates_usage_by_message_id(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

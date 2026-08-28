@@ -30,7 +30,9 @@ AUTHORIZATION = re.compile(
 )
 BEARER_TOKEN = re.compile(r"(?i)\b(Bearer\s+)([A-Za-z0-9._~+/=-]{12,})")
 KNOWN_TOKEN = re.compile(r"\b(sk-[A-Za-z0-9_-]{12,}|gh[oprsu]_[A-Za-z0-9_]{12,}|xox[baprs]-[A-Za-z0-9-]{12,})\b")
-URL_PASSWORD = re.compile(r"(?i)(https?://[^\s/:@]+:)([^\s/@]+)(@)")
+URI_PASSWORD = re.compile(
+    r"(?i)(\b[a-z][a-z0-9+.-]*://[^\s/:@]+:)([^\s/@]+)(@)"
+)
 INJECTED_MARKERS = (
     "<local-command-caveat>",
     "<task-notification>",
@@ -45,7 +47,7 @@ def redact(text: str) -> str:
     text = BEARER_TOKEN.sub(lambda match: match.group(1) + REDACTED, text)
     text = ASSIGNED_SECRET.sub(lambda match: match.group(1) + REDACTED + match.group(3), text)
     text = KNOWN_TOKEN.sub(REDACTED, text)
-    return URL_PASSWORD.sub(lambda match: match.group(1) + REDACTED + match.group(3), text)
+    return URI_PASSWORD.sub(lambda match: match.group(1) + REDACTED + match.group(3), text)
 
 
 def content_text(content: object) -> str:
