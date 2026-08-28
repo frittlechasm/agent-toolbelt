@@ -7,13 +7,13 @@ import argparse
 import json
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 from checks.validate_skills import read_frontmatter, skill_directories
+from evals.codex_cli import CodexError, invoke_json
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -91,53 +91,14 @@ Prompts:
 def invoke_codex(prompt: str, model: str, timeout: int) -> dict[str, Any]:
     """Run one isolated structured-output classification call."""
     with tempfile.TemporaryDirectory(prefix="agent-toolbelt-trigger-eval-") as directory:
-        root = Path(directory)
-        schema_path = root / "output-schema.json"
-        output_path = root / "result.json"
-        schema_path.write_text(json.dumps(OUTPUT_SCHEMA), encoding="utf-8")
-
-        command = [
-            "codex",
-            "exec",
-            "--ephemeral",
-            "--ignore-user-config",
-            "--ignore-rules",
-            "--skip-git-repo-check",
-            "--sandbox",
-            "read-only",
-            "--color",
-            "never",
-            "--model",
+        return invoke_json(
+            prompt,
             model,
-            "--output-schema",
-            str(schema_path),
-            "--output-last-message",
-            str(output_path),
-            "--cd",
-            str(root),
-            "-",
-        ]
-        try:
-            result = subprocess.run(
-                command,
-                input=prompt,
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False,
-                timeout=timeout,
-            )
-        except subprocess.TimeoutExpired as error:
-            raise RuntimeError(f"Codex exceeded the {timeout}s per-skill timeout") from error
-        if result.returncode:
-            detail = result.stderr.strip() or result.stdout.strip() or "no diagnostic output"
-            raise RuntimeError(f"Codex exited {result.returncode}: {detail}")
-        if not output_path.is_file():
-            raise RuntimeError("Codex did not write a structured result")
-        try:
-            return json.loads(output_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as error:
-            raise RuntimeError(f"Codex returned invalid JSON: {error}") from error
+            timeout,
+            Path(directory),
+            "read-only",
+            OUTPUT_SCHEMA,
+        )
 
 
 def compare_results(cases: list[dict[str, Any]], response: dict[str, Any]) -> list[str]:
@@ -219,7 +180,7 @@ def main() -> int:
         try:
             response = invoke_codex(classifier_prompt(skill, cases), args.model, args.timeout)
             errors = compare_results(cases, response)
-        except (OSError, RuntimeError, KeyError, TypeError) as error:
+        except (CodexError, OSError, RuntimeError, KeyError, TypeError) as error:
             errors = [str(error)]
         total += len(cases)
         if errors:

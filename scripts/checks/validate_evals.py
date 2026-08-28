@@ -21,6 +21,10 @@ EVAL_SCHEMAS = {
         "should_trigger": "boolean",
     },
 }
+OPTIONAL_EVAL_FIELDS = {
+    "evals.json": {"setup": "nonempty_string_list"},
+    "trigger-evals.json": {},
+}
 
 
 def matches_type(value: Any, expected: str) -> bool:
@@ -60,26 +64,34 @@ def validate_eval_file(path: Path, skill_name: str, repo_root: Path) -> tuple[li
         return errors, 0, 0
 
     schema = EVAL_SCHEMAS[path.name]
+    optional = OPTIONAL_EVAL_FIELDS[path.name]
     seen_ids = set()
-    fixtureless = 0
+    setup_cases = 0
     for index, case in enumerate(cases):
         location = f"{relative}: evals[{index}]"
         if not isinstance(case, dict):
             errors.append(f"{location} must be an object")
             continue
-        if set(case) != set(schema):
-            errors.append(f"{location} keys must be {', '.join(schema)}")
+        missing = set(schema) - set(case)
+        unexpected = set(case) - set(schema) - set(optional)
+        if missing:
+            errors.append(f"{location} missing keys: {', '.join(sorted(missing))}")
+        if unexpected:
+            errors.append(f"{location} unsupported keys: {', '.join(sorted(unexpected))}")
         for field, expected in schema.items():
             if field not in case or not matches_type(case[field], expected):
+                errors.append(f"{location}.{field} must be {expected.replace('_', ' ')}")
+        for field, expected in optional.items():
+            if field in case and not matches_type(case[field], expected):
                 errors.append(f"{location}.{field} must be {expected.replace('_', ' ')}")
         case_id = case.get("id")
         if matches_type(case_id, "integer"):
             if case_id in seen_ids:
                 errors.append(f"{location}.id duplicates {case_id}")
             seen_ids.add(case_id)
-        if path.name == "evals.json" and case.get("files") == []:
-            fixtureless += 1
-    return errors, len(cases), fixtureless
+        if path.name == "evals.json" and "setup" in case:
+            setup_cases += 1
+    return errors, len(cases), setup_cases
 
 
 def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict[str, int | list[str]]]:
@@ -87,7 +99,7 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
     errors: list[str] = []
     workflow_cases = 0
     trigger_cases = 0
-    fixtureless_cases = 0
+    setup_cases = 0
     eval_files = 0
     missing_workflow_evals = []
     missing_trigger_evals = []
@@ -102,11 +114,11 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
 
         for path in (path for path in eval_paths.values() if path.is_file()):
             eval_files += 1
-            file_errors, cases, fixtureless = validate_eval_file(path, skill.name, repo_root)
+            file_errors, cases, file_setup_cases = validate_eval_file(path, skill.name, repo_root)
             errors.extend(file_errors)
             if path.name == "evals.json":
                 workflow_cases += cases
-                fixtureless_cases += fixtureless
+                setup_cases += file_setup_cases
             else:
                 trigger_cases += cases
 
@@ -122,7 +134,7 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
         "eval_files": eval_files,
         "workflow_cases": workflow_cases,
         "trigger_cases": trigger_cases,
-        "fixtureless_cases": fixtureless_cases,
+        "setup_cases": setup_cases,
         "missing_workflow_evals": missing_workflow_evals,
         "missing_trigger_evals": missing_trigger_evals,
     }

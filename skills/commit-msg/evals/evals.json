@@ -6,6 +6,7 @@
       "prompt": "Write a commit message for the staged changes in this repo. Do not commit it.",
       "expected_output": "A conventional commit message based on git diff --cached, with only the message text and no git commit execution or attribution trailer.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "staged"],
       "expectations": [
         "Inspects staged changes before unstaged changes.",
         "Leads with the commit message; no diff recap, unrequested body, alternatives, or how-to-commit prose (at most one short caveat line allowed).",
@@ -18,6 +19,7 @@
       "prompt": "Nothing is staged yet, but I want a commit msg for my current local changes. Please just suggest the message.",
       "expected_output": "A conventional commit message based on git diff because no staged diff exists, with an appropriate type/scope and no extra explanation.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "unstaged"],
       "expectations": [
         "Falls back to unstaged changes only after confirming there are no staged changes.",
         "Leads with the commit message; at most one short caveat line (e.g. 'nothing staged'), with no body/alternatives/how-to-commit prose.",
@@ -30,6 +32,7 @@
       "prompt": "Check the staged diff and commit it with a good conventional commit message.",
       "expected_output": "The assistant inspects the staged diff, derives a conventional commit message, and uses it for the requested commit without adding attribution trailers.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "staged"],
       "expectations": [
         "Uses git diff --cached to derive the message from staged changes.",
         "Uses a valid conventional commit header in the git commit message.",
@@ -42,6 +45,7 @@
       "prompt": "The only local change is a new untracked src/health-check.ts file. Suggest a commit message without committing.",
       "expected_output": "The assistant notices and inspects the untracked file, then returns a conventional commit message based on its purpose.",
       "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "untracked"],
       "expectations": [
         "Uses git status --short to discover the untracked file.",
         "Inspects the relevant file content rather than claiming there are no changes.",

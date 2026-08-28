@@ -64,6 +64,15 @@ Run trigger-routing evals explicitly with an authenticated Codex CLI and a chose
 The runner makes one isolated, read-only model call per skill and compares the structured classifications with `trigger-evals.json`.
 It is intentionally separate from `./scripts/check` because model evals have latency and usage costs.
 
+Run isolated workflow cases with separate subject and judge models when desired:
+
+```bash
+./scripts/eval-workflows --model <model> --judge-model <judge-model> <skill-name>
+```
+
+Workflow evals may declare a trusted `setup` command array whose first item is a Python script relative to the skill's `evals` directory.
+The runner executes setup in a temporary workspace, runs the skill with write access only to that workspace, and grades the final response and resulting artifacts read-only.
+
 ## Skills
 
 | Skill | What it helps with |
