@@ -64,6 +64,9 @@ Trace important flows from real source. When evidence exists:
 ### Diagrams
 - Use a diagram only when relationships or sequence are materially clearer visually.
 - Every node and connection must be supported by the source or explicitly marked as inferred.
+- Draw deployment and infrastructure boundaries only when configuration or documentation supports
+  the containment. Do not place a data store or external service inside an application deployment
+  merely because the application uses it.
 - One system diagram may be enough; add flow diagrams only when they improve understanding.
 
 ## Handle evidence honestly
@@ -75,6 +78,8 @@ Make the confidence of important claims clear in natural language or concise lab
 - **Gap** — something missing, inconsistent, risky, or under-documented for a stated reason.
 
 Do not label every sentence mechanically. Cite important source-backed claims with file paths and line numbers when practical.
+Distinguish configured or intended state from observed runtime state. For example, a deployment
+manifest can show that two replicas are configured, but not that two replicas are currently running.
 Before finalizing, recheck high-impact claims and downgrade anything the source does not support.
 
 When the report concludes that a requested component or flow is absent, summarize the files, directories, or search scope checked so the absence is auditable.
@@ -112,3 +117,5 @@ Omit sections that are irrelevant or unsupported. Do not pad the report with gen
 
 For Markdown, use a clean heading hierarchy and only the tables or code blocks that aid comparison. 
 For HTML, pass the finished report content and useful diagrams to the `html-document` skill when available; let it decide the presentation.
+When the user requests a standalone HTML report, keep all styling and assets inside the artifact;
+do not load fonts, scripts, stylesheets, or images from external URLs.
