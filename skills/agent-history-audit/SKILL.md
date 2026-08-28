@@ -17,12 +17,10 @@ Never modify history, global instructions, installed skills, or remote machines.
 
 - Review the last 30 days for regressions unless the user specifies another window.
 - Use full history to identify skill candidates.
-- Include every named machine. Report inaccessible history as a collection gap.
+- By default, collect both Claude and Codex history from all machines.
+- If the user supplies history roots, machine limits, or exclusions, use exactly that scope.
+- Treat excluded sources as out of scope, not collection failures.
 - Before recommending changes, inventory global instructions and installed skills on each machine.
-- Treat an explicit user scope as authoritative. If the user supplies history roots, pass them with
-  `--claude-root` and `--codex-root`; do not inspect default roots or contact excluded machines.
-- When the user deliberately limits machines or inventories, report them as outside the requested
-  scope rather than as failed required collection.
 
 Run the collector once into a `0700` temporary directory, then remove the directory:
 
@@ -33,33 +31,31 @@ trap 'rm -rf "$audit_dir"' EXIT
 python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --recent-days 30 --ssh-host mowork > "$audit_dir/history.jsonl"
 ```
 
-The collector redacts credentials, marks injected messages, omits Claude subagents, fingerprints duplicates, and normalizes usage.
-Run the collector even for supplied local roots and use its normalized output as the only history
-evidence. Never parse, link to, quote, or expose raw history. If parsing fails, report the files and
-inspect a minimal redacted sample before changing the collector.
+- The collector redacts credentials, marks injected messages, omits Claude subagents, fingerprints duplicates, and normalizes usage.
+- Run the collector even for supplied local roots and use its normalized output as the only history evidence.
+- Never parse, link to, quote, or expose raw history.
+- If parsing fails, report the files and inspect a minimal redacted sample before changing the collector.
 
 Count Claude usage once per message ID and Codex once per token-count event.
 Keep vendor-specific cache and reasoning fields separate; cross-vendor token totals are not equivalent.
 
 ## Analyze
 
-A repeated pattern needs at least two independent user interactions. For each finding, report:
+- A repeated pattern needs at least two independent user interactions. For each finding, report:
+  - expected versus observed behavior
+  - classification: model error, user refinement, external/tool failure, or policy/permission gate
+  - machine, session basename, and full event timestamp rather than a date-only summary
+  - evidence before and after any later instruction or skill fix
 
-- expected versus observed behavior
-- classification: model error, user refinement, external/tool failure, or policy/permission gate
-- machine, session basename, and full event timestamp rather than a date-only summary
-- evidence before and after any later instruction or skill fix
+- Use normalized collector output as evidence and identify sessions by basename.
+- Prefer direct corrections and observed failures.
+- Ignore injected messages, command caveats, tool wrappers, Claude subagent records, and duplicate snapshots or forks.
+- Delegated sessions are supporting evidence, not direct feedback.
 
-Cite session basenames as plain identifiers. Base evidence on the normalized collector output.
-
-Prefer direct corrections and observed failures.
-Ignore injected messages, command caveats, tool wrappers, Claude subagent records, and duplicate snapshots or forks.
-Delegated sessions are supporting evidence, not direct feedback.
-
-A skill candidate must be a repeated, stable workflow that would reduce prompting or prevent a demonstrated mistake.
-Prefer updating an existing skill. Keep broad preferences in global instructions.
-Assign durable preferences observed across repositories or sessions to the relevant global instruction variant, not a workspace-local instruction.
-Reject one-offs and discoverable facts. Define the trigger, boundary, inputs, verification, and non-goals; compare these with every machine's inventory.
+- A skill candidate must be a repeated, stable workflow that would reduce prompting or prevent a demonstrated mistake.
+- Prefer updating an existing skill. Keep broad preferences in global instructions.
+- Record recurring preferences in the relevant global instructions, not workspace instructions.
+- Reject one-offs and discoverable facts. Define the trigger, boundary, inputs, verification, and non-goals; compare these with every machine's inventory.
 
 ## Report
 
@@ -70,7 +66,6 @@ Owners are Claude instructions, Codex instructions, an existing skill, or a new 
 Separate confirmed findings from weak signals. Include a deferred list so low-value ideas do not look approved.
 
 HTML reports also need:
-
   - an executive summary
   - successful patterns
   - recurring errors

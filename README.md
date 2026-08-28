@@ -2,26 +2,24 @@
 
 Reusable agent skills and supporting utilities.
 
+## Skills
+
+| Skill | What it does |
+| --- | --- |
+| `agent-history-audit` | Reviews Claude and Codex history for repeated problems and workflow improvements. |
+| `bitbucket-pr-fetch` | Fetches and reviews a Bitbucket Cloud PR without changing it. |
+| `code-change-explainer-html` | Creates an HTML explainer for code changes. |
+| `codebase-architecture-report` | Creates source-backed architecture reports. |
+| `commit-msg` | Writes conventional commit messages from Git changes. |
+| `eli5` | Creates simple visual explanations for beginners. |
+| `html-document` | Creates standalone HTML documents. |
+| `sync-upstream` | Syncs all branches in a fork with upstream. |
+| `table-cleanup` | Converts Markdown tables into aligned plain text. |
+| `ui-mocks` | Creates side-by-side HTML UI mockups. |
+
 ## Install
 
-### From a checkout
-
-Use the metadata-aware sync script when this repository should remain the source of record:
-
-```bash
-./scripts/sync-skills check
-./scripts/sync-skills apply
-./scripts/sync-skills check --host mowork
-./scripts/sync-skills apply --host mowork
-```
-
-`check` is read-only. `apply` installs only skills whose `machines` metadata includes the target
-machine and preserves machine-local files such as `.env` and `.env.local`. Remote operations require
-`rsync` on both machines.
-
-Use `--machine <name>` only when the SSH alias or local hostname does not match the skill metadata.
-
-### With `npx skills`
+Use `npx skills` for a one-off installation:
 
 ```bash
 # List available skills
@@ -34,33 +32,20 @@ npx skills add frittlechasm/agent-toolbelt --skill <skill-name> -y
 npx skills add frittlechasm/agent-toolbelt --skill '*' -y
 ```
 
-## Check
+For a checkout you control, use `sync-skills` below.
 
-```bash
-./scripts/check
-```
+## Scripts
 
-This validates skill metadata and eval definitions, then runs all Python unit tests. It does not run
-model-dependent evals.
+| Command | What it does |
+| --- | --- |
+| `./scripts/check` | Validates skills and evals, then runs Python unit tests. |
+| `./scripts/eval triggers [skill ...]` | Prepares trigger evals for the calling agent. |
+| `./scripts/eval workflows [skill ...]` | Prepares workflow evals and isolated workspaces. |
+| `./scripts/sync-skills check [--host <host>]` | Shows which skills would be installed. |
+| `./scripts/sync-skills apply [--host <host>]` | Installs skills for the selected machine. |
 
-## Evals
+`scripts/eval` prints a JSON manifest and does not invoke a model.
+The calling agent runs each subject, checks the result, and removes workflow workspaces.
 
-Prepare trigger evals:
-
-```bash
-./scripts/eval triggers [skill-name ...]
-```
-
-Prepare workflow evals:
-
-```bash
-./scripts/eval workflows [skill-name ...]
-./scripts/eval workflows commit-msg --case 1 --case 3
-```
-
-`scripts/eval` validates the definitions and prints a JSON manifest. It does not invoke a model or
-judge. The calling agent gives each subject only its subject input, compares the result with the
-supplied expectations, and removes workflow workspaces afterward.
-
-Workflow fixtures are created only when a case needs controlled data or state. When a fixture
-provides command shims, the calling agent must use the exact executable paths in the manifest.
+`sync-skills apply` follows each skill's `machines` metadata and preserves machine-local `.env` and `.env.local` files.
+Remote operations require `rsync` on both machines.
