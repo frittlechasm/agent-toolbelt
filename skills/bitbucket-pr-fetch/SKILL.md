@@ -34,7 +34,9 @@ metadata:
 ## Output
 
 - Read the output directory printed by the script.
-  - Start with `summary.md`.
+  - You may verify `manifest.json` first to confirm bundle identity and completeness.
+  - Then read `summary.md` and, when present, `review-summary.md` before evaluating
+    `diff.patch`, comments, commits, or metadata.
   - Use `diff.patch` for code changes.
   - Use `comments.json` for review threads.
   - Use `comments.raw.json` when normalized comments omit a Bitbucket field.
@@ -43,7 +45,8 @@ metadata:
   - Use `diffstat.json` for file statistics.
   - Use `manifest.json` to verify bundle identity, freshness, and completeness.
 
-- If `review-summary.md` exists in the output directory, read it before a review or re-review.
+- If `review-summary.md` exists in the output directory, read it before evaluating detailed review
+  artifacts so prior finding IDs and assessment state inform the review.
 - It records the last completed review and is not a fetched Bitbucket artifact.
 
 - Complete the requested task using the fetched artifacts and the checked-out repo where relevant.

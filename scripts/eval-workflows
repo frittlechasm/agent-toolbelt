@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -105,6 +106,16 @@ User request:
 """
 
 
+def subject_environment(workspace: Path) -> dict[str, str] | None:
+    """Expose fixture command shims only to the subject process."""
+    fixture_bin = workspace / ".eval" / "bin"
+    if not fixture_bin.is_dir():
+        return None
+    env = os.environ.copy()
+    env["PATH"] = f"{fixture_bin}{os.pathsep}{env.get('PATH', '')}"
+    return env
+
+
 def judge_prompt(
     skill: Path,
     case: dict[str, Any],
@@ -152,6 +163,7 @@ def run_case(
             workspace,
             "workspace-write",
             approve_for_me=True,
+            env=subject_environment(workspace),
         )
         return invoke_json(
             judge_prompt(skill, case, subject.final_response, subject.command_trace),

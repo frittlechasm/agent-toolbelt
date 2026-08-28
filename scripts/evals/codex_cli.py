@@ -60,6 +60,7 @@ def invoke_with_trace(
     sandbox: str,
     output_schema: dict[str, Any] | None = None,
     approve_for_me: bool = False,
+    env: dict[str, str] | None = None,
 ) -> CodexResult:
     """Run one ephemeral Codex call and return its final message and command trace."""
     with tempfile.TemporaryDirectory(prefix="agent-toolbelt-eval-control-") as directory:
@@ -97,6 +98,7 @@ def invoke_with_trace(
                 stderr=subprocess.PIPE,
                 check=False,
                 timeout=timeout,
+                env=env,
             )
         except subprocess.TimeoutExpired as error:
             raise CodexError(f"Codex exceeded the {timeout}s per-call timeout") from error
@@ -119,10 +121,11 @@ def invoke(
     sandbox: str,
     output_schema: dict[str, Any] | None = None,
     approve_for_me: bool = False,
+    env: dict[str, str] | None = None,
 ) -> str:
     """Run one ephemeral Codex call and return its final message."""
     return invoke_with_trace(
-        prompt, model, timeout, workspace, sandbox, output_schema, approve_for_me
+        prompt, model, timeout, workspace, sandbox, output_schema, approve_for_me, env
     ).final_response
 
 
