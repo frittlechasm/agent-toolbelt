@@ -54,6 +54,9 @@ metadata:
 ## Record a completed review
 
 - Create or update `review-summary.md` only after completing a review.
+- Store it as `<output-directory>/review-summary.md`, where `<output-directory>` is the path printed
+  by `fetch_pr.py` or reused from earlier in the session. Never create it at the repository or
+  workspace root.
 - The fetch script never creates, modifies, validates, or deletes `review-summary.md` file.
 - Treat it as a rolling checkpoint, not an append-only transcript:
   - Record `reviewed_at` as a UTC ISO 8601 timestamp, plus `source_commit`, `destination_commit`, `pr_updated_on`, and `comment_count` in YAML frontmatter.

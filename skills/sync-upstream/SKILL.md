@@ -16,7 +16,11 @@ Preserve every commit and the user's working state. Stop when safety cannot be p
 
 - Record the current branch so it can be restored.
 - Run `git status --short`, `git stash list`, and `git remote -v`.
-- Stop on a detached HEAD or an unfinished merge, rebase, or cherry-pick.
+- Explicitly check Git's metadata paths for an unfinished merge, rebase, cherry-pick, or revert;
+  use `git rev-parse --git-path` for `MERGE_HEAD`, `rebase-merge`, `rebase-apply`,
+  `CHERRY_PICK_HEAD`, and `REVERT_HEAD`, then test whether each path exists. `git status --short`
+  alone does not prove that no operation is active. Stop if any are present.
+- Stop on a detached HEAD or unfinished operation.
 - If the tree is dirty, stash tracked and untracked files only when the user requested the sync. Record the created stash.
 - Detect the GitHub parent and its default branch with `gh repo view`.
 - Add `upstream` when absent. Stop if an existing `upstream` points elsewhere.
@@ -67,7 +71,9 @@ If resolution is unsafe, run `git rebase --abort`, mark the branch skipped, and 
 Before replacing local `dev` or `origin/dev`:
 
 - Ignore merge commits created by earlier dev builds.
-- Use `git cherry` or `git log --cherry-pick` to identify non-merge patches already represented by the updated base or feature branches.
+- Check local `dev` and `origin/dev` separately with `git cherry` or `git log --cherry-pick` to
+  identify non-merge patches already represented by the updated base or feature branches. Evidence
+  for one ref does not prove that the other ref is safe to replace.
 - Stop and show any remaining unique patches.
 
 Only after that check passes:
@@ -94,6 +100,8 @@ Push rebuilt dev with `git push origin dev --force-with-lease`. Stop and report 
 - Apply the recorded stash there.
 - Drop it only after a clean apply; otherwise keep it and report the conflict.
 - Do not add AI attribution trailers to any commit.
-- Report each branch, skipped work, push failures, stash state, and `git log --oneline --graph dev | head -30`.
+- In the final response, report each branch, skipped work, push failures, stash state, and the actual
+  output of `git log --oneline --graph dev | head -30`; running the graph command without including
+  its result is incomplete.
 - For every skipped rebase or dev merge, explain why it was unsafe and give the smallest concrete
   manual step needed before the branch can be integrated or pushed.
