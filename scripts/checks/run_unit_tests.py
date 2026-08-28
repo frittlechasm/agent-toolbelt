@@ -1,4 +1,4 @@
-"""Discover and run all nested Python unit tests."""
+"""Discover and run nested Python unit tests."""
 
 from __future__ import annotations
 

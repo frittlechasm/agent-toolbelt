@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from run_unit_tests import run_unit_tests
-from validate_evals import validate_evals
-from validate_skills import validate_skills
+from checks.run_unit_tests import run_unit_tests
+from checks.validate_evals import validate_evals
+from checks.validate_skills import validate_skills
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

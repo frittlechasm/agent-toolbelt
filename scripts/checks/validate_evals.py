@@ -1,4 +1,4 @@
-"""Validate workflow and trigger eval definitions."""
+"""Validate workflow and trigger eval JSON definitions."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Discover skills and validate their required metadata."""
+"""Validate required metadata for discovered skills."""
 
 from __future__ import annotations
 
