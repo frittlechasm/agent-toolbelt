@@ -3,241 +3,21 @@
 
 from __future__ import annotations
 
-import json
-import re
-import sys
-import unittest
 from pathlib import Path
-from typing import Any
+
+from run_unit_tests import run_unit_tests
+from validate_evals import validate_evals
+from validate_skills import validate_skills
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILLS_ROOT = REPO_ROOT / "skills"
-SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-REQUIRED_METADATA = ("scope", "agents", "machines")
-EVAL_SCHEMAS = {
-    "evals.json": {
-        "id": "integer",
-        "prompt": "string",
-        "expected_output": "string",
-        "files": "string_list",
-        "expectations": "nonempty_string_list",
-    },
-    "trigger-evals.json": {
-        "id": "integer",
-        "prompt": "string",
-        "should_trigger": "boolean",
-    },
-}
-
-
-def skill_directories() -> list[Path]:
-    """Return public and private skill directories in stable order."""
-    roots = [SKILLS_ROOT]
-    private = SKILLS_ROOT / "private"
-    if private.is_dir():
-        roots.append(private)
-
-    skills = []
-    for root in roots:
-        skills.extend(
-            path
-            for path in root.iterdir()
-            if path.is_dir() and path.name != "private" and (path / "SKILL.md").is_file()
-        )
-    return sorted(skills, key=lambda path: path.name)
-
-
-def read_frontmatter(path: Path) -> tuple[dict[str, str], dict[str, str]]:
-    """Read the simple top-level fields used by this repository."""
-    lines = path.read_text(encoding="utf-8").splitlines()
-    if not lines or lines[0] != "---":
-        raise ValueError("missing opening YAML frontmatter delimiter")
-
-    try:
-        end = lines.index("---", 1)
-    except ValueError as error:
-        raise ValueError("missing closing YAML frontmatter delimiter") from error
-
-    fields: dict[str, str] = {}
-    metadata: dict[str, str] = {}
-    in_metadata = False
-    for line in lines[1:end]:
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if line == "metadata:":
-            in_metadata = True
-            continue
-        if in_metadata and line.startswith("  ") and ":" in line:
-            key, value = line.strip().split(":", 1)
-            metadata[key] = value.strip()
-            continue
-        if line.startswith(" "):
-            continue
-        in_metadata = False
-        key, separator, value = line.partition(":")
-        if not separator:
-            raise ValueError(f"invalid frontmatter line: {line}")
-        fields[key] = value.strip()
-    return fields, metadata
-
-
-def matches_type(value: Any, expected: str) -> bool:
-    """Match one eval value against the repository's JSON conventions."""
-    if expected == "integer":
-        return isinstance(value, int) and not isinstance(value, bool)
-    if expected == "boolean":
-        return isinstance(value, bool)
-    if expected == "string":
-        return isinstance(value, str) and bool(value.strip())
-    if expected == "string_list":
-        return isinstance(value, list) and all(isinstance(item, str) and item.strip() for item in value)
-    if expected == "nonempty_string_list":
-        return bool(value) and matches_type(value, "string_list")
-    raise ValueError(f"unsupported schema type: {expected}")
-
-
-def validate_eval_file(path: Path, skill_name: str, errors: list[str]) -> tuple[int, int]:
-    """Validate one workflow or trigger eval file and return case counts."""
-    relative = path.relative_to(REPO_ROOT)
-    try:
-        document = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        errors.append(f"{relative}: invalid JSON: {error}")
-        return 0, 0
-
-    if not isinstance(document, dict):
-        errors.append(f"{relative}: top level must be an object")
-        return 0, 0
-    if set(document) != {"skill_name", "evals"}:
-        errors.append(f"{relative}: top-level keys must be skill_name and evals")
-    if document.get("skill_name") != skill_name:
-        errors.append(f"{relative}: skill_name must be {skill_name!r}")
-
-    cases = document.get("evals")
-    if not isinstance(cases, list) or not cases:
-        errors.append(f"{relative}: evals must be a non-empty array")
-        return 0, 0
-
-    schema = EVAL_SCHEMAS[path.name]
-    seen_ids = set()
-    fixtureless = 0
-    for index, case in enumerate(cases):
-        location = f"{relative}: evals[{index}]"
-        if not isinstance(case, dict):
-            errors.append(f"{location} must be an object")
-            continue
-        if set(case) != set(schema):
-            errors.append(f"{location} keys must be {', '.join(schema)}")
-        for field, expected in schema.items():
-            if field not in case or not matches_type(case[field], expected):
-                errors.append(f"{location}.{field} must be {expected.replace('_', ' ')}")
-        case_id = case.get("id")
-        if matches_type(case_id, "integer"):
-            if case_id in seen_ids:
-                errors.append(f"{location}.id duplicates {case_id}")
-            seen_ids.add(case_id)
-        if path.name == "evals.json" and case.get("files") == []:
-            fixtureless += 1
-    return len(cases), fixtureless
-
-
-def validate_repository() -> tuple[list[str], dict[str, int | list[str]]]:
-    """Validate skills and eval definitions without running model behavior."""
-    errors: list[str] = []
-    skills = skill_directories()
-    names = set()
-    workflow_cases = 0
-    trigger_cases = 0
-    fixtureless_cases = 0
-    eval_files = 0
-    missing_evals = []
-
-    for skill in skills:
-        relative = skill.relative_to(REPO_ROOT)
-        if not SKILL_NAME.fullmatch(skill.name):
-            errors.append(f"{relative}: invalid skill directory name")
-        if skill.name in names:
-            errors.append(f"{relative}: duplicate skill name")
-        names.add(skill.name)
-
-        try:
-            fields, metadata = read_frontmatter(skill / "SKILL.md")
-        except (OSError, ValueError) as error:
-            errors.append(f"{relative}/SKILL.md: {error}")
-        else:
-            if fields.get("name") != skill.name:
-                errors.append(f"{relative}/SKILL.md: name must be {skill.name!r}")
-            if not fields.get("description"):
-                errors.append(f"{relative}/SKILL.md: description is required")
-            missing_metadata = [key for key in REQUIRED_METADATA if not metadata.get(key)]
-            if missing_metadata:
-                errors.append(
-                    f"{relative}/SKILL.md: missing metadata: {', '.join(missing_metadata)}"
-                )
-
-        eval_paths = [skill / "evals" / name for name in EVAL_SCHEMAS]
-        present = [path for path in eval_paths if path.is_file()]
-        if not present:
-            missing_evals.append(skill.name)
-            continue
-        if len(present) != len(eval_paths):
-            missing = [path.name for path in eval_paths if not path.is_file()]
-            errors.append(f"{relative}/evals: missing {', '.join(missing)}")
-
-        for path in present:
-            eval_files += 1
-            cases, fixtureless = validate_eval_file(path, skill.name, errors)
-            if path.name == "evals.json":
-                workflow_cases += cases
-                fixtureless_cases += fixtureless
-            else:
-                trigger_cases += cases
-
-        eval_directory = skill / "evals"
-        unexpected = sorted(
-            path.name for path in eval_directory.glob("*.json") if path.name not in EVAL_SCHEMAS
-        )
-        if unexpected:
-            errors.append(f"{relative}/evals: unsupported JSON files: {', '.join(unexpected)}")
-
-    return errors, {
-        "skills": len(skills),
-        "eval_files": eval_files,
-        "workflow_cases": workflow_cases,
-        "trigger_cases": trigger_cases,
-        "fixtureless_cases": fixtureless_cases,
-        "missing_evals": missing_evals,
-    }
-
-
-def run_unit_tests() -> tuple[bool, int, int]:
-    """Discover and run every unittest suite, including nested skill tests."""
-    test_directories = sorted(
-        {path.parent for path in REPO_ROOT.rglob("test_*.py")},
-        key=lambda path: str(path.relative_to(REPO_ROOT)),
-    )
-    if not test_directories:
-        print("ERROR no unit tests found")
-        return False, 0, 0
-
-    suite = unittest.TestSuite()
-    loader = unittest.TestLoader()
-    for directory in test_directories:
-        suite.addTests(
-            loader.discover(
-                start_dir=str(directory),
-                pattern="test_*.py",
-                top_level_dir=str(directory),
-            )
-        )
-
-    result = unittest.TextTestRunner(stream=sys.stdout, verbosity=2).run(suite)
-    return result.wasSuccessful(), result.testsRun, len(test_directories)
 
 
 def main() -> int:
-    errors, stats = validate_repository()
+    skills, skill_errors = validate_skills(REPO_ROOT, SKILLS_ROOT)
+    eval_errors, stats = validate_evals(REPO_ROOT, skills)
+    errors = skill_errors + eval_errors
 
     print("==> Skill and eval definitions")
     for error in errors:
@@ -245,7 +25,7 @@ def main() -> int:
     if not errors:
         print(
             "OK "
-            f"{stats['skills']} skills, {stats['eval_files']} eval files, "
+            f"{len(skills)} skills, {stats['eval_files']} eval files, "
             f"{stats['workflow_cases']} workflow cases, {stats['trigger_cases']} trigger cases"
         )
 
@@ -259,7 +39,7 @@ def main() -> int:
         print(f"INFO model-dependent cases validated but not executed: {model_cases}")
 
     print("\n==> Unit tests")
-    tests_ok, tests_run, directories = run_unit_tests()
+    tests_ok, tests_run, directories = run_unit_tests(REPO_ROOT)
     if tests_ok:
         print(f"OK {tests_run} tests from {directories} directories")
 
