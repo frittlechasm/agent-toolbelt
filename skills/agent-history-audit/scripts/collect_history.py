@@ -216,7 +216,7 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
     for path in sessions.rglob("*.jsonl"):
         delegated = False
         current_model = None
-        # session_meta may appear after messages, so apply delegation after reading the whole file.
+        # session_meta may appear after messages or repeat, so accumulate delegation across the file.
         pending = []
         for line_number, item in read_jsonl(path):
             payload = item.get("payload")
@@ -224,7 +224,9 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
                 continue
             if item.get("type") == "session_meta":
                 source_text = json.dumps(payload.get("source", "")).lower()
-                delegated = '"exec"' in source_text or "codex_exec" in source_text or "subagent" in source_text
+                delegated = delegated or (
+                    '"exec"' in source_text or "codex_exec" in source_text or "subagent" in source_text
+                )
                 continue
             if item.get("type") == "turn_context":
                 model = payload.get("model")
