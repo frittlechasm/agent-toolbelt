@@ -18,7 +18,11 @@ SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 RSYNC_OPTIONS = (
     "-rlpc",
     "--delete-after",
-    "--delete-excluded",
+    # Credentials and runtime files are machine-local. The include must come
+    # before the broader .env.* exclusion because rsync uses the first match.
+    "--include=.env.example",
+    "--exclude=.env",
+    "--exclude=.env.*",
     "--exclude=.DS_Store",
     "--exclude=__pycache__/",
     "--exclude=*.pyc",

@@ -20,6 +20,7 @@ Remote checks and applies require `rsync` on both machines and stop before makin
 
 On the current machine, `apply` links the agent skill directories to this checkout.
 For an SSH host, it copies selected skills and creates Claude links for shared skills.
+Credential files such as `.env` and `.env.local` remain machine-local; committed `.env.example` files are synchronized.
 Codex reads shared skills from `~/.agents/skills`; remove older same-named copies under `~/.codex/skills` separately.
 Use `--machine <name>` only when the SSH alias or local hostname does not match the skill metadata.
 
