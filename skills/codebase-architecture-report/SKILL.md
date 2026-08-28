@@ -64,9 +64,8 @@ Trace important flows from real source. When evidence exists:
 ### Diagrams
 - Use a diagram only when relationships or sequence are materially clearer visually.
 - Every node and connection must be supported by the source or explicitly marked as inferred.
-- Draw deployment and infrastructure boundaries only when configuration or documentation supports
-  the containment. Do not place a data store or external service inside an application deployment
-  merely because the application uses it.
+- Show a component inside a deployment or infrastructure boundary only when configuration or
+  documentation confirms it.
 - One system diagram may be enough; add flow diagrams only when they improve understanding.
 
 ## Handle evidence honestly
