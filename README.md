@@ -44,6 +44,17 @@ To install one skill:
 npx skills add frittlechasm/agent-toolbelt --skill <skill-name> -y
 ```
 
+## Check
+
+Run the repository's deterministic checks with:
+
+```bash
+./scripts/check
+```
+
+The command validates skill metadata and eval JSON, then discovers and runs every nested Python unit test.
+Workflow and trigger evals require model execution, so the command reports those definitions without claiming to have run their behavior.
+
 ## Skills
 
 | Skill | What it helps with |
