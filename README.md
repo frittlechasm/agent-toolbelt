@@ -55,6 +55,15 @@ Run the repository's deterministic checks with:
 The command validates skill metadata and eval JSON, then discovers and runs every nested Python unit test.
 Workflow and trigger evals require model execution, so the command reports those definitions without claiming to have run their behavior.
 
+Run trigger-routing evals explicitly with an authenticated Codex CLI and a chosen model:
+
+```bash
+./scripts/eval-triggers --model <model> [skill-name ...]
+```
+
+The runner makes one isolated, read-only model call per skill and compares the structured classifications with `trigger-evals.json`.
+It is intentionally separate from `./scripts/check` because model evals have latency and usage costs.
+
 ## Skills
 
 | Skill | What it helps with |

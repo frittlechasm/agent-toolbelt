@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""Evaluate skill trigger routing with the Codex CLI."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any
+
+from checks.validate_skills import read_frontmatter, skill_directories
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SKILLS_ROOT = REPO_ROOT / "skills"
+POLICY_PATTERN = re.compile(r"^\s+allow_implicit_invocation:\s*(true|false)\s*$", re.MULTILINE)
+OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "results": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "should_trigger": {"type": "boolean"},
+                    "reason": {"type": "string"},
+                },
+                "required": ["id", "should_trigger", "reason"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["results"],
+    "additionalProperties": False,
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("skills", nargs="*", help="skill names; defaults to every trigger eval file")
+    parser.add_argument("--model", required=True, help="Codex model used for classification")
+    parser.add_argument("--timeout", type=int, default=180, help="seconds allowed per skill")
+    return parser.parse_args()
+
+
+def allows_implicit_invocation(skill: Path) -> bool:
+    """Read the optional Codex invocation policy for a skill."""
+    path = skill / "agents" / "openai.yaml"
+    if not path.is_file():
+        return True
+    match = POLICY_PATTERN.search(path.read_text(encoding="utf-8"))
+    return match is None or match.group(1) == "true"
+
+
+def load_trigger_cases(skill: Path) -> list[dict[str, Any]]:
+    """Load one validated trigger eval definition."""
+    path = skill / "evals" / "trigger-evals.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return document["evals"]
+
+
+def classifier_prompt(skill: Path, cases: list[dict[str, Any]]) -> str:
+    """Build a routing-only prompt without exposing expected labels."""
+    fields, _ = read_frontmatter(skill / "SKILL.md")
+    payload = [{"id": case["id"], "prompt": case["prompt"]} for case in cases]
+    policy = allows_implicit_invocation(skill)
+    return f"""You are evaluating skill routing. Do not answer the user prompts and do not use tools.
+
+Decide whether an ideal Codex agent should load the target skill before answering each prompt.
+Use only the skill metadata and invocation policy below.
+
+Skill name: {skill.name}
+Description: {fields['description']}
+Implicit invocation allowed: {str(policy).lower()}
+
+If implicit invocation is false, return true only when the prompt explicitly invokes the skill by
+name, such as `$skill-name` or `/skill-name`. Otherwise judge whether the description is the best
+match for the request. Return one result for every input id and preserve each id exactly.
+
+Prompts:
+{json.dumps(payload, indent=2)}
+"""
+
+
+def invoke_codex(prompt: str, model: str, timeout: int) -> dict[str, Any]:
+    """Run one isolated structured-output classification call."""
+    with tempfile.TemporaryDirectory(prefix="agent-toolbelt-trigger-eval-") as directory:
+        root = Path(directory)
+        schema_path = root / "output-schema.json"
+        output_path = root / "result.json"
+        schema_path.write_text(json.dumps(OUTPUT_SCHEMA), encoding="utf-8")
+
+        command = [
+            "codex",
+            "exec",
+            "--ephemeral",
+            "--ignore-user-config",
+            "--ignore-rules",
+            "--skip-git-repo-check",
+            "--sandbox",
+            "read-only",
+            "--color",
+            "never",
+            "--model",
+            model,
+            "--output-schema",
+            str(schema_path),
+            "--output-last-message",
+            str(output_path),
+            "--cd",
+            str(root),
+            "-",
+        ]
+        try:
+            result = subprocess.run(
+                command,
+                input=prompt,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise RuntimeError(f"Codex exceeded the {timeout}s per-skill timeout") from error
+        if result.returncode:
+            detail = result.stderr.strip() or result.stdout.strip() or "no diagnostic output"
+            raise RuntimeError(f"Codex exited {result.returncode}: {detail}")
+        if not output_path.is_file():
+            raise RuntimeError("Codex did not write a structured result")
+        try:
+            return json.loads(output_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            raise RuntimeError(f"Codex returned invalid JSON: {error}") from error
+
+
+def compare_results(cases: list[dict[str, Any]], response: dict[str, Any]) -> list[str]:
+    """Compare model classifications with expected trigger labels."""
+    expected = {case["id"]: case["should_trigger"] for case in cases}
+    returned: dict[int, dict[str, Any]] = {}
+    errors = []
+    results = response.get("results") if isinstance(response, dict) else None
+    if not isinstance(results, list):
+        return ["model response must contain a results array"]
+    for result in results:
+        if not isinstance(result, dict):
+            errors.append("model returned a non-object result")
+            continue
+        case_id = result.get("id")
+        if case_id in returned:
+            errors.append(f"duplicate result id {case_id}")
+        elif case_id not in expected:
+            errors.append(f"unexpected result id {case_id}")
+        else:
+            returned[case_id] = result
+
+    for case in cases:
+        case_id = case["id"]
+        if case_id not in returned:
+            errors.append(f"case {case_id}: model returned no result")
+            continue
+        actual = returned[case_id].get("should_trigger")
+        if actual != case["should_trigger"]:
+            reason = returned[case_id].get("reason", "no reason")
+            errors.append(
+                f"case {case_id}: expected {str(case['should_trigger']).lower()}, "
+                f"got {str(actual).lower()} ({reason})"
+            )
+    return errors
+
+
+def selected_skills(names: list[str]) -> list[Path]:
+    """Resolve requested skills or every skill with trigger evals."""
+    available = {skill.name: skill for skill in skill_directories(SKILLS_ROOT)}
+    if names:
+        missing = [name for name in names if name not in available]
+        if missing:
+            raise RuntimeError(f"unknown skills: {', '.join(missing)}")
+        selected = [available[name] for name in names]
+    else:
+        selected = list(available.values())
+
+    without_evals = [
+        skill.name for skill in selected if not (skill / "evals" / "trigger-evals.json").is_file()
+    ]
+    if names and without_evals:
+        raise RuntimeError(f"skills without trigger evals: {', '.join(without_evals)}")
+    return [
+        skill for skill in selected if (skill / "evals" / "trigger-evals.json").is_file()
+    ]
+
+
+def main() -> int:
+    args = parse_args()
+    if shutil.which("codex") is None:
+        print("ERROR codex CLI was not found in PATH", file=sys.stderr)
+        return 2
+
+    try:
+        skills = selected_skills(args.skills)
+    except RuntimeError as error:
+        print(f"ERROR {error}", file=sys.stderr)
+        return 2
+    if not skills:
+        print("ERROR no trigger eval definitions found", file=sys.stderr)
+        return 2
+
+    total = 0
+    failed = 0
+    for skill in skills:
+        cases = load_trigger_cases(skill)
+        print(f"==> {skill.name} ({len(cases)} cases)")
+        try:
+            response = invoke_codex(classifier_prompt(skill, cases), args.model, args.timeout)
+            errors = compare_results(cases, response)
+        except (OSError, RuntimeError, KeyError, TypeError) as error:
+            errors = [str(error)]
+        total += len(cases)
+        if errors:
+            failed += len(errors)
+            for error in errors:
+                print(f"FAIL {error}")
+        else:
+            print(f"OK {len(cases)} cases")
+
+    print(f"\n{'FAIL' if failed else 'OK'} {total} cases across {len(skills)} skills")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

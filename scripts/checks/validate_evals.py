@@ -89,20 +89,18 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
     trigger_cases = 0
     fixtureless_cases = 0
     eval_files = 0
-    missing_evals = []
+    missing_workflow_evals = []
+    missing_trigger_evals = []
 
     for skill in skills:
         relative = skill.relative_to(repo_root)
-        eval_paths = [skill / "evals" / name for name in EVAL_SCHEMAS]
-        present = [path for path in eval_paths if path.is_file()]
-        if not present:
-            missing_evals.append(skill.name)
-            continue
-        if len(present) != len(eval_paths):
-            missing = [path.name for path in eval_paths if not path.is_file()]
-            errors.append(f"{relative}/evals: missing {', '.join(missing)}")
+        eval_paths = {name: skill / "evals" / name for name in EVAL_SCHEMAS}
+        if not eval_paths["evals.json"].is_file():
+            missing_workflow_evals.append(skill.name)
+        if not eval_paths["trigger-evals.json"].is_file():
+            missing_trigger_evals.append(skill.name)
 
-        for path in present:
+        for path in (path for path in eval_paths.values() if path.is_file()):
             eval_files += 1
             file_errors, cases, fixtureless = validate_eval_file(path, skill.name, repo_root)
             errors.extend(file_errors)
@@ -112,9 +110,10 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
             else:
                 trigger_cases += cases
 
-        eval_directory = skill / "evals"
         unexpected = sorted(
-            path.name for path in eval_directory.glob("*.json") if path.name not in EVAL_SCHEMAS
+            path.name
+            for path in (skill / "evals").glob("*.json")
+            if path.name not in EVAL_SCHEMAS
         )
         if unexpected:
             errors.append(f"{relative}/evals: unsupported JSON files: {', '.join(unexpected)}")
@@ -124,5 +123,6 @@ def validate_evals(repo_root: Path, skills: list[Path]) -> tuple[list[str], dict
         "workflow_cases": workflow_cases,
         "trigger_cases": trigger_cases,
         "fixtureless_cases": fixtureless_cases,
-        "missing_evals": missing_evals,
+        "missing_workflow_evals": missing_workflow_evals,
+        "missing_trigger_evals": missing_trigger_evals,
     }

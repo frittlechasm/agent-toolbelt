@@ -29,9 +29,12 @@ def main() -> int:
             f"{stats['workflow_cases']} workflow cases, {stats['trigger_cases']} trigger cases"
         )
 
-    missing_evals = stats["missing_evals"]
-    if missing_evals:
-        print(f"INFO skills without eval definitions: {', '.join(missing_evals)}")
+    missing_workflows = stats["missing_workflow_evals"]
+    if missing_workflows:
+        print(f"INFO skills without workflow evals: {', '.join(missing_workflows)}")
+    missing_triggers = stats["missing_trigger_evals"]
+    if missing_triggers:
+        print(f"INFO skills without trigger evals: {', '.join(missing_triggers)}")
     if stats["fixtureless_cases"]:
         print(f"INFO workflow cases without file fixtures: {stats['fixtureless_cases']}")
     model_cases = stats["workflow_cases"] + stats["trigger_cases"]

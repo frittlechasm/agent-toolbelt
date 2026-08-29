@@ -1,0 +1,45 @@
+{
+  "skill_name": "agent-history-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use $agent-history-audit to review the last eight days of Claude and Codex sessions for repeated failures.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "$agent-history-audit compare agent behavior on fmp and mowork and identify instruction drift.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "/agent-history-audit mine my full agent history for workflows that deserve reusable skills.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Audit my recent Claude and Codex history and recommend improvements.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Compare the agent sessions on my Mac and WSL machine.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Review the last twenty Git commits and summarize the main themes.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "How many tokens did this API request consume?",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Create a new skill for recurring database migration reviews.",
+      "should_trigger": false
+    }
+  ]
+}
