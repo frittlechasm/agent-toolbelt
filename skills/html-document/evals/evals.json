@@ -4,6 +4,7 @@
     {
       "id": 1,
       "prompt": "Generate a polished standalone HTML document from this technical summary so I can export it as a PDF for a client. Use the title `API Gateway Rollout Brief`, omit the client name intentionally, use the skill's default neutral styling, and show the rollout date as August 12, 2026. Summary: The API gateway validates OIDC access tokens, caches issuer signing keys for 10 minutes, and returns HTTP 503 when issuer metadata is unavailable.",
+      "capabilities": ["browser"],
       "expected_output": "A restrained, standalone, flowing HTML document using the default design with appropriate print styles that remains readable at narrow and desktop widths and passes screen and print visual QA. PDF export does not activate fixed-page composition.",
       "files": [],
       "expectations": [
@@ -16,6 +17,7 @@
     {
       "id": 2,
       "prompt": "Render this architecture report as HTML. System flow: Client requests pass through the API Gateway to the Orders Service, which reads and writes Postgres. Deployment options: single-region is simpler but has regional downtime risk; multi-region improves regional resilience but adds replication and operational complexity. Warning: the multi-region failover path has not been verified. Include the specified system diagram, simultaneous option comparison, and warning.",
+      "capabilities": ["browser"],
       "expected_output": "The requested primary content is preserved in a simple accessible diagram, a responsive simultaneous comparison, and a visible warning. The document avoids decorative containers and does not invent architecture content.",
       "files": [],
       "expectations": [
@@ -29,6 +31,7 @@
     {
       "id": 3,
       "prompt": "Create an HTML setup guide from this supplied content. The reader follows exactly one platform path. macOS path: install with `brew install tool`; configure credentials with `tool config set credential-store keychain`; then run `tool login --profile staging`. Linux path: install with `apt install tool`; configure credentials with `tool config set credential-store secret-service`; then run `tool login --profile staging`. Shared reusable command: `tool deploy --dry-run`. Reusable prompt: `Review this deployment plan for rollback risks.` Example terminal output (not reusable input): `Authenticated as release-bot` followed by `Dry run completed: 0 errors`.",
+      "capabilities": ["browser"],
       "expected_output": "A simple setup guide that keeps both short platform paths visible, presents reusable input as code, and presents terminal output as output. It adds no tabs or copy controls because the user did not request interaction.",
       "files": [],
       "expectations": [
@@ -41,6 +44,7 @@
     {
       "id": 4,
       "prompt": "Create an HTML incident summary from these supplied facts: availability was 99.7%; deployment began at 14:02; errors rose at 14:06; rollback began at 14:31; recovery completed at 14:49; final status was Recovered.",
+      "capabilities": ["browser"],
       "expected_output": "A concise incident summary that preserves every value and event, presents the chronology clearly, invents no metrics or states, and uses no unnecessary badges, stat panels, or containers.",
       "files": [],
       "expectations": [
@@ -53,6 +57,7 @@
     {
       "id": 5,
       "prompt": "Create an HTML deployment guide from these supplied sequential steps: Prepare — run `deployctl validate release.yaml`; Deploy — run `deployctl apply release.yaml`; Verify — run `deployctl status`; Roll back — run `deployctl rollback`. Follow the steps with this terminal output log (not reusable input): `Validation passed`, `Release applied`, `Status: healthy`.",
+      "capabilities": ["browser"],
       "expected_output": "The sequential process remains visible as ordered steps with commands shown as code and terminal output shown distinctly. The document adds no tabs or copy controls because the user did not request interaction.",
       "files": [],
       "expectations": [
@@ -65,6 +70,7 @@
     {
       "id": 6,
       "prompt": "Turn this supplied requirements table into HTML and make it easy to copy into Excel while preserving blank response cells. Table: `Requirement | Response`; `SAML 2.0 support | `; `Audit log export | `.",
+      "capabilities": ["browser"],
       "expected_output": "A semantic responsive table with an accessible TSV copy control because spreadsheet transfer was requested. TSV preserves blank cells and rectangular shape, and clipboard behavior is verified without adding unrelated document controls.",
       "files": [],
       "expectations": [
@@ -77,6 +83,7 @@
     {
       "id": 7,
       "prompt": "Turn this supplied executive briefing into a page-perfect A4 HTML handout with one deliberately composed page per section. Objective: reduce release lead time from five days to two. Current state: approvals are collected in email and production checks are manual. Proposal: add an approval workflow and automated preflight checks. Risks: workflow outages could delay releases; automation may initially miss uncommon checks. Rollout: pilot with the Identity team in August, then expand after four successful releases. Decision requested: approve the August pilot and assign one platform engineer.",
+      "capabilities": ["browser"],
       "expected_output": "The explicit fixed-page request uses A4, deliberately composed pages, overflow and clipping checks for every page, and visual inspection of dense pages plus print preview before delivery.",
       "files": [],
       "expectations": [
@@ -89,6 +96,7 @@
     {
       "id": 8,
       "prompt": "Create an HTML table and let me copy it as CSV. Data: `Name | Note`; `Gateway | Handles auth, routing`; `Worker | Said \"ready\"`; `Empty | `.",
+      "capabilities": ["browser"],
       "expected_output": "A semantic table with an accessible CSV copy control whose payload preserves commas, quotes, and the blank trailing cell.",
       "files": [],
       "expectations": [
@@ -101,6 +109,7 @@
     {
       "id": 9,
       "prompt": "Create a standalone HTML architecture brief and explicitly use illustrated architecture mode. Inside an AWS ap-south-1 boundary, place CloudFront in a nested Edge region, Lambda and EventBridge in a nested Runtime region, and DynamoDB and SQS in a nested Managed data region. Runtime flow: Browser to CloudFront to Lambda to DynamoDB; Lambda publishes events to EventBridge, which sends them to SQS. Outside AWS, GitHub Actions deploys Lambda and CDK provisions the AWS resources. Use a light graph-paper canvas and recognizable product icons.",
+      "capabilities": ["browser", "network"],
       "expected_output": "A full-width illustrated architecture diagram that preserves every supplied component and relationship, uses measured container gutters and low-emphasis connectors, keeps readable labels, and remains usable through a diagram-only horizontal scroller at narrow widths.",
       "files": [],
       "expectations": [
@@ -118,6 +127,7 @@
     {
       "id": 10,
       "prompt": "Create a standalone HTML explainer with an accessible flow diagram for this supplied support process: request received; triage the request; decide whether it is actionable; if yes, assign an owner and resolve it; if no, request more information and return to triage. Keep the retry outside the main path and make the result usable at desktop and phone widths.",
+      "capabilities": ["browser"],
       "expected_output": "A restrained inline SVG flow diagram with measured rendered typography, stable connectors and arrowheads, a clear retry route, and diagram-only narrow-width scrolling when the natural canvas exceeds the content width.",
       "files": [],
       "expectations": [

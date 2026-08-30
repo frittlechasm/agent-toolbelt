@@ -13,7 +13,7 @@
     },
     {
       "id": 3,
-      "prompt": "Turn this diff into a line-by-line implementation explainer for a Python developer.",
+      "prompt": "Turn this diff into a standalone HTML line-by-line implementation explainer for a Python developer.",
       "should_trigger": true
     },
     {

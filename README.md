@@ -46,6 +46,7 @@ For a checkout you control, use `sync-skills` below.
 
 `scripts/eval` prints a JSON manifest and does not invoke a model.
 The calling agent runs each subject, checks the result, and removes workflow workspaces.
+It must record the model, reasoning effort, and available capabilities declared by the manifest.
 
 `sync-skills apply` follows each skill's `machines` metadata and preserves machine-local `.env` and `.env.local` files.
 Remote operations require `rsync` on both machines.

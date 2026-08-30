@@ -21,5 +21,6 @@ Use this visual system only when the user or invoking skill supplies no template
 - Keep the main column around 780px and prose near 68 characters per line.
 - Align headings and body content to the same content edge. Use a calm type scale and generous section spacing.
 - Let content determine the layout. Use a compact grid only when short metadata or comparisons scan better side by side.
+- Do not add a summary or metric panel that repeats facts already visible in the document.
 - Prefer whitespace and thin separators over containers. Add a boundary only when grouping would otherwise be unclear.
 - Avoid gradients, shadows, badges, decorative cards, ornamental imagery, unnecessary navigation, and a table of contents unless the content requires one.

@@ -4,6 +4,7 @@
     {
       "id": 1,
       "prompt": "Create UI mocks for a desktop team-members screen. Every variant must show the same title, a search field, an Invite member button, and a table with Name, Role, and Status columns. Use these rows: Ana / Owner / Active; Dev / Viewer / Invited. I want to choose a visual direction.",
+      "capabilities": ["browser"],
       "expected_output": "One self-contained HTML comparison containing three genuinely different, fully styled static UI directions. The variants are stacked, visibly labeled A, B, and C, preserve identical requirements and data, and contain no descriptive substitute for rendered UI.",
       "files": [],
       "expectations": [
@@ -17,6 +18,7 @@
     {
       "id": 2,
       "prompt": "Create four static mobile checkout UI mock variants and lay them out side by side. Each must show Order summary, Shipping address, Payment method, a total of $84.00, and a Place order button. Label the options for selection and do not include design commentary.",
+      "capabilities": ["browser"],
       "expected_output": "One self-contained HTML comparison containing four equally sized mobile mock surfaces arranged side by side as explicitly requested and labeled A through D. Each is a distinct rendered design direction with identical supplied checkout content and no rationale or application behavior.",
       "files": [],
       "expectations": [

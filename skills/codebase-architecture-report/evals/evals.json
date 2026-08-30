@@ -18,6 +18,7 @@
     {
       "id": 2,
       "prompt": "Create an HTML architecture report for this codebase that I can share with a client. Save it as architecture-report.html.",
+      "capabilities": ["browser"],
       "expected_output": "A client-readable HTML report that explains the architecture simply, supports important claims with source evidence, communicates uncertainty honestly, and uses diagrams or other presentation elements only when they improve understanding.",
       "files": [],
       "fixture": "fixtures/repository",

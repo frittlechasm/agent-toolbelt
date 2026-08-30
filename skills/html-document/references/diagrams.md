@@ -29,6 +29,7 @@ For an architecture map, read this reference and `architecture-diagrams.md`.
 
 - Trim the view box to the drawing plus a small even margin.
 - Choose the diagram's natural rendered width after layout. Do not let responsive sizing enlarge it beyond that width or shrink labels below readability.
+- Keep one diagram at a stable, readable width when possible. Use a separate narrow-screen layout only after checking its text and layout at that width.
 - Verify final text sizes in CSS pixels after view box scaling.
 - Give the SVG a concise `<title>` and `<desc>`. Do not repeat the same full description in nearby prose.
 - Do not fit a wide, text-heavy SVG by shrinking it until labels become unreadable.

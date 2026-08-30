@@ -12,6 +12,21 @@ from pathlib import Path
 from typing import Any
 
 
+RUN_METADATA_FORMAT = {
+    "model": "string",
+    "reasoning_effort": "string",
+    "capabilities": "string_list",
+}
+CASE_RESULT_FORMAT = {
+    "skill_name": "string",
+    "case_id": "integer",
+    "status": ["passed", "failed", "skipped"],
+    "reason": "string",
+    "unmet_expectations": "string_list",
+    "evidence": "string_list",
+}
+
+
 def load_cases(skill: Path, case_ids: list[int] | None) -> list[dict[str, Any]]:
     path = skill / "evals" / "evals.json"
     cases = json.loads(path.read_text(encoding="utf-8"))["evals"]
@@ -73,6 +88,15 @@ def fixture_commands(workspace: Path) -> dict[str, str]:
     }
 
 
+def sandbox_writable_paths(workspace: Path) -> list[str]:
+    """Return the workspace roots that a subject sandbox must permit."""
+    paths = [str(workspace)]
+    git_metadata = workspace / ".git"
+    if git_metadata.exists():
+        paths.append(str(git_metadata))
+    return paths
+
+
 def build_workflow_manifest(skills: list[Path], case_ids: list[int] | None) -> dict[str, Any]:
     cases = []
     workspaces = []
@@ -91,6 +115,8 @@ def build_workflow_manifest(skills: list[Path], case_ids: list[int] | None) -> d
                             "skill_file": str(skill / "SKILL.md"),
                             "prompt": case["prompt"],
                             "fixture_commands": fixture_commands(workspace),
+                            "required_capabilities": case.get("capabilities", []),
+                            "sandbox_writable_paths": sandbox_writable_paths(workspace),
                         },
                         "judge": {
                             "expected_output": case["expected_output"],
@@ -107,12 +133,23 @@ def build_workflow_manifest(skills: list[Path], case_ids: list[int] | None) -> d
         "eval_type": "workflows",
         "instructions": [
             "Run each subject in its workspace and load subject.skill_file before working.",
+            "Record the subject model, reasoning effort, and available capabilities once per run.",
+            (
+                "Before running a case, compare subject.required_capabilities with the available "
+                "capabilities; record the case as skipped when any requirement is unavailable."
+            ),
             "Give the subject only subject, workspace, and these instructions, never judge.",
-            "Keep all writes inside the workspace.",
+            (
+                "Keep all writes inside the workspace and configure every "
+                "subject.sandbox_writable_paths entry as writable; Git workspaces require the explicit "
+                ".git entry because ordinary workspace-write sandboxes may protect Git metadata."
+            ),
             "When fixture_commands is non-empty, invoke those exact paths for matching commands.",
             "After the subject finishes, inspect its response, command evidence, and workspace.",
             "Pass only when every material judge expectation is satisfied.",
             "Remove every listed workspace after recording the result.",
         ],
+        "run_metadata_format": RUN_METADATA_FORMAT,
+        "case_result_format": CASE_RESULT_FORMAT,
         "cases": cases,
     }

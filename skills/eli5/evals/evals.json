@@ -4,6 +4,7 @@
     {
       "id": 1,
       "prompt": "ELI5 how DNS turns example.com into the server my browser connects to. Make it visual, but do not talk to me like a child.",
+      "capabilities": ["browser"],
       "expected_output": "One standalone visual HTML explainer for an intelligent beginner. It answers the question immediately, then uses a short picture-first sequence to show how a name becomes an IP address and then a browser connection.",
       "files": [],
       "expectations": [
@@ -20,6 +21,7 @@
     {
       "id": 2,
       "prompt": "Create a picture explainer for an intelligent beginner showing why a Kubernetes Deployment creates ReplicaSets and Pods.",
+      "capabilities": ["browser"],
       "expected_output": "One standalone visual HTML explanation that distinguishes the desired-state controller, ReplicaSet, and Pods through a clear illustrated relationship and a concrete scaling or rollout example. The presentation is playful but technically credible.",
       "files": [],
       "expectations": [
@@ -36,6 +38,7 @@
     {
       "id": 3,
       "prompt": "Explain public-key encryption like I'm five with playful illustrations. I understand locks, but I know nothing about cryptography.",
+      "capabilities": ["browser"],
       "expected_output": "One standalone visual HTML explainer that uses the reader's lock mental model in a short picture-first sequence, visually distinguishes public and private keys, and shows how a public key locks a message while the private key opens it.",
       "files": [],
       "expectations": [

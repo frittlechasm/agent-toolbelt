@@ -71,4 +71,7 @@ For each distinct concept:
 
 ## Render
 
-Use the `html-document` skill when available; otherwise create the standalone HTML directly. Keep the document readable and focused on teaching the change.
+- Use the `html-document` skill when available; otherwise create the standalone HTML directly.
+- Keep the document readable and focused on teaching the change. Each section should teach something new.
+- If the introduction and outcome callout say the same thing, keep only one.
+- A walkthrough may state the result first if it then explains how the code produces it.

@@ -64,6 +64,7 @@ Trace important flows from real source. When evidence exists:
 ### Diagrams
 - Use a diagram only when relationships or sequence are materially clearer visually.
 - Every node and connection must be supported by the source or explicitly marked as inferred.
+- Label a connection with a protocol or transport only when the source supports it. Otherwise, leave the label out or mark it as inferred.
 - Show a component inside a deployment or infrastructure boundary only when configuration or documentation confirms it.
 - One system diagram may be enough; add flow diagrams only when they improve understanding.
 
@@ -77,6 +78,7 @@ Make the confidence of important claims clear in natural language or concise lab
 
 Do not label every sentence mechanically. Cite important source-backed claims with file paths and line numbers when practical.
 Distinguish configured state from observed runtime state.
+For example, a deployment manifest can show that two replicas should run. It cannot prove that two are running now.
 Before finalizing, recheck high-impact claims and downgrade anything the source does not support.
 
 When the report concludes that a requested component or flow is absent, summarize the files, directories, or search scope checked so the absence is auditable.
@@ -94,7 +96,8 @@ Describe concrete controls and residual gaps; never claim that the system is sec
 Do not turn an architecture report into a standalone vulnerability review unless requested.
 
 Separate unclear areas from demonstrated gaps. Explain why each gap matters and the evidence or absence behind it.
-Keep recommendations narrow, actionable, and tied to a specific observed gap.
+For each important gap, suggest the smallest practical next step supported by the evidence. If there is not enough evidence, say so.
+Leave out recommendations only when the user asks for findings without them.
 
 ## Assemble the report
 

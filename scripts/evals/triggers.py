@@ -11,6 +11,11 @@ from checks.validate_skills import read_frontmatter
 
 
 POLICY_PATTERN = re.compile(r"^\s+allow_implicit_invocation:\s*(true|false)\s*$", re.MULTILINE)
+RUN_METADATA_FORMAT = {
+    "model": "string",
+    "reasoning_effort": "string",
+    "capabilities": "string_list",
+}
 
 
 def allows_implicit_invocation(skill: Path) -> bool:
@@ -50,10 +55,17 @@ def build_trigger_manifest(skills: list[Path]) -> dict[str, Any]:
         "eval_type": "triggers",
         "instructions": [
             "Use an isolated subject model when available.",
+            "Record the subject model, reasoning effort, and available capabilities once per run.",
             "Give the subject only skill and subject_input, never expected.",
             "Ask whether the skill should be loaded before answering; do not answer the prompt.",
+            (
+                "When allow_implicit_invocation is false, trigger only when the prompt explicitly names "
+                "the skill through $skill-name, /skill-name, or an equivalent UI invocation; requesting "
+                "the underlying task is not explicit skill invocation."
+            ),
             "Compare each subject decision with expected and report every mismatch.",
         ],
+        "run_metadata_format": RUN_METADATA_FORMAT,
         "result_format": {
             "id": "integer",
             "should_trigger": "boolean",

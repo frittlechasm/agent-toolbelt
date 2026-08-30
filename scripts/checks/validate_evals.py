@@ -23,6 +23,7 @@ EVAL_SCHEMAS = {
 }
 OPTIONAL_EVAL_FIELDS = {
     "evals.json": {
+        "capabilities": "nonempty_string_list",
         "fixture": "string",
         "setup": "nonempty_string_list",
     },
