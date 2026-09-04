@@ -20,6 +20,7 @@ metadata:
 - Keep short alternatives and comparisons visible. Do not hide content or add controls merely to create a visual pattern.
 - If content is clearer as a diagram than prose, build an inline SVG and read `references/diagrams.md`.
 - For an architecture map, also read `references/architecture-diagrams.md` for its construction contract, reusable SVG scaffold, routing rules, and illustrated mode.
+- For database content, use the `erd-diagram` skill and include its ERD in the same HTML document.
 - If required content was not supplied and cannot be found, ask for it instead of fabricating examples or domain details.
 
 ## Output

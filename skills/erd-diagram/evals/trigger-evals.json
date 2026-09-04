@@ -1,0 +1,55 @@
+{
+  "skill_name": "erd-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate an ERD from these Flyway migrations.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Create an interactive database relationship diagram for these JPA entities.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Map these PostgreSQL tables and foreign keys as a schema diagram.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Update this ERD HTML to show the new composite foreign key.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Create a source-aware architecture diagram for this service.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Review this database migration for correctness and indexing problems.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Design a PostgreSQL schema for campaign delivery.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Create three UI mockups for the database administration screen.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Explain how these SQL joins work in prose.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Draw a Mermaid sequence diagram for the checkout request.",
+      "should_trigger": false
+    }
+  ]
+}

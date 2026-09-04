@@ -12,6 +12,7 @@ Reusable agent skills and supporting utilities.
 | `codebase-architecture-report` | Creates source-backed architecture reports. |
 | `commit-msg` | Writes conventional commit messages from Git changes. |
 | `eli5` | Creates simple visual explanations for beginners. |
+| `erd-diagram` | Creates source-grounded interactive database ERDs. |
 | `html-document` | Creates standalone HTML documents. |
 | `sync-upstream` | Syncs all branches in a fork with upstream. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. |

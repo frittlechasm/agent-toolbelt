@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Database ERD</title>
+  <style>
+    :root {
+      --ground: #f6f8fa;
+      --surface: #ffffff;
+      --surface-2: #eef1f5;
+      --surface-3: #e3e8ef;
+      --ink: #12161d;
+      --ink-2: #454e5c;
+      --ink-3: #737e8d;
+      --rule: #d5dce5;
+      --rule-soft: #e9edf2;
+      --accent: #a54b08;
+      --accent-soft: #fdf0dd;
+      --wire: #8792a1;
+      --danger: #a33a3a;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ground: #0e1116;
+        --surface: #161b22;
+        --surface-2: #1c232c;
+        --surface-3: #252e39;
+        --ink: #e8ecf1;
+        --ink-2: #b3bcc8;
+        --ink-3: #7c8794;
+        --rule: #2b333e;
+        --rule-soft: #212932;
+        --accent: #f0a868;
+        --accent-soft: #2c2113;
+        --wire: #697585;
+        --danger: #f08d91;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--ground); }
+    body {
+      min-height: 100dvh;
+      margin: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(28rem, 1fr) auto;
+      background: var(--ground);
+      color: var(--ink-2);
+      font: 15px/1.45 var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .mast {
+      padding: 1.25rem clamp(1rem, 3vw, 2rem) 1rem;
+      border-bottom: 1px solid var(--rule);
+      background: var(--surface);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 1rem 2rem;
+    }
+    .mast-copy { flex: 1 1 28rem; min-width: 0; }
+    .eyebrow {
+      margin: 0 0 .35rem;
+      color: var(--accent);
+      font: 600 .68rem/1.3 var(--mono);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 .3rem;
+      color: var(--ink);
+      font-size: clamp(1.4rem, 3vw, 1.95rem);
+      line-height: 1.12;
+      letter-spacing: -.02em;
+    }
+    .subtitle { max-width: 72ch; margin: 0; color: var(--ink-3); font-size: .9rem; }
+    .stats { display: flex; flex-wrap: wrap; gap: 1.4rem; }
+    .stat { display: grid; gap: .08rem; }
+    .stat b { color: var(--ink); font: 700 1.25rem/1 var(--mono); }
+    .stat span {
+      color: var(--ink-3);
+      font: 500 .63rem/1.3 var(--mono);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .45rem;
+      padding: .58rem clamp(1rem, 3vw, 2rem);
+      border-bottom: 1px solid var(--rule);
+      background: var(--surface-2);
+    }
+    .search {
+      flex: 0 1 16rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .32rem .55rem;
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      background: var(--surface);
+    }
+    .search svg { flex: none; color: var(--ink-3); }
+    .search input {
+      min-width: 0;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font: .76rem var(--mono);
+    }
+    .btn, .zoom button {
+      min-height: 2rem;
+      padding: .3rem .58rem;
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--ink-2);
+      cursor: pointer;
+      font: 500 .7rem/1.35 var(--mono);
+    }
+    .btn:hover, .zoom button:hover { border-color: var(--ink-3); color: var(--ink); }
+    .btn[aria-pressed="false"] { opacity: .55; }
+    .btn:disabled { cursor: default; opacity: .4; }
+    .zoom { display: inline-flex; }
+    .zoom button { border-radius: 0; }
+    .zoom button:first-child { border-radius: 5px 0 0 5px; }
+    .zoom button + button { border-left: 0; }
+    .zoom button:last-child { border-radius: 0 5px 5px 0; }
+    .spacer { flex: 1 1 auto; }
+    .btn:focus-visible, .zoom button:focus-visible, .search:focus-within {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .stage {
+      position: relative;
+      min-width: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      background: var(--ground);
+    }
+    .stage:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .zoom-wrap { width: max-content; transform-origin: 0 0; }
+    .canvas {
+      position: relative;
+      z-index: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 3.4rem;
+      width: max-content;
+      padding: 1.7rem clamp(1rem, 3vw, 2rem) 5rem;
+    }
+    .wires {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .wire, .bracket, .tick {
+      fill: none;
+      stroke: var(--wire);
+      stroke-width: 1.5;
+      opacity: .58;
+      vector-effect: non-scaling-stroke;
+      transition: opacity .15s, stroke .15s, stroke-width .15s;
+    }
+    .wire.logical { stroke-dasharray: 6 4; }
+    .wire.derived { stroke-dasharray: 2 4; stroke-width: 1.3; }
+    .wire.hot, .bracket.hot, .tick.hot { stroke: var(--accent); stroke-width: 2.4; opacity: 1; }
+    .wire.mute, .bracket.mute, .tick.mute { opacity: .05; }
+    .cardinality {
+      fill: var(--ink-3);
+      font: 600 10px var(--mono);
+      paint-order: stroke;
+      stroke: var(--ground);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+    .cardinality.hot { fill: var(--accent); }
+    .cardinality.mute { opacity: .06; }
+
+    .lane { position: relative; z-index: 2; width: 17.5rem; flex: none; }
+    .lane-heading {
+      margin: 0 0 1rem;
+      padding-bottom: .35rem;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink-3);
+      font: 600 .64rem/1.35 var(--mono);
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .lane-description { display: block; margin-top: .22rem; letter-spacing: 0; text-transform: none; }
+    .table-list { display: grid; gap: 1.4rem; }
+    .table-card {
+      overflow: hidden;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: var(--surface);
+      transition: opacity .15s, border-color .15s;
+    }
+    .table-card.existing { border-style: dashed; background: var(--surface-2); }
+    .table-card.hidden { display: none; }
+    .table-card.mute { opacity: .18; }
+    .table-card.selected { border-color: var(--group-color); outline: 2px solid var(--group-color); }
+    .table-heading {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .52rem .62rem;
+      border: 0;
+      border-bottom: 1px solid var(--rule);
+      background: var(--group-soft);
+      text-align: left;
+      cursor: pointer;
+    }
+    .table-heading:hover { background: var(--surface-3); }
+    .table-heading:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .table-name {
+      min-width: 0;
+      flex: 1;
+      color: var(--group-color);
+      font: 700 .76rem/1.3 var(--mono);
+      overflow-wrap: anywhere;
+    }
+    .table-count { color: var(--ink-3); font: .62rem var(--mono); }
+    .existing-label {
+      color: var(--ink-3);
+      font: 600 .52rem var(--mono);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .columns { margin: 0; padding: 0; list-style: none; }
+    .column {
+      min-height: 1.55rem;
+      display: flex;
+      align-items: baseline;
+      gap: .32rem;
+      padding: .22rem .58rem;
+      border-bottom: 1px solid var(--rule-soft);
+      font: .67rem/1.35 var(--mono);
+    }
+    .column:last-child { border-bottom: 0; }
+    .column.on { background: var(--accent-soft); }
+    .keys { width: 3.25rem; flex: none; display: flex; gap: .15rem; }
+    .key {
+      min-width: .96rem;
+      padding: .03rem .12rem;
+      border-radius: 2px;
+      text-align: center;
+      font-size: .48rem;
+      font-weight: 700;
+    }
+    .key.pk { background: #ece9ff; color: #5542b9; }
+    .key.fk { background: #def4ee; color: #0f766e; }
+    .key.uq { background: #f5e9ff; color: #7e22ce; }
+    @media (prefers-color-scheme: dark) {
+      .key.pk { background: #292445; color: #c4b5fd; }
+      .key.fk { background: #173831; color: #5eead4; }
+      .key.uq { background: #342044; color: #d8b4fe; }
+    }
+    .column-name { min-width: 0; flex: 1; color: var(--ink); overflow-wrap: anywhere; }
+    .column-name.required { font-weight: 700; }
+    .column-type {
+      max-width: 7.5rem;
+      flex: none;
+      overflow: hidden;
+      color: var(--ink-3);
+      font-size: .61rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: .75rem 1.2rem;
+      padding: .65rem clamp(1rem, 3vw, 2rem);
+      border-top: 1px solid var(--rule);
+      background: var(--surface);
+      color: var(--ink-3);
+      font: .65rem/1.35 var(--mono);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: .35rem; }
+    .legend-line { width: 2rem; border-top: 1.5px solid var(--wire); }
+    .legend-line.logical { border-top-style: dashed; }
+    .legend-line.derived { border-top-style: dotted; }
+
+    .scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgb(10 13 18 / .42);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s;
+    }
+    .scrim.open { opacity: 1; pointer-events: auto; }
+    .dialog {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 60;
+      width: min(31rem, 96vw);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--rule);
+      background: var(--surface);
+      transform: translateX(101%);
+      transition: transform .2s ease;
+    }
+    .dialog.open { transform: none; }
+    .dialog-head { position: relative; padding: 1rem 3.2rem .85rem 1.2rem; border-bottom: 1px solid var(--rule); }
+    .dialog-head h2 { margin: 0; color: var(--ink); font: 700 .94rem/1.35 var(--mono); overflow-wrap: anywhere; }
+    .dialog-note { margin: .55rem 0 0; color: var(--ink-2); font-size: .84rem; }
+    .close {
+      position: absolute;
+      top: .78rem;
+      right: .85rem;
+      width: 2rem;
+      height: 2rem;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: var(--surface-2);
+      cursor: pointer;
+    }
+    .close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .dialog-body { flex: 1; overflow-y: auto; padding: .95rem 1.2rem 3rem; }
+    .detail-section { margin: 1.25rem 0 .48rem; color: var(--ink-3); font: 600 .62rem var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+    .detail-section:first-child { margin-top: 0; }
+    .detail-source, .constraint, .mapping {
+      margin: 0 0 .38rem;
+      padding: .4rem .5rem;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: var(--surface-2);
+      color: var(--ink-2);
+      font: .68rem/1.45 var(--mono);
+      overflow-wrap: anywhere;
+    }
+    .constraint strong { color: var(--ink-3); text-transform: uppercase; }
+    .relationship {
+      width: 100%;
+      margin: 0 0 .35rem;
+      padding: .45rem .55rem;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: var(--surface-2);
+      color: var(--ink-2);
+      text-align: left;
+      cursor: pointer;
+      font: .67rem/1.45 var(--mono);
+    }
+    .relationship:hover { border-color: var(--accent); color: var(--ink); }
+    .relationship:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .relationship b { color: var(--ink); }
+    .relationship-meta { display: block; margin-top: .18rem; color: var(--ink-3); }
+    .empty { color: var(--ink-3); font-size: .82rem; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 560px) {
+      body { grid-template-rows: auto auto minmax(34rem, 1fr) auto; }
+      .mast { align-items: start; }
+      .stats { width: 100%; justify-content: space-between; gap: .75rem; }
+      .bar .search { flex-basis: 100%; }
+      .spacer { display: none; }
+      .lane { width: 15.5rem; }
+      .canvas { gap: 3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+    @media print {
+      body { display: block; background: #fff; color: #111; }
+      .bar, .legend, .scrim, .dialog { display: none !important; }
+      .stage { overflow: visible; }
+      .zoom-wrap { transform: none !important; width: auto !important; height: auto !important; }
+      .canvas { transform: scale(.72); transform-origin: top left; }
+    }
+  </style>
+</head>
+<body>
+  <header class="mast">
+    <div class="mast-copy">
+      <p class="eyebrow" id="version">Database schema</p>
+      <h1 id="title">Database ERD</h1>
+      <p class="subtitle" id="subtitle"></p>
+    </div>
+    <div class="stats" aria-label="Schema summary">
+      <div class="stat"><b id="table-count">0</b><span>tables</span></div>
+      <div class="stat"><b id="column-count">0</b><span>columns</span></div>
+      <div class="stat"><b id="relationship-count">0</b><span>relationships</span></div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <label class="search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <input id="search" type="search" placeholder="find table or column" autocomplete="off">
+    </label>
+    <button class="btn" id="existing-toggle" type="button" aria-pressed="true">Existing tables</button>
+    <div class="zoom" role="group" aria-label="Diagram zoom">
+      <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+      <button id="zoom-reset" type="button">100%</button>
+      <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn" id="clear" type="button">Clear focus</button>
+    <span class="sr-only" id="search-status" aria-live="polite"></span>
+  </div>
+
+  <main class="stage" id="stage" role="region" aria-label="Scrollable entity relationship diagram" aria-describedby="diagram-help" tabindex="0">
+    <div class="zoom-wrap" id="zoom-wrap">
+      <div class="canvas" id="canvas">
+        <svg class="wires" id="wires" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </main>
+
+  <footer class="legend" id="diagram-help">
+    <span class="legend-item"><span class="legend-line"></span>foreign key</span>
+    <span class="legend-item"><span class="legend-line logical"></span>logical relationship</span>
+    <span class="legend-item"><span class="legend-line derived"></span>derived relationship</span>
+    <span class="legend-item"><span class="key pk">PK</span>primary key</span>
+    <span class="legend-item"><span class="key fk">FK</span>foreign-key column</span>
+    <span class="legend-item">dashed card = existing table</span>
+  </footer>
+
+  <div class="scrim" id="scrim"></div>
+  <section class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-hidden="true" inert>
+    <header class="dialog-head">
+      <h2 id="dialog-title">Table details</h2>
+      <button class="close" id="dialog-close" type="button" aria-label="Close table details">×</button>
+      <p class="dialog-note" id="dialog-note"></p>
+    </header>
+    <div class="dialog-body" id="dialog-body"></div>
+  </section>
+
+  <script>
+    const MODEL = __ERD_MODEL_JSON__;
+    const PALETTE = [
+      ['#4f46e5', '#eeedfd'], ['#7c3aed', '#f2ecfe'],
+      ['#0e7490', '#e5f4f8'], ['#0d7a6f', '#e3f4f1'],
+      ['#a54b08', '#fbf0e0'], ['#4d7c0f', '#eef5e2'],
+      ['#be185d', '#fce7f3'], ['#475569', '#edf1f5']
+    ];
+    const DARK_PALETTE = [
+      ['#a5b4fc', '#1d1f35'], ['#c4b5fd', '#231d36'],
+      ['#67e8f9', '#132a31'], ['#5eead4', '#12292a'],
+      ['#fbbf24', '#2c2113'], ['#a3e635', '#1e2713'],
+      ['#f9a8d4', '#351829'], ['#cbd5e1', '#202832']
+    ];
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const canvas = document.getElementById('canvas');
+    const wires = document.getElementById('wires');
+    const stage = document.getElementById('stage');
+    const zoomWrap = document.getElementById('zoom-wrap');
+    const dialog = document.getElementById('dialog');
+    const dialogBody = document.getElementById('dialog-body');
+    const scrim = document.getElementById('scrim');
+    const colorScheme = matchMedia('(prefers-color-scheme: dark)');
+    const tableById = Object.fromEntries(MODEL.tables.map(table => [table.id, table]));
+    const groupById = Object.fromEntries(MODEL.groups.map(group => [group.id, group]));
+    const fkColumns = new Set();
+    MODEL.relationships
+      .filter(relationship => relationship.enforcement === 'foreign-key')
+      .forEach(relationship => relationship.from.columns.forEach(column => fkColumns.add(`${relationship.from.table}::${column}`)));
+    let selectedTable = null;
+    let showExisting = true;
+    let zoom = 1;
+    let lastFocus = null;
+
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function svgElement(tag, attributes = {}) {
+      const node = document.createElementNS(svgNS, tag);
+      Object.entries(attributes).forEach(([name, value]) => node.setAttribute(name, value));
+      return node;
+    }
+
+    function paletteFor(index) {
+      const dark = colorScheme.matches;
+      return (dark ? DARK_PALETTE : PALETTE)[index % PALETTE.length];
+    }
+
+    function renderHeader() {
+      document.title = `${MODEL.title} — ERD`;
+      document.getElementById('title').textContent = MODEL.title;
+      document.getElementById('subtitle').textContent = MODEL.subtitle || 'Entity relationship diagram';
+      document.getElementById('version').textContent = MODEL.version || 'Database schema';
+      document.getElementById('table-count').textContent = MODEL.tables.length;
+      document.getElementById('column-count').textContent = MODEL.tables.reduce((sum, table) => sum + table.columns.length, 0);
+      document.getElementById('relationship-count').textContent = MODEL.relationships.length;
+      const existingButton = document.getElementById('existing-toggle');
+      existingButton.disabled = !MODEL.tables.some(table => table.existing);
+    }
+
+    function keyBadge(kind) {
+      return element('span', `key ${kind.toLowerCase()}`, kind);
+    }
+
+    function renderTables() {
+      canvas.querySelectorAll('.lane').forEach(node => node.remove());
+      MODEL.groups.forEach((group, groupIndex) => {
+        const [color, soft] = paletteFor(groupIndex);
+        const lane = element('section', 'lane');
+        lane.dataset.group = group.id;
+        lane.style.setProperty('--group-color', color);
+        lane.style.setProperty('--group-soft', soft);
+        const heading = element('h2', 'lane-heading', group.label);
+        if (group.description) heading.append(element('span', 'lane-description', group.description));
+        lane.append(heading);
+        const list = element('div', 'table-list');
+        MODEL.tables.filter(table => table.group === group.id).forEach(table => {
+          const card = element('article', `table-card${table.existing ? ' existing' : ''}`);
+          card.dataset.table = table.id;
+          const button = element('button', 'table-heading');
+          button.type = 'button';
+          button.setAttribute('aria-label', `View ${table.name} table details`);
+          button.append(element('span', 'table-name', table.name));
+          if (table.existing) button.append(element('span', 'existing-label', 'existing'));
+          button.append(element('span', 'table-count', String(table.columns.length)));
+          button.addEventListener('click', event => openDetails(table.id, event.currentTarget));
+          card.append(button);
+          const columns = element('ul', 'columns');
+          table.columns.forEach(column => {
+            const row = element('li', 'column');
+            row.dataset.column = column.name;
+            const keys = element('span', 'keys');
+            if (column.primaryKey) keys.append(keyBadge('PK'));
+            if (fkColumns.has(`${table.id}::${column.name}`)) keys.append(keyBadge('FK'));
+            if (column.unique) keys.append(keyBadge('UQ'));
+            row.append(keys);
+            const name = element('span', `column-name${column.nullable ? '' : ' required'}`, column.name);
+            name.title = column.note || column.name;
+            const type = element('span', 'column-type', column.type);
+            type.title = column.type;
+            row.append(name, type);
+            columns.append(row);
+          });
+          card.append(columns);
+          list.append(card);
+        });
+        lane.append(list);
+        canvas.append(lane);
+      });
+    }
+
+    function cardFor(tableId) {
+      return canvas.querySelector(`.table-card[data-table="${CSS.escape(tableId)}"]`);
+    }
+
+    function endpointAnchor(endpoint) {
+      const card = cardFor(endpoint.table);
+      if (!card || card.classList.contains('hidden')) return null;
+      const canvasBox = canvas.getBoundingClientRect();
+      const cardBox = card.getBoundingClientRect();
+      const rows = endpoint.columns.map(column => card.querySelector(`.column[data-column="${CSS.escape(column)}"]`));
+      if (rows.some(row => !row)) return null;
+      const ys = rows.map(row => {
+        const box = row.getBoundingClientRect();
+        return box.top - canvasBox.top + box.height / 2;
+      });
+      return {
+        left: cardBox.left - canvasBox.left,
+        right: cardBox.right - canvasBox.left,
+        center: cardBox.left - canvasBox.left + cardBox.width / 2,
+        y: ys.reduce((sum, value) => sum + value, 0) / ys.length,
+        ys,
+        minY: Math.min(...ys),
+        maxY: Math.max(...ys)
+      };
+    }
+
+    function relationshipClass(relationship) {
+      return relationship.enforcement === 'foreign-key' ? 'foreign-key' : relationship.enforcement;
+    }
+
+    function markRelationshipNode(node, relationship) {
+      node.dataset.relationship = relationship.id;
+      node.dataset.from = relationship.from.table;
+      node.dataset.to = relationship.to.table;
+    }
+
+    function drawBracket(anchor, x, outward, relationship) {
+      if (anchor.ys.length < 2) return;
+      const bracket = svgElement('path', {
+        d: `M${x} ${anchor.minY}L${x} ${anchor.maxY}`,
+        class: 'bracket'
+      });
+      markRelationshipNode(bracket, relationship);
+      wires.append(bracket);
+      anchor.ys.forEach(y => {
+        const tick = svgElement('path', {
+          d: `M${x} ${y}L${x + outward * 7} ${y}`,
+          class: 'tick'
+        });
+        markRelationshipNode(tick, relationship);
+        wires.append(tick);
+      });
+    }
+
+    function drawCardinality(value, x, y, anchor, relationship) {
+      const label = svgElement('text', {
+        x,
+        y: y - 6,
+        class: 'cardinality',
+        'text-anchor': anchor
+      });
+      label.textContent = value === 'unknown' ? '?' : value;
+      markRelationshipNode(label, relationship);
+      wires.append(label);
+    }
+
+    function drawRelationships() {
+      const width = canvas.scrollWidth;
+      const height = canvas.scrollHeight;
+      wires.setAttribute('width', width);
+      wires.setAttribute('height', height);
+      wires.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      wires.replaceChildren();
+      MODEL.relationships.forEach(relationship => {
+        const fromAnchor = endpointAnchor(relationship.from);
+        const toAnchor = endpointAnchor(relationship.to);
+        if (!fromAnchor || !toAnchor) return;
+        const sameTable = relationship.from.table === relationship.to.table;
+        const sameLane = tableById[relationship.from.table].group === tableById[relationship.to.table].group;
+        let fromX;
+        let toX;
+        let pathData;
+        let fromDirection;
+        let toDirection;
+        if (sameTable || sameLane) {
+          fromX = fromAnchor.right;
+          toX = toAnchor.right;
+          const loopX = Math.max(fromX, toX) + (sameTable ? 46 : 34);
+          pathData = `M${fromX} ${fromAnchor.y}C${loopX} ${fromAnchor.y} ${loopX} ${toAnchor.y} ${toX} ${toAnchor.y}`;
+          fromDirection = -1;
+          toDirection = -1;
+        } else {
+          const rightward = fromAnchor.center < toAnchor.center;
+          fromX = rightward ? fromAnchor.right : fromAnchor.left;
+          toX = rightward ? toAnchor.left : toAnchor.right;
+          const direction = rightward ? 1 : -1;
+          const curve = Math.max(34, Math.abs(toX - fromX) * .42) * direction;
+          pathData = `M${fromX} ${fromAnchor.y}C${fromX + curve} ${fromAnchor.y} ${toX - curve} ${toAnchor.y} ${toX} ${toAnchor.y}`;
+          fromDirection = rightward ? -1 : 1;
+          toDirection = rightward ? 1 : -1;
+        }
+        const path = svgElement('path', { d: pathData, class: `wire ${relationshipClass(relationship)}` });
+        markRelationshipNode(path, relationship);
+        wires.append(path);
+        drawBracket(fromAnchor, fromX, fromDirection, relationship);
+        drawBracket(toAnchor, toX, toDirection, relationship);
+        drawCardinality(relationship.from.cardinality, fromX + fromDirection * 8, fromAnchor.y, fromDirection < 0 ? 'end' : 'start', relationship);
+        drawCardinality(relationship.to.cardinality, toX + toDirection * 8, toAnchor.y, toDirection < 0 ? 'end' : 'start', relationship);
+      });
+      paintSelection();
+    }
+
+    function relatedTables(tableId) {
+      const result = new Set([tableId]);
+      MODEL.relationships.forEach(relationship => {
+        if (relationship.from.table === tableId) result.add(relationship.to.table);
+        if (relationship.to.table === tableId) result.add(relationship.from.table);
+      });
+      return result;
+    }
+
+    function paintSelection() {
+      const related = selectedTable ? relatedTables(selectedTable) : null;
+      canvas.querySelectorAll('.table-card').forEach(card => {
+        card.classList.toggle('selected', card.dataset.table === selectedTable);
+        card.classList.toggle('mute', Boolean(related) && !related.has(card.dataset.table));
+        card.querySelectorAll('.column').forEach(row => row.classList.remove('on'));
+      });
+      wires.querySelectorAll('[data-relationship]').forEach(node => {
+        const on = selectedTable && (node.dataset.from === selectedTable || node.dataset.to === selectedTable);
+        node.classList.toggle('hot', Boolean(on));
+        node.classList.toggle('mute', Boolean(selectedTable) && !on);
+      });
+      if (!selectedTable) return;
+      MODEL.relationships.forEach(relationship => {
+        if (relationship.from.table !== selectedTable && relationship.to.table !== selectedTable) return;
+        [relationship.from, relationship.to].forEach(endpoint => {
+          endpoint.columns.forEach(column => {
+            cardFor(endpoint.table)?.querySelector(`.column[data-column="${CSS.escape(column)}"]`)?.classList.add('on');
+          });
+        });
+      });
+    }
+
+    function detailHeading(text) {
+      dialogBody.append(element('h3', 'detail-section', text));
+    }
+
+    function relationshipText(relationship) {
+      const from = `${tableById[relationship.from.table].name}(${relationship.from.columns.join(', ')})`;
+      const to = `${tableById[relationship.to.table].name}(${relationship.to.columns.join(', ')})`;
+      return `${from} ${relationship.from.cardinality} → ${relationship.to.cardinality} ${to}`;
+    }
+
+    function addRelationshipDetail(relationship, otherTableId) {
+      const button = element('button', 'relationship');
+      button.type = 'button';
+      button.append(element('b', '', relationshipText(relationship)));
+      const meta = [relationship.enforcement, relationship.label, relationship.onDelete ? `ON DELETE ${relationship.onDelete}` : '', relationship.onUpdate ? `ON UPDATE ${relationship.onUpdate}` : ''].filter(Boolean).join(' · ');
+      button.append(element('span', 'relationship-meta', meta));
+      button.addEventListener('click', () => {
+        const target = cardFor(otherTableId);
+        target?.scrollIntoView({ block: 'center', inline: 'center' });
+        openDetails(otherTableId, lastFocus);
+      });
+      dialogBody.append(button);
+      if (relationship.from.columns.length > 1) {
+        relationship.from.columns.forEach((column, index) => {
+          dialogBody.append(element('p', 'mapping', `${relationship.from.table}.${column} → ${relationship.to.table}.${relationship.to.columns[index]}`));
+        });
+      }
+      if (relationship.note) dialogBody.append(element('p', 'mapping', relationship.note));
+      if (relationship.source) dialogBody.append(element('p', 'detail-source', `Source: ${relationship.source}`));
+    }
+
+    function openDetails(tableId, opener) {
+      const table = tableById[tableId];
+      if (!table) return;
+      if (!dialog.classList.contains('open') && opener) lastFocus = opener;
+      selectedTable = tableId;
+      document.getElementById('dialog-title').textContent = table.name;
+      document.getElementById('dialog-note').textContent = table.note || (table.existing ? 'Existing referenced table.' : '');
+      dialogBody.replaceChildren();
+      if (table.source || MODEL.sources.length) {
+        detailHeading('Sources');
+        if (table.source) dialogBody.append(element('p', 'detail-source', table.source));
+        MODEL.sources.forEach(source => dialogBody.append(element('p', 'detail-source', source)));
+      }
+      if (table.constraints.length) {
+        detailHeading('Constraints');
+        table.constraints.forEach(constraint => {
+          const item = element('p', 'constraint');
+          item.append(element('strong', '', `${constraint.kind}: `), document.createTextNode(constraint.text));
+          dialogBody.append(item);
+        });
+      }
+      const outgoing = MODEL.relationships.filter(relationship => relationship.from.table === tableId);
+      const incoming = MODEL.relationships.filter(relationship => relationship.to.table === tableId && relationship.from.table !== tableId);
+      if (outgoing.length) {
+        detailHeading('References');
+        outgoing.forEach(relationship => addRelationshipDetail(relationship, relationship.to.table));
+      }
+      if (incoming.length) {
+        detailHeading('Referenced by');
+        incoming.forEach(relationship => addRelationshipDetail(relationship, relationship.from.table));
+      }
+      if (!table.constraints.length && !outgoing.length && !incoming.length && !table.source && !MODEL.sources.length) {
+        dialogBody.append(element('p', 'empty', 'No constraints, relationships, or sources were supplied for this table.'));
+      }
+      dialog.classList.add('open');
+      dialog.setAttribute('aria-hidden', 'false');
+      dialog.removeAttribute('inert');
+      scrim.classList.add('open');
+      paintSelection();
+      document.getElementById('dialog-close').focus();
+    }
+
+    function closeDetails() {
+      dialog.classList.remove('open');
+      dialog.setAttribute('aria-hidden', 'true');
+      dialog.setAttribute('inert', '');
+      scrim.classList.remove('open');
+      selectedTable = null;
+      paintSelection();
+      if (lastFocus?.isConnected) lastFocus.focus();
+      lastFocus = null;
+    }
+
+    function applyFilter() {
+      const query = document.getElementById('search').value.trim().toLowerCase();
+      let visible = 0;
+      MODEL.tables.forEach(table => {
+        const haystack = [table.name, table.note, ...table.columns.flatMap(column => [column.name, column.type, column.note])].filter(Boolean).join(' ').toLowerCase();
+        const show = (!table.existing || showExisting) && (!query || haystack.includes(query));
+        cardFor(table.id)?.classList.toggle('hidden', !show);
+        if (show) visible += 1;
+      });
+      document.getElementById('search-status').textContent = `${visible} of ${MODEL.tables.length} tables visible`;
+      requestAnimationFrame(drawRelationships);
+    }
+
+    function setZoom(nextZoom) {
+      zoom = Math.min(1.4, Math.max(.4, nextZoom));
+      zoomWrap.style.transform = `scale(${zoom})`;
+      zoomWrap.style.width = `${canvas.scrollWidth * zoom}px`;
+      zoomWrap.style.height = `${canvas.scrollHeight * zoom}px`;
+      document.getElementById('zoom-reset').textContent = `${Math.round(zoom * 100)}%`;
+    }
+
+    document.getElementById('search').addEventListener('input', applyFilter);
+    document.getElementById('existing-toggle').addEventListener('click', event => {
+      showExisting = !showExisting;
+      event.currentTarget.setAttribute('aria-pressed', String(showExisting));
+      applyFilter();
+    });
+    document.getElementById('zoom-in').addEventListener('click', () => setZoom(zoom + .1));
+    document.getElementById('zoom-out').addEventListener('click', () => setZoom(zoom - .1));
+    document.getElementById('zoom-reset').addEventListener('click', () => setZoom(1));
+    document.getElementById('clear').addEventListener('click', closeDetails);
+    document.getElementById('dialog-close').addEventListener('click', closeDetails);
+    scrim.addEventListener('click', closeDetails);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && dialog.classList.contains('open')) closeDetails();
+      if (event.key !== 'Tab' || !dialog.classList.contains('open')) return;
+      const focusable = [...dialog.querySelectorAll('button:not(:disabled), [href], input:not(:disabled), [tabindex]:not([tabindex="-1"])')].filter(node => node.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+
+    renderHeader();
+    renderTables();
+    applyFilter();
+    requestAnimationFrame(() => {
+      drawRelationships();
+      setZoom(1);
+      if (document.fonts?.ready) document.fonts.ready.then(() => requestAnimationFrame(() => { drawRelationships(); setZoom(zoom); }));
+    });
+    window.addEventListener('resize', () => requestAnimationFrame(() => { drawRelationships(); setZoom(zoom); }));
+    new ResizeObserver(() => requestAnimationFrame(() => { drawRelationships(); setZoom(zoom); })).observe(canvas);
+    colorScheme.addEventListener('change', () => {
+      renderTables();
+      applyFilter();
+      requestAnimationFrame(() => { drawRelationships(); setZoom(zoom); });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "skill_name": "erd-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a complete interactive ERD from the Flyway migration in this repository. Preserve composite keys, nullability, cardinality, self-references, checks, and referential actions. Save the normalized model and rendered HTML in the workspace.",
+      "capabilities": ["browser"],
+      "expected_output": "A source-grounded normalized schema model and standalone interactive HTML ERD that accurately render all six tables and seven enforced foreign-key relationships from the migration, including composite and self-referential keys, with successful desktop and narrow-width interaction checks.",
+      "files": [],
+      "fixture": "fixtures/order-schema",
+      "expectations": [
+        "Uses the Flyway migration as the source of truth and includes exactly tenants, users, products, orders, order_items, and fulfilment_events without inventing tables or relationships.",
+        "Preserves ordered composite primary and foreign keys, the nullable product replacement self-reference, unique and check constraints, and each explicit ON DELETE action.",
+        "Represents all seven enforced foreign keys as foreign-key relationships and does not infer a relationship from provider_reference or payload.",
+        "Validates the normalized JSON with render_erd.py before rendering and produces one self-contained HTML artifact with no external runtime dependency.",
+        "Verifies search, existing-table filtering when applicable, zoom, table focus, relationship details, Escape and focus restoration, connector alignment, console errors, and diagram-only horizontal scrolling at desktop and phone widths."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make an ERD for this proposed schema and mark the CRM table as existing: accounts(id UUID PK, crm_contact_id UUID NULL); crm_contacts(id UUID PK); account_aliases(account_id UUID NOT NULL, alias VARCHAR NOT NULL, PK(account_id, alias)). Enforced FKs: accounts.crm_contact_id to crm_contacts.id with ON DELETE SET NULL; account_aliases.account_id to accounts.id with ON DELETE CASCADE. Show crm_contacts as an external existing table and do not add any other columns.",
+      "capabilities": ["browser"],
+      "expected_output": "A compact interactive HTML ERD and valid normalized model containing exactly the supplied tables, columns, constraints, and two relationships, with the external CRM table visibly distinguished and filterable.",
+      "files": [],
+      "expectations": [
+        "Contains exactly three tables and the supplied columns, without audit columns, tenant columns, timestamps, or inferred CRM fields.",
+        "Marks crm_contacts as existing and renders the two foreign keys with the supplied nullability and ON DELETE actions.",
+        "Shows explicit endpoint cardinalities and keeps the nullable CRM relationship distinct from the required alias-to-account relationship.",
+        "Produces valid renderer input and a self-contained HTML artifact that remains usable at desktop and phone widths."
+      ]
+    }
+  ]
+}

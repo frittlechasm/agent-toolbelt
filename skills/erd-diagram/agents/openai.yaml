@@ -1,0 +1,4 @@
+interface:
+  display_name: "ERD Diagram"
+  short_description: "Create accurate interactive database ERDs"
+  default_prompt: "Use $erd-diagram to create an interactive ERD from this database schema."
