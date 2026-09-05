@@ -28,6 +28,34 @@
         "Shows actual styled mobile UI with meaningful design differences and no variant names, rationale, or descriptive prose.",
         "Keeps the containing page usable without silently changing the mobile target viewport."
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "Create three static desktop UI mock directions for a Kubernetes operations overview. Every variant must show cluster health, deployment status, pod restarts, and recent alerts using the same sample data. I want bold, useful options that feel specific to platform engineers rather than default SaaS dashboard templates. Do not include design commentary.",
+      "capabilities": ["browser"],
+      "expected_output": "One self-contained HTML comparison containing three polished, structurally distinct operations interfaces. Each direction is grounded in the platform-engineering subject, has a coherent identity and a controlled visual risk, preserves identical operational data, and avoids decorative AI defaults that do not support the concept.",
+      "files": [],
+      "expectations": [
+        "Renders three complete desktop UI mocks labeled A, B, and C with identical cluster health, deployment status, pod restart, and recent alert data.",
+        "Explores meaningfully different information hierarchies and compositions instead of recoloring one generic dashboard shell.",
+        "Uses platform-engineering concepts and workflows to shape each direction rather than relying on unrelated trend labels or decorative motifs.",
+        "Keeps each direction visually coherent, with one controlled signature idea and no arbitrary gradients, glows, labels, colors, or repeated rounded cards.",
+        "Visually inspects the rendered comparison, fixes the largest composition and polish gaps, removes elements that add no information or identity, and verifies narrow-page containment."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create three static desktop UI mock variants for a file-import screen. Every variant must show one file being processed at 62%, a Cancel button, and a clear processing state. Use subtle animation to make progress easy to understand, but do not use video or add application behavior.",
+      "capabilities": ["browser"],
+      "expected_output": "One self-contained HTML comparison with three complete file-import mocks. Motion uses lightweight CSS or inline SVG, supports reduced motion, keeps the processing state clear when animation is disabled, and avoids decorative continuous repainting.",
+      "files": [],
+      "expectations": [
+        "Shows the same file, 62% progress, Cancel button, and processing state in all three variants.",
+        "Uses purposeful CSS or inline SVG motion instead of video, runtime dependencies, or application logic.",
+        "Provides a reduced-motion treatment and keeps progress understandable when animation is disabled.",
+        "Avoids large continuously repainting effects and does not add unrelated ambient animation.",
+        "Renders and checks the animated and reduced-motion states for clipping, clarity, and consistent comparison."
+      ]
     }
   ]
 }
