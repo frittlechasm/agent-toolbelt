@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proposed Kubernetes IAM deployment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Nunito:wght@400;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #0a0a0a;
+      color: #f5f5f5;
+      font-family: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    body {
+      background: #0a0a0a;
+      color: #f5f5f5;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    main {
+      width: min(100%, 1680px);
+      margin: 0 auto;
+      padding: 68px 36px 52px;
+    }
+
+    header {
+      width: min(100%, 780px);
+      margin-bottom: 38px;
+    }
+
+    h1 {
+      max-width: 19ch;
+      margin: 0 0 14px;
+      font-size: clamp(2.25rem, 5vw, 3rem);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .context {
+      max-width: 66ch;
+      margin: 0;
+      color: #a3a3a3;
+    }
+
+    .diagram-scroll {
+      --diagram-natural-width: 1600px;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-block: 1px solid #262626;
+      scrollbar-color: #525252 #171717;
+    }
+
+    .diagram-scroll:focus-visible {
+      outline: 2px solid #d4d4d4;
+      outline-offset: 4px;
+    }
+
+    .architecture-diagram {
+      display: block;
+      width: var(--diagram-natural-width);
+      min-width: 100%;
+      max-width: none;
+      height: auto;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 32px;
+      margin-top: 34px;
+      padding-top: 28px;
+      border-top: 1px solid #262626;
+    }
+
+    .notes h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+    }
+
+    .notes p {
+      max-width: 66ch;
+      margin: 0;
+      color: #a3a3a3;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      margin-top: 30px;
+      padding-top: 22px;
+      border-top: 1px solid #262626;
+      color: #737373;
+      font-size: 0.82rem;
+    }
+
+    footer a {
+      color: #a3a3a3;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    footer a:hover { color: #f5f5f5; }
+
+    @media (max-width: 760px) {
+      main { padding: 44px 20px 40px; }
+      header { margin-bottom: 28px; }
+      .notes { grid-template-columns: 1fr; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Proposed Kubernetes IAM deployment</h1>
+      <p class="context">A vendor-neutral server topology for a Spring Boot IAM service and its audit worker. It shows logical request and dependency paths, not observed configuration, physical worker placement, or a high-availability guarantee.</p>
+    </header>
+
+    <div class="diagram-scroll" data-iam-diagram-scroll role="region" aria-label="Scrollable proposed Kubernetes IAM deployment diagram">
+      <svg class="architecture-diagram" data-iam-diagram viewBox="0 0 1600 900" role="img" aria-labelledby="iam-k8s-title iam-k8s-description">
+        <title id="iam-k8s-title">Proposed Kubernetes deployment for a Spring Boot IAM service</title>
+        <desc id="iam-k8s-description">External clients reach a generic load balancer, a Kubernetes Gateway API edge, a ClusterIP service, and an illustrative Spring Boot IAM deployment. The IAM pods use Redis and PostgreSQL and publish audit events to RabbitMQ. RabbitMQ delivers those events to a Spring Boot audit worker, which writes audit records to the same PostgreSQL service. PostgreSQL, Redis, and RabbitMQ are proposed outside the cluster on a private network.</desc>
+        <defs>
+          <pattern id="iam-k8s-grid-minor" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M20 0H0V20" fill="none" stroke="#e4eaf1" stroke-width="0.75"/>
+          </pattern>
+          <pattern id="iam-k8s-grid-major" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#iam-k8s-grid-minor)"/>
+            <path d="M100 0H0V100" fill="none" stroke="#cbd5e1" stroke-width="1"/>
+          </pattern>
+          <marker id="iam-k8s-arrow" viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M0 0L8 4L0 8Z" fill="#475569" fill-opacity="0.72"/>
+          </marker>
+          <mask id="iam-k8s-boundary-title-gaps" maskUnits="userSpaceOnUse" x="0" y="0" width="1600" height="900">
+            <rect width="1600" height="900" fill="white"/>
+            <rect id="iam-k8s-mask-cluster" x="410" y="68" width="232" height="24" fill="black"/>
+            <rect id="iam-k8s-mask-edge" x="460" y="148" width="150" height="24" fill="black"/>
+            <rect id="iam-k8s-mask-identity" x="770" y="148" width="178" height="24" fill="black"/>
+            <rect id="iam-k8s-mask-data" x="1315" y="148" width="180" height="24" fill="black"/>
+          </mask>
+
+          <!-- Source: https://svgl.app/library/kubernetes.svg -->
+          <symbol id="iam-k8s-icon-kubernetes" viewBox="0 0 722.8 702">
+            <path style="fill:#326ce5;fill-opacity:1;stroke:#fff;stroke-width:0;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="M365 185a47 46 0 0 0-18 4L103 306a47 46 0 0 0-25 32L18 600a47 46 0 0 0 6 35 47 46 0 0 0 3 4l169 210a47 46 0 0 0 36 18h271a47 46 0 0 0 37-18l169-210a47 46 0 0 0 9-39l-60-263a47 46 0 0 0-26-31L388 189a47 46 0 0 0-23-4z" transform="translate(-6 -175)"/>
+            <path d="M368 274c-8 0-15 7-15 16v4l2 14 2 27c-1 3-3 6-5 7v7a190 190 0 0 0-122 58l-6-3c-2 0-5 1-8-1l-20-18-10-10-3-3c-3-2-7-4-10-4-5 0-9 2-12 5-5 7-3 16 4 22l3 3 12 7 22 15c2 2 3 7 3 8l5 5c-26 37-37 84-30 131l-6 2c-2 2-4 6-7 7l-26 4-14 1-4 1c-9 2-14 10-13 18 2 8 11 12 19 11h1v-1h4l13-5c9-4 17-7 25-8l9 3 6-1c15 45 45 82 84 105l-2 7c1 2 2 5 1 8l-13 24-8 11-2 4c-4 8-1 18 6 21 8 4 17 0 20-8l2-4 5-13c3-10 6-20 11-27l6-3 3-6a189 189 0 0 0 135 1l4 5c2 1 5 2 7 5l10 24 4 14 2 4c4 8 13 11 20 8 8-4 10-13 7-21l-2-4-8-12c-6-8-10-15-13-23-1-4 0-6 1-8l-2-6c40-24 70-62 84-106l6 1c2-2 4-4 8-3 8 1 16 4 26 7l13 5 4 1c9 2 17-3 19-10 2-8-4-16-12-18l-5-1-14-1c-10-1-18-2-26-5-3-1-5-5-6-6l-6-2a189 189 0 0 0-31-131l6-5c0-3 0-5 2-8 6-6 13-10 22-16l12-7 4-2c7-6 8-16 3-22s-15-7-22-1l-3 2-10 11c-7 7-13 13-19 17-3 2-7 2-9 1l-6 4c-31-33-75-54-121-58v-7c-2-2-5-3-5-7-1-8 0-16 1-27l2-14v-4c0-9-6-16-14-16zm-19 113-4 77a13 13 0 0 1-21 10l-63-44a151 151 0 0 1 88-43zm37 0c33 5 64 20 88 43l-63 44a13 13 0 0 1-21-10zm-148 71 58 52a13 13 0 0 1-5 22l-74 22c-4-35 4-68 21-96zm259 0a153 153 0 0 1 22 95l-74-21a13 13 0 0 1-5-22h-1l58-52zm-141 56h23l15 18-5 23-21 10-21-10-6-23zm75 62h3l77 13c-12 32-33 59-61 77l-30-72a13 13 0 0 1 11-18zm-128 1a13 13 0 0 1 12 18l-29 71c-27-18-49-44-61-77l76-12h2zm64 31c2-1 4 0 6 1 3 1 5 3 6 5l38 68a154 154 0 0 1-98-1l37-67c3-4 7-6 11-6z" style="fill:#fff;fill-opacity:1;stroke:#fff;stroke-width:.25" transform="translate(-6 -175)"/>
+          </symbol>
+
+          <!-- Source: https://svgl.app/library/spring.svg -->
+          <symbol id="iam-k8s-icon-spring" viewBox="0 0 64 64">
+            <path d="M58.2 3.365a29.503 29.503 0 0 1-3.419 6.064A32.094 32.094 0 1 0 9.965 55.372l1.186 1.047a32.08 32.08 0 0 0 52.67-22.253c.875-8.17-1.524-18.51-5.62-30.8zM14.53 55.558a2.744 2.744 0 1 1-.404-3.857 2.744 2.744 0 0 1 .404 3.857zm43.538-9.61c-7.92 10.55-24.83 6.99-35.672 7.502 0 0-1.922.113-3.857.43 0 0 .73-.31 1.663-.663 7.614-2.65 11.213-3.16 15.838-5.54 8.708-4.427 17.322-14.122 19.112-24.2-3.313 9.695-13.373 18.032-22.53 21.418-6.276 2.313-17.614 4.566-17.614 4.566l-.457-.245c-7.714-3.75-7.952-20.457 6.077-25.845 6.143-2.366 12.02-1.067 18.654-2.65 7.084-1.683 15.28-6.99 18.615-13.916 3.73 11.08 8.224 28.422.166 39.15z" fill="#68bd45"/>
+          </symbol>
+
+          <!-- Source: https://svgl.app/library/postgresql.svg -->
+          <symbol id="iam-k8s-icon-postgresql" viewBox="0 0 432.071 445.383">
+            <g style="fill-rule:nonzero;clip-rule:nonzero;fill:none;stroke:#fff;stroke-width:12.4651;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4">
+              <path d="M323.205 324.227c2.833-23.601 1.984-27.062 19.563-23.239l4.463.392c13.517.615 31.199-2.174 41.587-7 22.362-10.376 35.622-27.7 13.572-23.148-50.297 10.376-53.755-6.655-53.755-6.655 53.111-78.803 75.313-178.836 56.149-203.322-52.27-66.789-142.748-35.206-144.262-34.386l-.482.089c-9.938-2.062-21.06-3.294-33.554-3.496-22.761-.374-40.032 5.967-53.133 15.904 0 0-161.408-66.498-153.899 83.628 1.597 31.936 45.777 241.655 98.47 178.31 19.259-23.163 37.871-42.748 37.871-42.748 9.242 6.14 20.307 9.272 31.912 8.147l.897-.765c-.281 2.876-.157 5.689.359 9.019-13.572 15.167-9.584 17.83-36.723 23.416-27.457 5.659-11.326 15.734-.797 18.367 12.768 3.193 42.305 7.716 62.268-20.224l-.795 3.188c5.325 4.26 4.965 30.619 5.72 49.452.756 18.834 2.017 36.409 5.856 46.771 3.839 10.36 8.369 37.05 44.036 29.406 29.809-6.388 52.6-15.582 54.677-101.107" style="fill:#000;stroke:#000;stroke-width:37.3953;stroke-linecap:butt;stroke-linejoin:miter"/>
+              <path d="M402.395 271.23c-50.302 10.376-53.76-6.655-53.76-6.655 53.111-78.808 75.313-178.843 56.153-203.326-52.27-66.785-142.752-35.2-144.262-34.38l-.486.087c-9.938-2.063-21.06-3.292-33.56-3.496-22.761-.373-40.026 5.967-53.127 15.902 0 0-161.411-66.495-153.904 83.63 1.597 31.938 45.776 241.657 98.471 178.312 19.26-23.163 37.869-42.748 37.869-42.748 9.243 6.14 20.308 9.272 31.908 8.147l.901-.765c-.28 2.876-.152 5.689.361 9.019-13.575 15.167-9.586 17.83-36.723 23.416-27.459 5.659-11.328 15.734-.796 18.367 12.768 3.193 42.307 7.716 62.266-20.224l-.796 3.188c5.319 4.26 9.054 27.711 8.428 48.969-.626 21.259-1.044 35.854 3.147 47.254 4.191 11.4 8.368 37.05 44.042 29.406 29.809-6.388 45.256-22.942 47.405-50.555 1.525-19.631 4.976-16.729 5.194-34.28l2.768-8.309c3.192-26.611.507-35.196 18.872-31.203l4.463.392c13.517.615 31.208-2.174 41.591-7 22.358-10.376 35.618-27.7 13.573-23.148z" style="fill:#336791;stroke:none" stroke="none"/>
+              <path d="M215.866 286.484c-1.385 49.516.348 99.377 5.193 111.495 4.848 12.118 15.223 35.688 50.9 28.045 29.806-6.39 40.651-18.756 45.357-46.051 3.466-20.082 10.148-75.854 11.005-87.281M173.104 38.256S11.583-27.76 19.092 122.365c1.597 31.938 45.779 241.664 98.473 178.316 19.256-23.166 36.671-41.335 36.671-41.335M260.349 26.207c-5.591 1.753 89.848-34.889 144.087 34.417 19.159 24.484-3.043 124.519-56.153 203.329"/>
+              <path d="M348.282 263.953s3.461 17.036 53.764 6.653c22.04-4.552 8.776 12.774-13.577 23.155-18.345 8.514-59.474 10.696-60.146-1.069-1.729-30.355 21.647-21.133 19.96-28.739-1.525-6.85-11.979-13.573-18.894-30.338-6.037-14.633-82.796-126.849 21.287-110.183 3.813-.789-27.146-99.002-124.553-100.599-97.385-1.597-94.19 119.762-94.19 119.762" style="stroke-linejoin:bevel"/>
+              <path d="M188.604 274.334c-13.577 15.166-9.584 17.829-36.723 23.417-27.459 5.66-11.326 15.733-.797 18.365 12.768 3.195 42.307 7.718 62.266-20.229 6.078-8.509-.036-22.086-8.385-25.547-4.034-1.671-9.428-3.765-16.361 3.994z"/>
+              <path d="M187.715 274.069c-1.368-8.917 2.93-19.528 7.536-31.942 6.922-18.626 22.893-37.255 10.117-96.339-9.523-44.029-73.396-9.163-73.436-3.193-.039 5.968 2.889 30.26-1.067 58.548-5.162 36.913 23.488 68.132 56.479 64.938"/>
+              <path d="M172.517 141.7c-.288 2.039 3.733 7.48 8.976 8.207 5.234.73 9.714-3.522 9.998-5.559.284-2.039-3.732-4.285-8.977-5.015-5.237-.731-9.719.333-9.996 2.367z" style="fill:#fff;stroke-width:4.155;stroke-linecap:butt;stroke-linejoin:miter"/>
+              <path d="M331.941 137.543c.284 2.039-3.732 7.48-8.976 8.207-5.238.73-9.718-3.522-10.005-5.559-.277-2.039 3.74-4.285 8.979-5.015 5.239-.73 9.718.333 10.002 2.368z" style="fill:#fff;stroke-width:2.0775;stroke-linecap:butt;stroke-linejoin:miter"/>
+              <path d="M350.676 123.432c.863 15.994-3.445 26.888-3.988 43.914-.804 24.748 11.799 53.074-7.191 81.435"/>
+            </g>
+          </symbol>
+
+          <!-- Source: https://svgl.app/library/redis.svg -->
+          <symbol id="iam-k8s-icon-redis" viewBox="0 0 256 220" preserveAspectRatio="xMidYMid">
+            <path d="M246 169c-13.7 7-84.5 36.2-99.5 44-15.1 7.9-23.5 7.8-35.4 2.1C99.2 209.4 24 179 10.3 172.5 3.6 169.3 0 166.5 0 164v-26s98-21.3 113.9-27c15.8-5.6 21.3-5.8 34.8-.9 13.4 5 94 19.5 107.3 24.3V160c0 2.5-3 5.3-10 9" fill="#912626"/>
+            <path d="M246 143.2c-13.7 7.1-84.5 36.2-99.5 44-15.1 8-23.5 7.9-35.4 2.2-11.9-5.7-87.2-36.1-100.8-42.6-13.5-6.5-13.8-11-.5-16.2 13.4-5.2 88.2-34.6 104-40.3 16-5.6 21.4-5.8 34.9-1 13.4 5 83.8 33 97.1 37.9 13.3 4.9 13.8 8.9.2 16" fill="#C6302B"/>
+            <path d="M246 127c-13.7 7.2-84.5 36.3-99.5 44.2-15.1 7.8-23.5 7.7-35.4 2-11.9-5.6-87.2-36-100.8-42.6-6.7-3.2-10.3-6-10.3-8.5V96.2s98-21.3 113.9-27c15.8-5.7 21.3-5.9 34.8-1 13.4 5 94 19.5 107.3 24.4V118c0 2.5-3 5.4-10 9" fill="#912626"/>
+            <path d="M246 101.4c-13.7 7-84.5 36.2-99.5 44-15.1 7.9-23.5 7.8-35.4 2.1C99.2 141.8 24 111.4 10.3 105c-13.5-6.5-13.8-11-.5-16.1C23.2 83.5 98 54 113.8 48.5c16-5.7 21.4-6 34.9-1 13.4 5 83.8 33 97.1 37.8 13.3 5 13.8 9 .2 16" fill="#C6302B"/>
+            <path d="M246 83.7c-13.7 7-84.5 36.2-99.5 44-15.1 7.9-23.5 7.8-35.4 2.1C99.2 124.1 24 93.7 10.3 87.2 3.6 84 0 81.2 0 78.7v-26s98-21.3 113.9-27c15.8-5.6 21.3-5.8 34.8-.9 13.4 5 94 19.5 107.3 24.4v25.5c0 2.5-3 5.3-10 9" fill="#912626"/>
+            <path d="M246 58c-13.7 7-84.5 36.1-99.5 44-15.1 7.9-23.5 7.8-35.4 2C99.2 98.5 24 68 10.3 61.6c-13.5-6.5-13.8-11-.5-16.2C23.2 40.1 98 10.7 113.8 5c16-5.6 21.4-5.8 34.9-.9 13.4 5 83.8 33 97.1 37.8 13.3 4.9 13.8 9 .2 16" fill="#C6302B"/>
+            <path d="m159.3 32.8-22 2.2-5 11.9-8-13.2L99 31.4l19-6.9-5.8-10.5 17.8 7 16.7-5.5-4.5 10.9 17 6.4M131 90.3l-41-17 58.8-9.1-17.8 26M74 39.3c17.5 0 31.5 5.5 31.5 12.2 0 6.8-14 12.2-31.4 12.2s-31.5-5.4-31.5-12.2c0-6.7 14.1-12.2 31.5-12.2" fill="#FFF"/>
+            <path d="M185.3 36 220 49.8l-34.8 13.7V36" fill="#621B1C"/>
+            <path d="M146.8 51.2 185.3 36v27.5l-3.8 1.5-34.7-13.8" fill="#9A2928"/>
+          </symbol>
+
+          <!-- Source: https://www.rabbitmq.com/img/rabbitmq-logo.svg (RabbitMQ is not currently in the SVGL catalog) -->
+          <symbol id="iam-k8s-icon-rabbitmq" viewBox="0 0 132.29167 132.29166">
+            <g transform="translate(-76.200105,-115.62292)">
+              <g transform="matrix(3.3139169,0,0,3.3139169,76.216727,114.23118)" style="stroke-width:0.0798401">
+                <path d="M39.42 17.37H26.65a1.59 1.59 0 0 1-1.6-1.6V3a1.59 1.59 0 0 0-1.6-1.59h-4.78A1.59 1.59 0 0 0 17.07 3v12.77a1.59 1.59 0 0 1-1.6 1.6h-4.78a1.59 1.59 0 0 1-1.6-1.6V3a1.59 1.59 0 0 0-1.6-1.6H2.7A1.59 1.59 0 0 0 1.11 3v36.72a1.59 1.59 0 0 0 1.6 1.6h36.71a1.59 1.59 0 0 0 1.6-1.6V19a1.59 1.59 0 0 0-1.6-1.63ZM33 30.93a2.39 2.39 0 0 1-2.39 2.4h-3.2a2.39 2.39 0 0 1-2.39-2.4v-3.19a2.39 2.39 0 0 1 2.39-2.4h3.2a2.39 2.39 0 0 1 2.39 2.4Z" transform="translate(-1.11,-0.98)" style="fill:#ff6600;stroke-width:0.0798401"/>
+              </g>
+            </g>
+          </symbol>
+
+          <symbol id="iam-k8s-icon-clients" viewBox="0 0 64 64">
+            <rect x="9" y="13" width="46" height="31" rx="2" fill="none" stroke="#475569" stroke-width="3"/>
+            <path d="M22 52h20M32 44v8" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="square"/>
+            <circle cx="21" cy="27" r="5" fill="#94a3b8"/>
+            <path d="M31 24h15M31 30h11" fill="none" stroke="#64748b" stroke-width="3" stroke-linecap="square"/>
+          </symbol>
+
+          <symbol id="iam-k8s-icon-load-balancer" viewBox="0 0 64 64">
+            <path d="M12 20h40M12 44h40" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="square"/>
+            <path d="M18 20v24M46 20v24" fill="none" stroke="#94a3b8" stroke-width="3"/>
+            <rect x="7" y="14" width="12" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            <rect x="45" y="14" width="12" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            <rect x="7" y="38" width="12" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+            <rect x="45" y="38" width="12" height="12" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+          </symbol>
+
+          <symbol id="iam-k8s-icon-service" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="18" fill="none" stroke="#326ce5" stroke-width="3"/>
+            <circle cx="32" cy="32" r="5" fill="#326ce5"/>
+            <path d="M32 14v13M32 37v13M14 32h13M37 32h13" stroke="#326ce5" stroke-width="3"/>
+          </symbol>
+        </defs>
+
+        <rect width="1600" height="900" fill="#f8fafc"/>
+        <rect width="1600" height="900" fill="url(#iam-k8s-grid-major)"/>
+
+        <g aria-hidden="true">
+          <rect x="390" y="80" width="840" height="740" rx="10" fill="#3b82f6" fill-opacity="0.10"/>
+          <rect x="440" y="160" width="240" height="610" rx="8" fill="#22c55e" fill-opacity="0.10"/>
+          <rect x="750" y="160" width="430" height="610" rx="8" fill="#8b5cf6" fill-opacity="0.10"/>
+          <rect x="1295" y="160" width="245" height="610" rx="8" fill="#a855f7" fill-opacity="0.10"/>
+        </g>
+
+        <g aria-hidden="true" mask="url(#iam-k8s-boundary-title-gaps)" fill="none" stroke="#64748b" stroke-width="1.5" vector-effect="non-scaling-stroke">
+          <rect x="390" y="80" width="840" height="740" rx="10"/>
+          <rect x="440" y="160" width="240" height="610" rx="8" stroke-dasharray="8 6"/>
+          <rect x="750" y="160" width="430" height="610" rx="8" stroke-dasharray="8 6"/>
+          <rect x="1295" y="160" width="245" height="610" rx="8"/>
+        </g>
+
+        <g aria-hidden="true" fill="none" stroke="#475569" stroke-opacity="0.72" stroke-width="1.5" vector-effect="non-scaling-stroke">
+          <path d="M117 292H218" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M282 292H528" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M592 292H808" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M872 292H1038" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M1102 292H1260V608"/>
+          <path d="M1260 292H1388" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M1260 462H1388" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M1260 608H1388" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M1452 462H1570V745H950V632H1038" marker-end="url(#iam-k8s-arrow)"/>
+          <path d="M1102 640H1388" marker-end="url(#iam-k8s-arrow)"/>
+        </g>
+
+        <g aria-hidden="true" fill="#ffffff" stroke="#64748b" stroke-width="1.5" vector-effect="non-scaling-stroke">
+          <rect x="53" y="260" width="64" height="64" rx="6"/>
+          <rect x="218" y="260" width="64" height="64" rx="6"/>
+          <rect x="528" y="260" width="64" height="64" rx="6"/>
+          <rect x="808" y="260" width="64" height="64" rx="6"/>
+          <rect x="1038" y="260" width="64" height="64" rx="6"/>
+          <rect x="1038" y="600" width="64" height="64" rx="6"/>
+          <rect x="1388" y="260" width="64" height="64" rx="6"/>
+          <rect x="1388" y="430" width="64" height="64" rx="6"/>
+          <rect x="1388" y="600" width="64" height="64" rx="6"/>
+        </g>
+
+        <g aria-hidden="true">
+          <use href="#iam-k8s-icon-clients" x="66" y="273" width="38" height="38"/>
+          <use href="#iam-k8s-icon-load-balancer" x="231" y="273" width="38" height="38"/>
+          <use href="#iam-k8s-icon-kubernetes" x="541" y="273" width="38" height="38"/>
+          <use href="#iam-k8s-icon-service" x="821" y="273" width="38" height="38"/>
+          <use href="#iam-k8s-icon-spring" x="1050" y="272" width="40" height="40"/>
+          <use href="#iam-k8s-icon-spring" x="1050" y="612" width="40" height="40"/>
+          <use href="#iam-k8s-icon-redis" x="1400" y="275" width="40" height="34"/>
+          <use href="#iam-k8s-icon-rabbitmq" x="1401" y="443" width="38" height="38"/>
+          <use href="#iam-k8s-icon-postgresql" x="1401" y="612" width="38" height="40"/>
+        </g>
+
+        <g fill="#334155" font-size="12" font-weight="600" letter-spacing="0.04em">
+          <text data-boundary-title data-mask-id="iam-k8s-mask-cluster" x="418" y="84">KUBERNETES CLUSTER · PROPOSED</text>
+          <text data-boundary-title data-mask-id="iam-k8s-mask-edge" x="462" y="164">EDGE NAMESPACE</text>
+          <text data-boundary-title data-mask-id="iam-k8s-mask-identity" x="772" y="164">IDENTITY NAMESPACE</text>
+          <text data-boundary-title data-mask-id="iam-k8s-mask-data" x="1317" y="164">PRIVATE DATA SERVICES</text>
+        </g>
+
+        <g text-anchor="middle">
+          <g fill="#0f172a" font-size="14" font-weight="600">
+            <text x="85" y="347">External clients</text>
+            <text x="250" y="347">Load balancer</text>
+            <text x="560" y="347">Gateway API edge</text>
+            <text x="840" y="347">IAM Service</text>
+            <text x="1070" y="347">Spring Boot IAM</text>
+            <text x="1070" y="687">Audit worker</text>
+            <text x="1420" y="347">Redis</text>
+            <text x="1420" y="517">RabbitMQ</text>
+            <text x="1420" y="687">PostgreSQL</text>
+          </g>
+          <g fill="#475569" font-size="12">
+            <text x="85" y="369">browser + apps</text>
+            <text x="250" y="369">generic external entry</text>
+            <text x="560" y="369">data plane + controller</text>
+            <text x="840" y="369">stable ClusterIP</text>
+            <text x="1070" y="369">Deployment · pods ×3*</text>
+            <text x="1070" y="709">Deployment · pods ×2*</text>
+            <text x="1420" y="369">sessions + cache</text>
+            <text x="1420" y="539">audit event broker</text>
+            <text x="1420" y="709">IAM + audit storage</text>
+          </g>
+        </g>
+
+        <g fill="#334155" font-size="12" font-weight="500">
+          <text x="168" y="278" text-anchor="middle">HTTPS</text>
+          <text x="485" y="278" text-anchor="middle">forward</text>
+          <text x="642" y="278" text-anchor="middle">route</text>
+          <text x="952" y="278" text-anchor="middle">select pods</text>
+          <text x="1305" y="278">RESP</text>
+          <text x="1305" y="448">AMQP</text>
+          <text x="1305" y="594">SQL</text>
+          <text x="790" y="729">consume audit events</text>
+          <text x="1305" y="626">INSERT</text>
+        </g>
+
+        <g fill="#64748b" font-size="12">
+          <text x="40" y="864">* Replica counts are illustrative. They do not promise failure tolerance or high availability.</text>
+        </g>
+      </svg>
+    </div>
+
+    <section class="notes" aria-label="Architecture notes">
+      <div>
+        <h2>Logical grouping</h2>
+        <p>The dashed namespaces group Kubernetes objects for readability. A namespace does not by itself provide network isolation, and the pod groups do not map to physical workers.</p>
+      </div>
+      <div>
+        <h2>State placement</h2>
+        <p>This proposal places PostgreSQL, Redis, and RabbitMQ outside the cluster on a private network. PostgreSQL stores IAM state and append-only audit records; separate schemas or databases remain an implementation choice.</p>
+      </div>
+      <div>
+        <h2>Scope</h2>
+        <p>Responses, health checks, autoscaling, backups, secret delivery, encryption keys, and network policies are omitted. Secret and key management still require an explicit design.</p>
+      </div>
+    </section>
+
+    <footer>
+      References: <a href="https://svgl.app/">SVGL assets</a>, <a href="https://www.rabbitmq.com/img/rabbitmq-logo.svg">official RabbitMQ SVG</a>, <a href="https://kubernetes.io/docs/concepts/services-networking/gateway/">Kubernetes Gateway API</a>, and <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Kubernetes Deployments</a>.
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const svg = document.querySelector("[data-iam-diagram]");
+      const scroller = document.querySelector("[data-iam-diagram-scroll]");
+
+      const measureBoundaryTitles = () => {
+        const renderedScale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+        const horizontalPadding = 8 / renderedScale;
+
+        svg.querySelectorAll("[data-boundary-title]").forEach((title) => {
+          const mask = svg.querySelector(`#${title.dataset.maskId}`);
+          const width = title.getComputedTextLength();
+          mask.setAttribute("x", Number(title.getAttribute("x")) - horizontalPadding);
+          mask.setAttribute("width", width + horizontalPadding * 2);
+        });
+      };
+
+      const updateFocusability = () => {
+        const overflows = scroller.scrollWidth > scroller.clientWidth + 1;
+        if (overflows) scroller.setAttribute("tabindex", "0");
+        else scroller.removeAttribute("tabindex");
+      };
+
+      const overflowObserver = new ResizeObserver(updateFocusability);
+      overflowObserver.observe(scroller);
+      document.fonts.ready.then(() => {
+        measureBoundaryTitles();
+        updateFocusability();
+      });
+      updateFocusability();
+    })();
+  </script>
+</body>
+</html>

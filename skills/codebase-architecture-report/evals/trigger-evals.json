@@ -40,6 +40,11 @@
       "id": 8,
       "prompt": "Document the request and response fields for this API endpoint.",
       "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Create a standalone architecture diagram for these supplied components.",
+      "should_trigger": false
     }
   ]
 }

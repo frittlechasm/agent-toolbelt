@@ -1,11 +1,10 @@
-# Diagrams
+# Inline SVG flow diagrams
 
 Use inline SVG when a diagram communicates the supplied content more clearly than prose.
-For an architecture map, read this reference and `architecture-diagrams.md`.
 
 ## Shared construction
 
-- Keep nodes on a simple grid with consistent dimensions. Leave at least 40px between nodes and enough room for arrowheads and labels.
+- Keep nodes on a simple grid with consistent dimensions. Leave at least 40 rendered CSS pixels between nodes and enough room for arrowheads and labels.
 - Size nodes for their longest label. Reserve separate space for node labels, connector labels, and arrowheads.
 - Do not let a label overlap another label, node boundary, connector, or arrowhead.
 - Draw connectors before nodes so lines pass behind opaque node backgrounds.
@@ -20,8 +19,8 @@ For an architecture map, read this reference and `architecture-diagrams.md`.
 - Keep steps neutral unless color communicates a decision, state, failure, or rollback.
 - At the chosen natural width, render node titles at 14 CSS pixels, secondary labels at 11 CSS pixels, and connector labels at 10 CSS pixels.
 - Compute `scale = rendered SVG width / viewBox width`, then set each SVG source font size to `target rendered size / scale`.
-- Use connector strokes near 1.5 rendered CSS pixels with `vector-effect="non-scaling-stroke"`.
-- Define terminal markers with `markerUnits="strokeWidth"`, `orient="auto"`, and one `marker-end`; size the marker to render near 7–9 CSS pixels.
+- For flow diagrams, use connector strokes near 1.5 rendered CSS pixels with `vector-effect="non-scaling-stroke"`.
+- For flow diagrams, define terminal markers with `markerUnits="strokeWidth"`, `orient="auto"`, and one `marker-end`; size the marker to render near 7–9 CSS pixels.
 - Put the marker reference point at the arrow tip.
 - End each connector on the nearest target-node edge after a clear straight terminal segment, and keep the arrowhead clear of labels, bends, and unrelated nodes.
 

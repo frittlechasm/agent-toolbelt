@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture Diagram"
+  short_description: "Create source-grounded system architecture maps"
+  default_prompt: "Use $architecture-diagram to create an accurate system or server topology from these sources."

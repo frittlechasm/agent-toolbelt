@@ -18,8 +18,9 @@ metadata:
 - Preserve the supplied content and requested elements without inventing facts or changing meaning.
 - Use the smallest semantic structure that communicates the content clearly.
 - Keep short alternatives and comparisons visible. Do not hide content or add controls merely to create a visual pattern.
-- If content is clearer as a diagram than prose, build an inline SVG and read `references/diagrams.md`.
-- For an architecture map, also read `references/architecture-diagrams.md` for its construction contract, reusable SVG scaffold, routing rules, and illustrated mode.
+- For a flow or simple inline diagram, read `references/diagrams.md`.
+- For a system architecture diagram, use the `architecture-diagram` skill when available and embed its SVG in the document.
+- Do not use a generic process-flow fallback as a system architecture diagram.
 - For database content, use the `erd-diagram` skill and include its ERD in the same HTML document.
 - If required content was not supplied and cannot be found, ask for it instead of fabricating examples or domain details.
 
@@ -49,8 +50,7 @@ metadata:
 
 Read only what the selected content requires:
 - `references/design.md` — the default visual system when no template, brand, or design system was supplied.
-- `references/diagrams.md` — shared inline SVG construction and flow diagrams.
-- `references/architecture-diagrams.md` — architecture maps, including the optional illustrated architecture mode.
+- `references/diagrams.md` — inline SVG construction and flow diagrams.
 - `references/interactions.md` — explicitly requested tabs, copy controls, or other interaction.
 - `references/tables.md` — only for data tables, tabular presentation, or spreadsheet transfer. Ignore for prose comparisons, option panels, or layout grids.
 

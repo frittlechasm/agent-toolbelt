@@ -35,6 +35,16 @@
       "id": 7,
       "prompt": "Build a live analytics dashboard as one plain HTML file.",
       "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Create a system architecture diagram for these services and data flows.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Create a standalone HTML document that explains this incident response process with an inline flow diagram.",
+      "should_trigger": true
     }
   ]
 }

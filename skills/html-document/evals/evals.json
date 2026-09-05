@@ -108,24 +108,6 @@
     },
     {
       "id": 9,
-      "prompt": "Create a standalone HTML architecture brief and explicitly use illustrated architecture mode. Inside an AWS ap-south-1 boundary, place CloudFront in a nested Edge region, Lambda and EventBridge in a nested Runtime region, and DynamoDB and SQS in a nested Managed data region. Runtime flow: Browser to CloudFront to Lambda to DynamoDB; Lambda publishes events to EventBridge, which sends them to SQS. Outside AWS, GitHub Actions deploys Lambda and CDK provisions the AWS resources. Use a light graph-paper canvas and recognizable product icons.",
-      "capabilities": ["browser", "network"],
-      "expected_output": "A full-width illustrated architecture diagram that preserves every supplied component and relationship, uses measured container gutters and low-emphasis connectors, keeps readable labels, and remains usable through a diagram-only horizontal scroller at narrow widths.",
-      "files": [],
-      "expectations": [
-        "Uses the opt-in light graph-paper and icon-tile treatment without adding architecture components or relationships.",
-        "Uses the full desktop canvas instead of centering the SVG in an 80%-width frame, while preserving a readable natural canvas width inside a labelled horizontal scroller on narrow screens.",
-        "Keeps rendered component names at least 14 CSS pixels and secondary, connector, and boundary labels at least 12 CSS pixels.",
-        "Uses #475569 at 72% opacity for connector strokes and arrowheads, keeps labels fully opaque, and maintains at least 3:1 composited connector contrast.",
-        "Distinguishes runtime and delivery by line style, aligns directly related nodes when that enables a straight path, consolidates shared routes, and otherwise uses the shortest clear orthogonal path with the fewest bends.",
-        "Keeps sibling container borders at least 64 rendered pixels apart and nested boundaries and node footprints at least 32 rendered pixels inside their parent boundary.",
-        "Keeps every colored container fill at 8–16% opacity without fading its stroke or title; the AWS outer boundary is solid, every nested region uses a broken stroke, and each region title interrupts its top border through a tight transparent gap.",
-        "Inlines actual AWS SVG path data from awsicons.dev and the GitHub mark from svgl.app with adjacent source URL comments, uses a generic glyph only when the named asset is unavailable after lookup, centers visible artwork within 1px on both card axes, and permits connectors to terminate on labels that belong to their source or target nodes.",
-        "Draws connectors behind nodes, places labels beside clear connector segments to keep paths continuous, and uses SVG knockout masks only where a connector must pass under a node, boundary, or connector label; unavoidable knockouts leave the canvas and translucent region visible instead of using an opaque label plate."
-      ]
-    },
-    {
-      "id": 10,
       "prompt": "Create a standalone HTML explainer with an accessible flow diagram for this supplied support process: request received; triage the request; decide whether it is actionable; if yes, assign an owner and resolve it; if no, request more information and return to triage. Keep the retry outside the main path and make the result usable at desktop and phone widths.",
       "capabilities": ["browser"],
       "expected_output": "A restrained inline SVG flow diagram with measured rendered typography, stable connectors and arrowheads, a clear retry route, and diagram-only narrow-width scrolling when the natural canvas exceeds the content width.",

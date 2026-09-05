@@ -63,6 +63,7 @@ Trace important flows from real source. When evidence exists:
 
 ### Diagrams
 - Use a diagram only when relationships or sequence are materially clearer visually.
+- When the requested deliverable includes a system architecture map, use the `architecture-diagram` skill when available.
 - For database architecture, use the `erd-diagram` skill and include its ERD in the HTML report.
 - Every node and connection must be supported by the source or explicitly marked as inferred.
 - Label a connection with a protocol or transport only when the source supports it. Otherwise, leave the label out or mark it as inferred.

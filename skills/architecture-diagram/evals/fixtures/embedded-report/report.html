@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orders service overview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page-bg: #f5f3ee;
+      --text: #243039;
+      --muted: #5f6b73;
+      --accent: #245c4a;
+      --rule: #c9cec9;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--page-bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, sans-serif;
+    }
+
+    .report {
+      width: min(72rem, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0;
+    }
+
+    h1,
+    h2 { line-height: 1.2; }
+
+    h2 {
+      margin-top: 2.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .lede { color: var(--muted); }
+    .topology-placeholder { color: var(--accent); }
+
+    .diagram-scroll {
+      width: 8rem;
+      color: var(--accent);
+    }
+
+    .architecture-diagram {
+      display: block;
+      width: 8rem;
+      height: 2rem;
+    }
+
+    .node { fill: var(--accent); }
+    .connector { stroke: var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="report">
+    <h1>Orders service overview</h1>
+    <p class="lede">A concise operational reference for the current request path.</p>
+
+    <div class="diagram-scroll" id="diagram-stage" aria-label="Current service status">
+      <svg class="architecture-diagram" viewBox="0 0 128 32" role="img" aria-labelledby="diagram-title diagram-description">
+        <title id="diagram-title">Current service status</title>
+        <desc id="diagram-description">The service is operational.</desc>
+        <defs>
+          <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M8 0H0V8" fill="none" stroke="#c9cec9" />
+          </pattern>
+          <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0L8 4L0 8Z" fill="#5f6b73" />
+          </marker>
+          <mask id="connector-knockouts">
+            <rect width="128" height="32" fill="white" />
+          </mask>
+          <symbol id="status-icon" viewBox="0 0 16 16">
+            <path d="M3 8.5l3 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2" />
+          </symbol>
+        </defs>
+        <rect width="128" height="32" fill="url(#grid)" />
+        <path class="connector" d="M8 16H108" marker-end="url(#arrow)" mask="url(#connector-knockouts)" />
+        <g class="node" color="#245c4a"><use href="#status-icon" x="108" y="8" width="16" height="16" /></g>
+      </svg>
+    </div>
+
+    <section aria-labelledby="topology-heading">
+      <h2 id="topology-heading">System topology</h2>
+      <p class="topology-placeholder">Architecture map to be added here.</p>
+    </section>
+
+    <section aria-labelledby="operations-heading">
+      <h2 id="operations-heading">Operational note</h2>
+      <p>Queue consumers can be retried after transient delivery failures.</p>
+    </section>
+  </main>
+  <script>
+    function updateOverflowFocus() {
+      const diagramStage = document.getElementById('diagram-stage');
+      diagramStage.dataset.overflowChecked = 'true';
+    }
+
+    updateOverflowFocus();
+  </script>
+</body>
+</html>

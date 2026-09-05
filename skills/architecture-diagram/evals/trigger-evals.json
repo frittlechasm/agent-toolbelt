@@ -1,0 +1,80 @@
+{
+  "skill_name": "architecture-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a standalone HTML architecture diagram for these services and data flows.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Embed a system topology map in this existing HTML architecture report.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Update this AWS deployment diagram to add the new worker and queue.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Visualize the network zones and trust boundaries from this Terraform configuration.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Create a source-aware server topology for this Spring Boot IAM service and its backing stores.",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "Generate an ERD from these database migrations.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Write a prose architecture overview for onboarding without a diagram.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Design a more scalable architecture for this application.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Draw a flowchart for this customer support process.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Create a Mermaid sequence diagram for the checkout request.",
+      "should_trigger": false
+    },
+    {
+      "id": 11,
+      "prompt": "Map our IAM services, trust boundaries, and token-signing dependencies.",
+      "should_trigger": true
+    },
+    {
+      "id": 12,
+      "prompt": "Illustrate the multi-cloud deployment topology for these workloads.",
+      "should_trigger": true
+    },
+    {
+      "id": 13,
+      "prompt": "Draw the user login and OAuth redirect flow.",
+      "should_trigger": false
+    },
+    {
+      "id": 14,
+      "prompt": "Make a class diagram for these Java domain types.",
+      "should_trigger": false
+    },
+    {
+      "id": 15,
+      "prompt": "Turn this approval process into a flow diagram.",
+      "should_trigger": false
+    }
+  ]
+}

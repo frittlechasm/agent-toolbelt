@@ -7,6 +7,7 @@ Reusable agent skills and supporting utilities.
 | Skill | What it does |
 | --- | --- |
 | `agent-history-audit` | Reviews Claude and Codex history for repeated problems and workflow improvements. |
+| `architecture-diagram` | Creates source-grounded system architecture maps. |
 | `bitbucket-pr-fetch` | Fetches and reviews a Bitbucket Cloud PR without changing it. |
 | `code-change-explainer-html` | Creates an HTML explainer for code changes. |
 | `codebase-architecture-report` | Creates source-backed architecture reports. |

@@ -1,0 +1,64 @@
+{
+  "skill_name": "architecture-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a standalone HTML architecture brief and explicitly use illustrated architecture mode. Inside an AWS ap-south-1 boundary, place CloudFront in a nested Edge region, Lambda and EventBridge in a nested Runtime region, and DynamoDB and SQS in a nested Managed data region. Runtime flow: Browser to CloudFront to Lambda to DynamoDB; Lambda publishes events to EventBridge, which sends them to SQS. Outside AWS, GitHub Actions deploys Lambda and CDK provisions the AWS resources. Use a light graph-paper canvas and recognizable product icons.",
+      "capabilities": ["browser", "network"],
+      "expected_output": "A full-width illustrated architecture diagram that preserves every supplied component and relationship, uses measured container gutters and low-emphasis connectors, keeps readable labels, and remains usable through a diagram-only horizontal scroller at narrow widths.",
+      "files": [],
+      "expectations": [
+        "Uses the opt-in light graph-paper and icon-tile treatment without adding architecture components or relationships.",
+        "Uses the full desktop canvas instead of centering the SVG in an 80%-width frame, while preserving a readable natural canvas width inside a labelled horizontal scroller on narrow screens.",
+        "Keeps rendered component names at least 14 CSS pixels and secondary, connector, and boundary labels at least 12 CSS pixels.",
+        "Uses #475569 at 72% opacity for connector strokes and arrowheads, keeps labels fully opaque, and maintains at least 3:1 composited connector contrast.",
+        "Distinguishes runtime and delivery by line style, aligns directly related nodes when that enables a straight path, consolidates shared routes, and otherwise uses the shortest clear orthogonal path with the fewest bends.",
+        "Keeps sibling container borders at least 64 rendered pixels apart and nested boundaries and node footprints at least 32 rendered pixels inside their parent boundary.",
+        "Keeps every colored container fill at 8–16% opacity without fading its stroke or title; the AWS outer boundary is solid, every nested region uses a broken stroke, and each region title interrupts its top border through a tight transparent gap.",
+        "Inlines actual AWS SVG path data from awsicons.dev and the GitHub mark from svgl.app with adjacent source URL comments, uses a generic glyph only when the named asset is unavailable after lookup, centers visible artwork within 1px on both card axes, and permits connectors to terminate on labels that belong to their source or target nodes.",
+        "Draws connectors behind nodes, places labels beside clear connector segments to keep paths continuous, and uses SVG knockout masks only to remove a legitimate connector segment hidden by an intervening node, title, or connector label. It never masks a boundary stroke except for that boundary's measured title gap and never uses an opaque backing plate, text stroke, text shadow, filter, or similar halo to hide a collision.",
+        "Keeps each connector label's full rendered painted box at least 8 CSS pixels from every boundary stroke. At both viewports, browser QA checks every connector-label-to-boundary pair and separately reports intersections, clearance violations, and the minimum painted-edge distance. Zero intersections cannot pass when any pair violates the 8px clearance.",
+        "Reports rendered font and connector-stroke sizes in CSS pixels using actual browser geometry or getScreenCTM() scaling for computed SVG source values, without double-scaling non-scaling strokes, and retains the viewport and SVG scale or transform as evidence for each pass."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Edit report.html and replace the topology placeholder with an inline architecture map. The Browser calls the API Gateway over HTTPS. The API Gateway calls the Orders Service. The Orders Service publishes order-created events to RabbitMQ and reads and writes Postgres. Keep the existing document content and visual style. Do not create another HTML file.",
+      "capabilities": ["browser", "network"],
+      "expected_output": "The supplied report.html contains one accessible inline SVG architecture map integrated into its existing topology section, with scoped styles, collision-safe IDs, preserved host content, and no second document or iframe.",
+      "files": [],
+      "fixture": "fixtures/embedded-report",
+      "expectations": [
+        "Edits report.html in place, replaces only the topology placeholder, and creates no second HTML artifact or iframe.",
+        "Preserves the existing title, summary, operational note, document styles, and responsive behavior outside the inserted topology map.",
+        "Includes exactly Browser, API Gateway, Orders Service, RabbitMQ, and Postgres with the supplied HTTPS, call, publish, and read/write relationships.",
+        "Uses one inline SVG with wrapper-scoped CSS and diagram-prefixed definition, ARIA, and script IDs; it introduces no global selector or root-variable changes.",
+        "Preserves the fixture's existing inline SVG, generic IDs, classes, definitions, references, and global helper behavior unchanged, with no collision between either diagram.",
+        "Uses JetBrains Mono for every inserted SVG label without changing the host document typography, reuses or adds the permitted Google Fonts stylesheet once, and waits for document.fonts.ready before measuring text.",
+        "Applies the original architecture design's measured typography, spacing, routing, boundary, connector, accessibility, and responsive rules; it remains readable at desktop and 320–390px widths and keeps overflow inside a labelled diagram stage when needed.",
+        "Uses only wrapper-local JavaScript for required measurements and overflow focusability, including a scoped ResizeObserver when needed, and adds no unrequested interaction or globals."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use reference.html as an immutable visual benchmark and topology source. Create a fresh standalone proposed.html without editing reference.html. Match the reference's visual design, including its dark document shell, light graph-paper canvas, typography, palette, relative composition, region and node arrangement, connector axes, and reusable sourced SVG icons. Preserve the relative composition rather than freezing exact coordinates: make minimal geometry adjustments where needed to satisfy spacing, routing, and legibility contracts, including widening the external-node layout if its complete footprints are too close. Change only what this request or those cleanup rules require; do not reinterpret it as a fresh redesign. Regenerate its proposed illustrated Kubernetes IAM deployment with the same nine nodes and placement: External clients and Load balancer outside the cluster; Gateway API edge in the Edge namespace; IAM Service (stable ClusterIP), Spring Boot IAM (Deployment), and Audit worker (Deployment) in the Identity namespace; and Redis, RabbitMQ, and PostgreSQL outside the cluster in Private data services. Preserve the depicted request, dependency, event, and audit-write relationships. This is a proposed deployment reference, not observed configuration; exact wording identity is not required. In the completion response, not inside proposed.html, include a concise checkpoint table containing actual browser-measured geometry and collision results from desktop and narrow renders.",
+      "capabilities": ["browser", "network"],
+      "expected_output": "A new proposed.html that matches the source benchmark's visual system and source-grounded illustrated Kubernetes IAM deployment while leaving reference.html byte-for-byte unchanged, plus recorded browser geometry evidence.",
+      "files": [],
+      "fixture": "fixtures/iam-kubernetes-architecture",
+      "expectations": [
+        "Leaves reference.html unchanged and creates proposed.html as a standalone illustrated architecture document.",
+        "Preserves the benchmark's dark document shell, light graph-paper diagram canvas, typography, palette, relative composition, region and node arrangement, connector axes, and reusable sourced SVG icons. It makes only minimal geometry adjustments needed for clearance, routing, and legibility, including widening external-node spacing when required, instead of either freezing flawed coordinates or producing an arbitrary redesign.",
+        "Includes exactly the nine requested nodes and preserves their placement: two external entry nodes, four Kubernetes nodes in the supplied cluster and namespaces, and three private data services outside the cluster.",
+        "Preserves these relationships: clients to load balancer over HTTPS; load balancer forwards to Gateway API edge; Gateway routes to IAM Service; IAM Service selects Spring Boot IAM pods; Spring Boot IAM uses Redis, publishes to RabbitMQ, and writes PostgreSQL; RabbitMQ delivers to Audit worker; Audit worker inserts into PostgreSQL. It does not replace the topology with a login, OAuth, or protocol sequence.",
+        "Clearly labels the topology as proposed and does not claim observed configuration, physical worker placement, or high availability.",
+        "Uses actual inline SVG assets with adjacent source URLs for recognizable Kubernetes, Spring, PostgreSQL, Redis, and RabbitMQ products; checks the official product source before using a generic fallback when a preferred icon library lacks an asset.",
+        "Uses JetBrains Mono for all SVG text and preserves the rendered numeric contracts: 64px icon tiles, 36–40px icon artwork, at least 14px component names, 12px secondary, connector, and boundary labels, and 1.5px connectors.",
+        "Keeps sibling boundaries at least 64 rendered pixels apart, complete sibling node footprints at least 40 rendered pixels apart, complete node footprints and nested borders at least 32 rendered pixels inside parent boundaries, colored fills at 8–16% opacity, and labels clear of nodes, connectors, arrowheads, boundaries, and other text.",
+        "Uses numeric measured boundary-title mask positions and widths after document.fonts.ready, keeps translucent fills separate from fully opaque borders and titles, and namespaces every SVG definition and reference consistently.",
+        "Renders correctly at desktop and 320–390px widths, keeps page-level overflow contained, makes only an overflowing diagram stage focusable, and places connector endpoints and marker tips on their intended side ports within 1 CSS pixel with the correct terminal orientation.",
+        "Reports an evidence table in the QA or completion response, not in proposed.html, from actual browser measurements at both viewports. It includes observed minima for 64px sibling-boundary, 40px sibling-node, 32px nested-inset, 14px component-name, 12px secondary-label, and 1.5px connector contracts; zero text collisions by collision class; confirmation that every shared trunk is one unmarked path drawn once and every duplicate rendered segment is a failure; distinct reverse-edge routing; and per-edge marker-tip direction. It rerenders after any fix before reporting a pass."
+      ]
+    }
+  ]
+}
