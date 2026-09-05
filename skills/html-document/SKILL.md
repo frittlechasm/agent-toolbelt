@@ -2,9 +2,9 @@
 name: html-document
 description: Create standalone HTML documents. Use only when the user asks to generate, edit, or convert document content as HTML, or when another skill requires HTML output. Do not use for websites, landing pages, web apps, React apps, dashboards, or product UI.
 metadata:
-  scope: global
-  agents: all
-  machines: all
+    scope: global
+    agents: all
+    machines: all
 ---
 
 # HTML Document
@@ -35,11 +35,11 @@ metadata:
 ## Print and fixed pages
 
 - When print or PDF export is requested for a flowing document:
-  - add print styles with a light high-contrast palette
-  - sensible page margins
-  - hidden interactive controls
-  - practical break avoidance for compact grouped content
-  - Let the browser paginate it.
+    - add print styles with a light high-contrast palette
+    - sensible page margins
+    - hidden interactive controls
+    - practical break avoidance for compact grouped content
+    - Let the browser paginate it.
 - Use fixed pages only when the user explicitly requests page-perfect or deliberately composed pages.
 - Match the requested paper size with exact page containers, `@page`, and explicit page breaks.
 - Preserve fixed-page geometry at narrow widths by scaling each page inside its wrapper instead of reflowing its contents.
@@ -49,6 +49,7 @@ metadata:
 ## References
 
 Read only what the selected content requires:
+
 - `references/design.md` — the default visual system when no template, brand, or design system was supplied.
 - `references/diagrams.md` — inline SVG construction and flow diagrams.
 - `references/interactions.md` — explicitly requested tabs, copy controls, or other interaction.
