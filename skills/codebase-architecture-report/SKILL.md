@@ -2,9 +2,9 @@
 name: codebase-architecture-report
 description: Creates source-aware architecture reports explaining a codebase's structure, flows, design decisions, and security controls. Use only for architecture documentation and onboarding.
 metadata:
-  scope: global
-  agents: all
-  machines: all
+    scope: global
+    agents: all
+    machines: all
 ---
 
 # Codebase Architecture Report
@@ -30,12 +30,13 @@ Create a clear architecture report that explains how a codebase works using evid
 - Ask only when a missing choice would materially change the report; otherwise state a reasonable assumption and proceed.
 - For a large repository, begin with a high-level map and inspect a representative set of important flows. State what was covered, sampled, or left uninspected.
 - When the user explicitly requests architecture-improvement recommendations, follow any direction they provide; absent such direction:
-  - inspect roughly the last 20 commit messages
-  - use recent churn only to prioritize which areas to examine more deeply
+    - inspect roughly the last 20 commit messages
+    - use recent churn only to prioritize which areas to examine more deeply
 
 ## Gather evidence
 
 Start with repository guidance and architecture clues, then read only what the scope requires:
+
 - README, project guidance, `CONTEXT.md` when present, architecture docs, and ADRs
 - local setup, run, and test instructions when the report is for onboarding
 - build, dependency, framework, and runtime configuration
@@ -49,6 +50,7 @@ Use fast file discovery and targeted searches. Keep a working list of the files 
 ## Explain the architecture
 
 Cover the parts that matter for the requested scope:
+
 - system purpose and users
 - the shortest verified path to run the system locally when the report is for onboarding
 - runtime boundaries such as frontend, backend, workers, CLIs, scheduled jobs, and queues
@@ -58,10 +60,12 @@ Cover the parts that matter for the requested scope:
 - deployment topology and cross-cutting concerns such as configuration, logging, audit, and error handling
 
 Trace important flows from real source. When evidence exists:
+
 - cover the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests.
 - if a step cannot be verified, say so.
 
 ### Diagrams
+
 - Use a diagram only when relationships or sequence are materially clearer visually.
 - When the requested deliverable includes a system architecture map, use the `architecture-diagram` skill when available.
 - For database architecture, use the `erd-diagram` skill and include its ERD in the HTML report.
@@ -73,6 +77,7 @@ Trace important flows from real source. When evidence exists:
 ## Handle evidence honestly
 
 Make the confidence of important claims clear in natural language or concise labels:
+
 - **Source-backed** — directly supported by code, documentation, configuration, tests, or deployment files.
 - **Inferred** — a likely interpretation of source structure or usage.
 - **Unclear** — the available repository evidence cannot confirm it.
