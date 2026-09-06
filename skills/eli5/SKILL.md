@@ -1,16 +1,17 @@
 ---
 name: eli5
-description: Use when the user asks for ELI5 or an illustrated beginner explanation. Do not use for ordinary concise explanations, code-change walkthroughs, or UI mockups.
+description: Use when the user explicitly requests a visual ELI5 or picture-based beginner explanation. Do not use for plain-text explanations, code-change walkthroughs, or UI mockups.
 metadata:
-  scope: global
-  agents: all
-  machines: all
+    scope: global
+    agents: all
+    machines: all
 ---
 
 Explain like I'm someone who knows nothing about this topic.
 Create one visual HTML document explainer with big, purposeful illustrations and few words.
 
 ## Guide
+
 - ELI5 means the reader is new to the topic, not that they are a child. Use plain language for adults.
 - Do not use image generation unless the user explicitly requests a raster image.
 - Prefer progressive disclosure. For a process, sequence, or comparison, use one focused interaction with one short caption per state.

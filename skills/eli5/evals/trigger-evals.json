@@ -35,6 +35,16 @@
       "id": 7,
       "prompt": "Explain eventual consistency in simple terms.",
       "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "ELI5 how DNS works in three short paragraphs.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Explain public-key encryption like I'm five.",
+      "should_trigger": false
     }
   ]
 }

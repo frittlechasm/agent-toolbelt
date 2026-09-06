@@ -12,7 +12,7 @@ Reusable agent skills and supporting utilities.
 | `code-change-explainer-html` | Creates an HTML explainer for code changes. |
 | `codebase-architecture-report` | Creates source-backed architecture reports. |
 | `commit-msg` | Writes conventional commit messages from Git changes. |
-| `eli5` | Creates simple visual explanations for beginners. |
+| `eli5` | Creates illustrated HTML explanations for beginners. |
 | `erd-diagram` | Creates source-grounded interactive database ERDs. |
 | `flow-diagram` | Creates clear process flows with decisions, branches, and retries. |
 | `html-document` | Creates standalone HTML documents. |
