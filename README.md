@@ -19,6 +19,7 @@ Reusable agent skills and supporting utilities.
 | `sync-upstream` | Syncs all branches in a fork with upstream. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. |
 | `ui-mocks` | Creates side-by-side HTML UI mockups. |
+| `visual-design-review` | Reviews rendered UI for visual quality and polish. |
 
 ## Install
 

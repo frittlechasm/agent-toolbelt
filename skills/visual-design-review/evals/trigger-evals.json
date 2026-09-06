@@ -1,0 +1,55 @@
+{
+  "skill_name": "visual-design-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review this UI screenshot and tell me the three biggest visual problems.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Why does this dashboard still feel generic and AI-generated?",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Rank these three mockups by visual polish and taste.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Give the landing page a final aesthetic quality review before we ship it.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Critique the animation and visual hierarchy in this onboarding screen.",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "Audit this page for WCAG accessibility problems.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Implement this approved mockup as a production React component.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Review the architecture and state management in this frontend code.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Create three visual directions for our new account settings screen.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Review this signup flow for usability and keyboard accessibility.",
+      "should_trigger": false
+    }
+  ]
+}

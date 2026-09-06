@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Incident overview</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #f4f5f3;
+            color: #18211d;
+            font:
+                15px/1.45 system-ui,
+                sans-serif;
+        }
+        main {
+            max-width: 1120px;
+            margin: 64px auto;
+            padding: 0 28px;
+        }
+        header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            border-bottom: 1px solid #cdd3cf;
+            padding-bottom: 22px;
+        }
+        h1 {
+            margin: 0;
+            font:
+                600 30px/1.1 Georgia,
+                serif;
+        }
+        .muted {
+            color: #64716b;
+        }
+        button {
+            border: 1px solid #1f4d3b;
+            background: #1f4d3b;
+            color: white;
+            padding: 10px 15px;
+            font: inherit;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: #cdd3cf;
+            margin: 28px 0;
+        }
+        .metric {
+            background: #fff;
+            padding: 22px;
+        }
+        .metric strong {
+            display: block;
+            font:
+                600 28px Georgia,
+                serif;
+        }
+        .metric span {
+            color: #64716b;
+        }
+        section {
+            background: #fff;
+            border: 1px solid #cdd3cf;
+        }
+        h2 {
+            font-size: 16px;
+            margin: 0;
+            padding: 18px 20px;
+            border-bottom: 1px solid #dce1de;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th,
+        td {
+            text-align: left;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e7eae8;
+        }
+        th {
+            color: #64716b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .sev {
+            color: #9d321f;
+            font-weight: 650;
+        }
+        .owner {
+            color: #46534d;
+        }
+    </style>
+    <main>
+        <header>
+            <div>
+                <p class="muted">Operations / Incident overview</p>
+                <h1>Active incidents</h1>
+            </div>
+            <button>Create incident</button>
+        </header>
+        <div class="summary">
+            <div class="metric"><strong>3</strong><span>Active incidents</span></div>
+            <div class="metric"><strong>18 min</strong><span>Median response</span></div>
+            <div class="metric"><strong>99.96%</strong><span>30-day availability</span></div>
+        </div>
+        <section>
+            <h2>Needs attention</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Incident</th>
+                        <th>Severity</th>
+                        <th>Service</th>
+                        <th>Owner</th>
+                        <th>Opened</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Elevated login failures</td>
+                        <td class="sev">High</td>
+                        <td>Identity API</td>
+                        <td class="owner">Mira Chen</td>
+                        <td>12 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>Delayed audit exports</td>
+                        <td>Medium</td>
+                        <td>Reporting</td>
+                        <td class="owner">Jon Bell</td>
+                        <td>31 min ago</td>
+                    </tr>
+                    <tr>
+                        <td>Webhook retry backlog</td>
+                        <td>Low</td>
+                        <td>Events</td>
+                        <td class="owner">Sam Rao</td>
+                        <td>48 min ago</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visual Design Review"
+  short_description: "Critique rendered UI for taste and polish"
+  default_prompt: "Use $visual-design-review to critique rendered UI and identify the highest impact improvements."

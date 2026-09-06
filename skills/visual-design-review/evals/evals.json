@@ -1,0 +1,51 @@
+{
+  "skill_name": "visual-design-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Open dashboard.html in the browser and review it at a 1280px desktop viewport. This incident dashboard should help operations leads scan active incidents quickly and feel calm, precise, and trustworthy. Report only material visual problems and do not change files.",
+      "capabilities": [
+        "browser"
+      ],
+      "fixture": "fixtures/calm-dashboard",
+      "expected_output": "A concise, read-only review of the supplied dashboard. It may conclude that there are no material visual problems, does not manufacture a next-pass brief, and distinguishes optional taste changes from defects.",
+      "files": [],
+      "expectations": [
+        "Opens and reviews dashboard.html at the requested viewport rather than discussing its source code.",
+        "Judges the screen against fast incident scanning and the calm, precise, trustworthy direction.",
+        "Reports only evidence-backed material gaps and allows a no-material-findings verdict.",
+        "Labels taste-based refinements as optional preferences rather than defects.",
+        "Does not edit files, invent a score, or force a next-pass brief when none is warranted."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review the visual hierarchy of the attached account settings screenshot. It should feel direct and quiet for administrators. Do not change files.",
+      "expected_output": "A concise response that states the screenshot is not available, avoids fabricating visual observations, and asks for the missing evidence needed to perform the review.",
+      "files": [],
+      "expectations": [
+        "States that the referenced screenshot is missing or inaccessible.",
+        "Does not invent screen contents, visible defects, or a verdict about polish.",
+        "Asks the user to attach the screenshot or provide an accessible URL.",
+        "Preserves the supplied product goal and target feeling for the eventual review."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Open motion-states.html in the browser. Review the supplied still states for this onboarding transition: initial, representative transition frame, final, and reduced motion. Tell me what the images establish and what they cannot establish without a recording or runnable interaction. Do not change files.",
+      "capabilities": [
+        "browser"
+      ],
+      "fixture": "fixtures/onboarding-motion",
+      "expected_output": "A review grounded in the four supplied states. It can assess continuity, hierarchy, and whether the reduced-motion state preserves meaning, but explicitly declines to infer timing, smoothness, interaction behavior, or performance from still images.",
+      "files": [],
+      "expectations": [
+        "Opens motion-states.html and examines the initial, transition, final, and reduced-motion panels.",
+        "Uses visible evidence to assess continuity, hierarchy, and preservation of meaning.",
+        "Does not claim that stills prove timing, smoothness, runtime behavior, or rendering performance.",
+        "Requests a recording or runnable UI only for conclusions that require temporal evidence.",
+        "Does not edit files or turn the review into implementation guidance."
+      ]
+    }
+  ]
+}

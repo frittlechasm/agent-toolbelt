@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Onboarding motion states</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #ecefe9;
+            color: #172019;
+            font:
+                14px/1.4 system-ui,
+                sans-serif;
+        }
+        main {
+            max-width: 1180px;
+            margin: 40px auto;
+            padding: 24px;
+        }
+        h1 {
+            font:
+                600 25px Georgia,
+                serif;
+            margin: 0 0 22px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        .state {
+            background: #fff;
+            border: 1px solid #cbd2cb;
+            min-height: 410px;
+            padding: 20px;
+        }
+        .label {
+            color: #667268;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid #e1e5e1;
+            padding-bottom: 12px;
+        }
+        .step {
+            margin-top: 34px;
+            color: #667268;
+        }
+        .art {
+            height: 120px;
+            margin: 28px 0;
+            background: #dce9df;
+            display: grid;
+            place-items: center;
+            font-size: 42px;
+        }
+        .moving .art {
+            transform: translateY(-12px);
+            opacity: 0.62;
+        }
+        .done .art,
+        .reduced .art {
+            background: #244f3c;
+            color: white;
+        }
+        .reduced .art {
+            outline: 3px solid #a7b8ac;
+            outline-offset: 4px;
+        }
+        h2 {
+            font-size: 20px;
+            margin: 0 0 8px;
+        }
+        p {
+            color: #59645c;
+        }
+        button {
+            margin-top: 14px;
+            padding: 9px 13px;
+            border: 1px solid #244f3c;
+            background: #244f3c;
+            color: #fff;
+        }
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+    <main>
+        <h1>Workspace setup: supplied visual states</h1>
+        <div class="grid">
+            <section class="state">
+                <div class="label">Initial</div>
+                <div class="step">Step 2 of 3</div>
+                <div class="art">↗</div>
+                <h2>Connect your directory</h2>
+                <p>Choose a provider to import people and groups.</p>
+                <button>Connect directory</button>
+            </section>
+            <section class="state moving">
+                <div class="label">Transition frame</div>
+                <div class="step">Step 2 of 3</div>
+                <div class="art">↗</div>
+                <h2>Verifying connection</h2>
+                <p>Checking permissions and directory access.</p>
+            </section>
+            <section class="state done">
+                <div class="label">Final</div>
+                <div class="step">Step 3 of 3</div>
+                <div class="art">✓</div>
+                <h2>Directory connected</h2>
+                <p>People and groups are ready to import.</p>
+                <button>Review import</button>
+            </section>
+            <section class="state reduced">
+                <div class="label">Reduced motion</div>
+                <div class="step">Step 3 of 3</div>
+                <div class="art">✓</div>
+                <h2>Directory connected</h2>
+                <p>The final state appears without movement.</p>
+                <button>Review import</button>
+            </section>
+        </div>
+    </main>
+</html>

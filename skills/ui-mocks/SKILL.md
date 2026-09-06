@@ -63,7 +63,8 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 - Render the file and inspect screenshots at narrow and desktop widths. Judge the result, not the code or effort.
 - Check that every requirement appears in every variant and that the variants are truly different.
 - Review composition and hierarchy first, then type, spacing, color, controls, and polish. Compare with supplied references without copying them.
-- If independent review is available and authorized, use `visual-design-review` when available. Give it only the screenshots, target feeling, and references.
+- If independent review is allowed and available, use `visual-design-review` with fresh context.
+- Give the reviewer only the screenshots, product goal, target users and task, constraints, desired feeling, and references. Do not include earlier implementation rationale.
 - Make one or two improvement passes. Fix the largest gaps first.
 - Remove anything that adds no information, hierarchy, identity, or required behavior.
 - Remove generic hero layouts, arbitrary gradients or glows, excess containers, decorative labels, random accent colors, and repeated rounded cards unless the direction calls for them.
