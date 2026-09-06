@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alert response runbook</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page-bg: #f7f5f0;
+      --text: #27313a;
+      --muted: #61707b;
+      --accent: #355f72;
+      --rule: #cbd2d4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--page-bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, sans-serif;
+    }
+
+    .runbook {
+      width: min(68rem, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0;
+    }
+
+    h1,
+    h2 { line-height: 1.2; }
+
+    h2 {
+      margin-top: 2.5rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .lede { color: var(--muted); }
+    .workflow-placeholder { color: var(--accent); }
+
+    .diagram-scroll {
+      width: 8rem;
+      color: var(--accent);
+    }
+
+    .status-diagram {
+      display: block;
+      width: 8rem;
+      height: 2rem;
+    }
+
+    .node { fill: var(--accent); }
+    .connector { stroke: var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="runbook">
+    <h1>Alert response runbook</h1>
+    <p class="lede">A concise guide for assessing incoming operational alerts.</p>
+
+    <div class="diagram-scroll" id="diagram-stage" aria-label="Current monitoring status">
+      <svg class="status-diagram" viewBox="0 0 128 32" role="img" aria-labelledby="diagram-title diagram-description">
+        <title id="diagram-title">Current monitoring status</title>
+        <desc id="diagram-description">Monitoring is active.</desc>
+        <defs>
+          <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0L8 4L0 8Z" fill="#61707b" />
+          </marker>
+          <symbol id="status-icon" viewBox="0 0 16 16">
+            <path d="M3 8.5l3 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2" />
+          </symbol>
+        </defs>
+        <path class="connector" d="M8 16H108" marker-end="url(#arrow)" />
+        <g class="node" color="#355f72"><use href="#status-icon" x="108" y="8" width="16" height="16" /></g>
+      </svg>
+    </div>
+
+    <section aria-labelledby="workflow-heading">
+      <h2 id="workflow-heading">Response workflow</h2>
+      <p class="workflow-placeholder">Response flow to be added here.</p>
+    </section>
+
+    <section aria-labelledby="operations-heading">
+      <h2 id="operations-heading">Operational note</h2>
+      <p>Record the alert outcome in the incident timeline.</p>
+    </section>
+  </main>
+  <script>
+    function updateOverflowFocus() {
+      const diagramStage = document.getElementById('diagram-stage');
+      diagramStage.dataset.overflowChecked = 'true';
+    }
+
+    updateOverflowFocus();
+  </script>
+</body>
+</html>

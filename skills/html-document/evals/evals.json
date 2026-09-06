@@ -108,16 +108,16 @@
     },
     {
       "id": 9,
-      "prompt": "Create a standalone HTML explainer with an accessible flow diagram for this supplied support process: request received; triage the request; decide whether it is actionable; if yes, assign an owner and resolve it; if no, request more information and return to triage. Keep the retry outside the main path and make the result usable at desktop and phone widths.",
+      "prompt": "Create a standalone HTML incident playbook that includes the supplied overview and embeds an accessible flow diagram in the workflow section. Overview: support owns the initial assessment and the incident commander owns mitigation. Workflow: alert received; support triages; decide whether it is actionable; if yes, assign the incident commander, mitigate, and close; if no, request more information and return to triage. Preserve the overview as document prose and make the result usable at desktop and phone widths.",
       "capabilities": ["browser"],
-      "expected_output": "A restrained inline SVG flow diagram with measured rendered typography, stable connectors and arrowheads, a clear retry route, and diagram-only narrow-width scrolling when the natural canvas exceeds the content width.",
+      "expected_output": "A restrained standalone HTML playbook that preserves its prose content and integrates one accessible inline SVG process flow without turning the whole deliverable into a diagram.",
       "files": [],
       "expectations": [
-        "Renders node titles at 13.5–14.5 CSS pixels, secondary labels at 10.5–11.5 CSS pixels, and connector labels at 9.5–10.5 CSS pixels after view box scaling at desktop and 320–375px widths.",
-        "Uses connector strokes near 1.5 rendered CSS pixels with non-scaling-stroke, explicit markerUnits=strokeWidth, orient=auto, and one marker-end whose arrowhead remains near 7–9 rendered CSS pixels at both widths.",
-        "Draws connectors before nodes, routes the retry outside the main path, and keeps every label clear of node boundaries, connector paths, bends, and arrowheads.",
-        "Ends every connector on the nearest target-node edge after a clear straight terminal segment; browser-coordinate verification shows each path endpoint meets that edge within 1 CSS pixel and every arrowhead follows the terminal path direction.",
-        "Keeps narrow-width overflow inside a labelled keyboard-focusable diagram scroller with no page-level horizontal overflow, and includes a concise SVG title and description."
+        "Preserves the supplied ownership overview as readable prose and every supplied workflow step without inventing incident policy.",
+        "Embeds one accessible inline SVG flow in the workflow section with a clear actionable decision, labelled branches, and the retry outside the main path.",
+        "Uses the document's visual system for the surrounding playbook and keeps diagram-specific styles and IDs scoped.",
+        "Keeps the full document readable at desktop and 320–375px widths, with any irreducible diagram overflow confined to a labelled keyboard-focusable scroller.",
+        "Verifies document hierarchy, prose readability, SVG accessibility, clipping, and page-level overflow in the rendered result."
       ]
     }
   ]

@@ -1,0 +1,55 @@
+{
+  "skill_name": "flow-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Turn this approval process into a flow diagram with labelled decision branches.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Create a standalone HTML flowchart for our incident escalation procedure.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Embed this retry workflow in the existing HTML runbook.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Map the happy path, validation failure branch, and return to review loop.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Create a system topology showing our Kubernetes services and databases.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Draw a sequence diagram for the OAuth authorization code exchange.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Generate an ERD from these Postgres migrations.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Create a UML class diagram for these Java domain types.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Write these deployment steps as a numbered checklist.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Create an architecture diagram for the request path from browser to API to database.",
+      "should_trigger": false
+    }
+  ]
+}

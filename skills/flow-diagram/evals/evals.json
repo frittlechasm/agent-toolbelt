@@ -1,0 +1,37 @@
+{
+  "skill_name": "flow-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a standalone HTML explainer with an accessible flow diagram for this supplied support process: request received; triage the request; decide whether it is actionable; if yes, assign an owner and resolve it; if no, request more information and return to triage. Keep the retry outside the main path and make the result usable at desktop and phone widths.",
+      "capabilities": ["browser"],
+      "expected_output": "A restrained inline SVG flow diagram in a standalone HTML document with measured rendered typography, stable connectors and arrowheads, a clear retry route, and diagram-only narrow-width scrolling when the natural canvas exceeds the content width.",
+      "files": [],
+      "expectations": [
+        "Preserves every supplied step, the actionable decision, both branches, and the return from more information to triage without inventing process behavior.",
+        "Renders node titles at 13.5–14.5 CSS pixels, secondary labels at 10.5–11.5 CSS pixels, and connector labels at 9.5–10.5 CSS pixels after view box scaling at desktop and 320–375px widths.",
+        "Uses connector strokes near 1.5 rendered CSS pixels with non-scaling-stroke, explicit markerUnits=strokeWidth, orient=auto, and one marker-end whose arrowhead remains near 7–9 rendered CSS pixels at both widths.",
+        "Draws connectors before nodes, routes the retry outside the main path, and keeps every label clear of node boundaries, connector paths, bends, and arrowheads.",
+        "Ends every connector on the nearest target-node edge after a clear straight terminal segment; browser-coordinate verification shows each path endpoint meets that edge within 1 CSS pixel and every arrowhead follows the terminal path direction.",
+        "Keeps narrow-width overflow inside a labelled keyboard-focusable diagram scroller with no page-level horizontal overflow, and includes a concise SVG title and description."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Edit runbook.html in place and replace the workflow placeholder with an inline flow diagram. Process: alert received; inspect the alert; decide whether it is actionable; if yes, mitigate and close; if no, gather more context and return to inspect. Keep the existing document content and visual style. Do not create another HTML file.",
+      "capabilities": ["browser"],
+      "expected_output": "The supplied runbook.html contains one accessible inline SVG flow diagram integrated into its existing workflow section, with scoped styles, collision-safe IDs, preserved host content, and no second document or iframe.",
+      "files": [],
+      "fixture": "fixtures/embedded-runbook",
+      "expectations": [
+        "Edits runbook.html in place, replaces only the workflow placeholder, and creates no second HTML artifact or iframe.",
+        "Preserves the existing title, summary, operational note, document styles, responsive behavior, generic SVG definitions, and global helper behavior outside the inserted flow.",
+        "Includes every supplied process step, the actionable decision, yes and no branches, and the return from gather more context to inspect without inventing behavior.",
+        "Uses one inline SVG with wrapper-scoped CSS and flow-prefixed definition, ARIA, and script IDs, so it does not collide with the fixture's existing IDs and classes.",
+        "Routes the retry outside the main path, labels both branches near their departure points, and keeps labels clear of nodes, connectors, bends, and arrowheads.",
+        "Applies the flow diagram reference's measured typography, connector, endpoint, accessibility, and responsive rules at desktop and 320–375px widths.",
+        "Keeps overflow inside a labelled diagram stage when needed and adds only wrapper-local JavaScript required for measurement or overflow focusability."
+      ]
+    }
+  ]
+}

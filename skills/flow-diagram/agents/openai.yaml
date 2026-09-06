@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flow Diagram"
+  short_description: "Create clear process flow diagrams"
+  default_prompt: "Use $flow-diagram to turn this process into a clear flow diagram."

@@ -43,7 +43,7 @@
     },
     {
       "id": 9,
-      "prompt": "Create a standalone HTML document that explains this incident response process with an inline flow diagram.",
+      "prompt": "Create a standalone HTML incident playbook with explanatory prose and an embedded flow diagram.",
       "should_trigger": true
     }
   ]

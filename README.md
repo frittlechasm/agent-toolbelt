@@ -14,6 +14,7 @@ Reusable agent skills and supporting utilities.
 | `commit-msg` | Writes conventional commit messages from Git changes. |
 | `eli5` | Creates simple visual explanations for beginners. |
 | `erd-diagram` | Creates source-grounded interactive database ERDs. |
+| `flow-diagram` | Creates clear process flows with decisions, branches, and retries. |
 | `html-document` | Creates standalone HTML documents. |
 | `sync-upstream` | Syncs all branches in a fork with upstream. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. |
