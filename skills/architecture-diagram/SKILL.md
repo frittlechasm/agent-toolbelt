@@ -1,6 +1,6 @@
 ---
 name: architecture-diagram
-description: Create or edit system architecture diagrams as standalone HTML or inline SVG. Use for topologies; do not use for flow, sequence or class diagrams or ERDs.
+description: Create or edit system architecture diagrams as HTML or inline SVG. Use for topologies, not process flows, sequence or class diagrams, or ERDs.
 metadata:
     scope: global
     agents: all

@@ -1,6 +1,6 @@
 ---
 name: agent-history-audit
-description: Audit Claude and Codex session histories for usage, repeated failures, or reusable workflows across a requested period or set of machines.
+description: Audit Claude and Codex session histories for usage, recurring failures, and reusable workflows across a requested period or machines.
 metadata:
   scope: global
   agents: all

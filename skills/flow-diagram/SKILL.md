@@ -1,6 +1,6 @@
 ---
 name: flow-diagram
-description: Create or edit process flow diagrams as standalone HTML or inline SVG. Use for steps, decisions, branches, retries, and loops; do not use for system topologies, sequence or class diagrams, or ERDs.
+description: Create or edit process flow diagrams as HTML or inline SVG. Use for steps, decisions, retries, and loops, not system topologies, sequence or class diagrams, or ERDs.
 metadata:
     scope: global
     agents: all

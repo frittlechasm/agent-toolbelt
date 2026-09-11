@@ -1,6 +1,6 @@
 ---
 name: ui-mocks
-description: Use to create standalone comparisons of static, fully styled UI mocks, screen designs, layout variants, or visual directions. Do not use for production implementation or application behavior.
+description: Create standalone comparisons of static UI design directions. Do not use for production implementation or application behavior.
 metadata:
     scope: global
     agents: all

@@ -1,6 +1,6 @@
 ---
 name: html-document
-description: Create standalone HTML documents. Use only when the user asks to generate, edit, or convert document content as HTML, or when another skill requires HTML output. Do not use for websites, landing pages, web apps, React apps, dashboards, or product UI.
+description: Create or edit standalone HTML documents when requested by the user or required by another skill. Not for websites or product UI.
 metadata:
     scope: global
     agents: all

@@ -1,6 +1,6 @@
 ---
 name: eli5
-description: Use when the user explicitly requests a visual ELI5 or picture-based beginner explanation. Do not use for plain-text explanations, code-change walkthroughs, or UI mockups.
+description: Create visual beginner explanations when explicitly requested. Not for plain-text explanations or code-change walkthroughs.
 metadata:
     scope: global
     agents: all

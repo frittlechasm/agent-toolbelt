@@ -1,6 +1,6 @@
 ---
 name: code-change-explainer-html
-description: Creates standalone HTML explainers that teach code changes using a language the reader knows. Use only when the user explicitly requests an HTML walkthrough or explainer for a commit, diff, or coding session.
+description: Create standalone HTML walkthroughs of a commit, diff, or coding session. Use only when the user explicitly requests an HTML code-change explainer.
 metadata:
     scope: global
     agents: all

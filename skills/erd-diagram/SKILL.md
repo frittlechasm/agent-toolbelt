@@ -1,6 +1,6 @@
 ---
 name: erd-diagram
-description: Create or edit accurate ERDs from database DDL, migrations, ORM mappings, or supplied schema descriptions. Use for database diagrams and HTML documents that explain database structure.
+description: Create or edit ERDs from database schemas, migrations, or ORM mappings. Use for database-structure diagrams, not process or system flows.
 metadata:
   scope: global
   agents: all
