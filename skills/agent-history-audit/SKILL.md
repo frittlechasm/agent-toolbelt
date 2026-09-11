@@ -1,6 +1,6 @@
 ---
 name: agent-history-audit
-description: Audit Claude and Codex session history. Use for recent regression reviews, full-history workflow mining, or comparisons across machines.
+description: Audit Claude and Codex session histories for usage, repeated failures, or reusable workflows across a requested period or set of machines.
 metadata:
   scope: global
   agents: all
@@ -17,10 +17,10 @@ Never modify history, global instructions, installed skills, or remote machines.
 
 - Review the last 30 days for regressions unless the user specifies another window.
 - Use full history to identify skill candidates.
-- By default, collect both Claude and Codex history from all machines.
+- Match the requested agent, period, and machines. If unspecified, use both agents on the current machine and the last 30 days.
 - If the user supplies history roots, machine limits, or exclusions, use exactly that scope.
 - Treat excluded sources as out of scope, not collection failures.
-- Before recommending changes, inventory global instructions and installed skills on each machine.
+- Inventory global instructions and installed skills only when the user asks for instruction or skill recommendations.
 
 Run the collector once into a `0700` temporary directory, then remove the directory:
 
@@ -28,15 +28,19 @@ Run the collector once into a `0700` temporary directory, then remove the direct
 audit_dir=$(mktemp -d)
 chmod 700 "$audit_dir"
 trap 'rm -rf "$audit_dir"' EXIT
-python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --recent-days 30 --ssh-host mowork > "$audit_dir/history.jsonl"
+python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --agent all --recent-days 30 --recent-only > "$audit_dir/history.jsonl"
 ```
 
 - The collector redacts credentials, marks injected messages, omits Claude subagents, fingerprints duplicates, and normalizes usage.
+- Use `--recent-only` for bounded audits. Omit it only when full history is required.
+- For calendar periods, use inclusive `--since` and exclusive `--until` ISO-8601 timestamps with an explicit timezone. Exact bounds take precedence over `--recent-only`.
 - Run the collector even for supplied local roots and use its normalized output as the only history evidence.
 - Never parse, link to, quote, or expose raw history.
 - If parsing fails, report the files and inspect a minimal redacted sample before changing the collector.
 
-Count Claude usage once per message ID and Codex once per token-count event.
+Count Claude usage once per message ID across session files.
+For Codex, prefer `token_usage_record`, deduplicate by thread and response ID, and retain unmatched `token_count` records from legacy or mixed-format sessions.
+Group delegated Codex usage by `root_thread_id` when comparing task-level cost.
 Keep vendor-specific cache and reasoning fields separate; cross-vendor token totals are not equivalent.
 
 ## Analyze
