@@ -75,6 +75,21 @@
       "id": 15,
       "prompt": "Turn this approval process into a flow diagram.",
       "should_trigger": false
+    },
+    {
+      "id": 16,
+      "prompt": "Animate all flows in this architecture map and label the components added by the PR.",
+      "should_trigger": true
+    },
+    {
+      "id": 17,
+      "prompt": "Review this PR for bugs and missing tests.",
+      "should_trigger": false
+    },
+    {
+      "id": 18,
+      "prompt": "Animate this approval flowchart through its yes branch and show the retry loop separately.",
+      "should_trigger": false
     }
   ]
 }

@@ -59,6 +59,33 @@
         "Renders correctly at desktop and 320–390px widths, keeps page-level overflow contained, makes only an overflowing diagram stage focusable, and places connector endpoints and marker tips on their intended side ports within 1 CSS pixel with the correct terminal orientation.",
         "Reports an evidence table in the QA or completion response, not in proposed.html, from actual browser measurements at both viewports. It includes observed minima for 64px sibling-boundary, 40px sibling-node, 32px nested-inset, 14px component-name, 12px secondary-label, and 1.5px connector contracts; zero text collisions by collision class; confirmation that every shared trunk is one unmarked path drawn once and every duplicate rendered segment is a failure; distinct reverse-edge routing; and per-edge marker-tip direction. It rerenders after any fix before reporting a pass."
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create an animated HTML architecture map explaining this PR change. Previously the Signup API called the Mail provider directly. Now the API publishes to a new Welcome queue; the queue delivers to a new Welcome worker; the worker calls the unchanged Mail provider. Show before and after. These are design relationships, not observed traffic. Make the map usable on phones and with reduced motion.",
+      "capabilities": ["browser", "network"],
+      "expected_output": "A stable map with selectable Before and After playback covering direct email sending and the full queue/worker/provider path, plus Play all and accessible static views.",
+      "files": [],
+      "expectations": [
+        "Shows the four supplied components. Before plays the direct API-to-provider call. After covers publishing, queue delivery, and the worker's provider call; it does not stop at API-to-queue or play the removed call as current behavior.",
+        "Offers scenario selection and Play all with a clear reset between Before and After. Labels changes with text while preserving component-category colors.",
+        "Starts static and uses dots and captions along the existing arrows without moving the topology. Does not claim observed traffic or measured timing.",
+        "Browser checks cover every scenario, completion, pause/resume, replay, repeated clicks, and changing scenarios mid-run. Old events cannot skip steps or start overlapping runs.",
+        "Keyboard controls, reduced motion on load and on change, and the no-JavaScript fallback keep every scenario usable. Desktop and 320–390px layouts remain readable without page overflow. Reports missing coverage and checks that could not be run."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Create an animated architecture map. An Events queue delivers independently to an Audit worker and a Mail worker. The Audit worker writes to Postgres; the Mail worker calls the Mail provider. The two workers may run concurrently, with no guaranteed order. The Mail worker also depends on configuration from a Config store; that dependency does not describe a message exchange.",
+      "capabilities": ["browser", "network"],
+      "expected_output": "A map with playback for both complete worker paths and an explained highlight for the configuration dependency, without inventing worker order.",
+      "files": [],
+      "expectations": [
+        "Covers queue-to-Audit-to-Postgres and queue-to-Mail-to-provider, including both downstream connections.",
+        "Lets readers explore both paths and play all. Any sequential tour of the two paths is labelled as explanatory order, not runtime order.",
+        "Covers the Config store dependency with a highlight and explanation, without a travelling dot implying messages that were not supplied.",
+        "Keeps all components and connections visible and provides explanations for every flow when motion is disabled."
+      ]
     }
   ]
 }

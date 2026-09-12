@@ -43,4 +43,8 @@ Use embedded mode when an existing HTML document is supplied or the flow belongs
 
 ## Render and verify
 
-Before rendering, read [references/diagrams.md](references/diagrams.md) completely. It is the source of SVG layout, typography, connector, responsive, accessibility, and verification requirements.
+Before rendering, read `references/diagrams.md` completely.
+It is the source of SVG layout, typography, connector, responsive, accessibility, and verification requirements.
+
+Keep diagrams static by default. For requested animation or a guided walkthrough, read `references/motion.md`.
+For guided walkthrough cover every supported scenario and flow in scope.

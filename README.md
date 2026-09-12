@@ -7,14 +7,14 @@ Reusable agent skills and supporting utilities.
 | Skill | What it does |
 | --- | --- |
 | `agent-history-audit` | Reviews Claude and Codex history for repeated problems and workflow improvements. |
-| `architecture-diagram` | Creates source-grounded system architecture maps. |
+| `architecture-diagram` | Creates source-grounded architecture maps with optional animation of all supported flows. |
 | `bitbucket-pr-fetch` | Fetches and reviews a Bitbucket Cloud PR without changing it. |
 | `code-change-explainer-html` | Creates an HTML explainer for code changes. |
 | `codebase-architecture-report` | Creates source-backed architecture reports. |
 | `commit-msg` | Writes conventional commit messages from Git changes. |
 | `eli5` | Creates illustrated HTML explanations for beginners. |
 | `erd-diagram` | Creates source-grounded interactive database ERDs. |
-| `flow-diagram` | Creates clear process flows with decisions, branches, and retries. |
+| `flow-diagram` | Creates process flows with optional animation of all supported scenarios. |
 | `html-document` | Creates standalone HTML documents. |
 | `sync-upstream` | Syncs all branches in a fork with upstream. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. |

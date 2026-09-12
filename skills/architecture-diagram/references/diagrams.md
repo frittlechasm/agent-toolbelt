@@ -352,9 +352,9 @@ Use JetBrains Mono for all SVG text. This is this reference's only intentional e
   - provide a visible focus style.
 - A wrapper-local `ResizeObserver` may manage this state.
 - Keep the page itself free of horizontal overflow.
-- Use JavaScript only for these rendering mechanics.
+- Use JavaScript for these rendering mechanics and, when requested, playback as described in [motion.md](motion.md).
 - Keep JavaScript wrapper-local.
-- Add no controls, animation, or unrequested interaction.
+- Keep ordinary maps static. Add playback controls and animation only in the requested motion mode.
 
 ## Verify in the browser
 

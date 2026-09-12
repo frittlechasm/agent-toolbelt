@@ -8,7 +8,7 @@
       "expected_output": "A restrained inline SVG flow diagram in a standalone HTML document with measured rendered typography, stable connectors and arrowheads, a clear retry route, and diagram-only narrow-width scrolling when the natural canvas exceeds the content width.",
       "files": [],
       "expectations": [
-        "Preserves every supplied step, the actionable decision, both branches, and the return from more information to triage without inventing process behavior.",
+        "Preserves every supplied step, the actionable decision, both branches, and the return from more information to triage without inventing process behavior; keeps this ordinary flow static without playback controls.",
         "Renders node titles at 13.5–14.5 CSS pixels, secondary labels at 10.5–11.5 CSS pixels, and connector labels at 9.5–10.5 CSS pixels after view box scaling at desktop and 320–375px widths.",
         "Uses connector strokes near 1.5 rendered CSS pixels with non-scaling-stroke, explicit markerUnits=strokeWidth, orient=auto, and one marker-end whose arrowhead remains near 7–9 rendered CSS pixels at both widths.",
         "Draws connectors before nodes, routes the retry outside the main path, and keeps every label clear of node boundaries, connector paths, bends, and arrowheads.",
@@ -31,6 +31,33 @@
         "Routes the retry outside the main path, labels both branches near their departure points, and keeps labels clear of nodes, connectors, bends, and arrowheads.",
         "Applies the flow diagram reference's measured typography, connector, endpoint, accessibility, and responsive rules at desktop and 320–375px widths.",
         "Keeps overflow inside a labelled diagram stage when needed and adds only wrapper-local JavaScript required for measurement or overflow focusability."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Create an animated HTML flow diagram explaining this PR change. Before: receive signup, validate it, reject invalid input, otherwise send the welcome email inline and respond. After: receive signup, validate it, reject invalid input, otherwise enqueue the welcome email and respond. A separate background process receives the queued job, sends the email, and completes the job. Make the result usable on phones and with reduced motion. These are supplied process descriptions, not a runtime trace.",
+      "capabilities": ["browser"],
+      "expected_output": "An HTML diagram covering valid and invalid signup, before and after the change, plus background delivery. Readers can choose a scenario or play all, with readable static views and accessible controls.",
+      "files": [],
+      "expectations": [
+        "Covers both validation branches and the full background delivery process. Shows the former inline-send path in Before only. Shared unchanged paths may be reused if their applicable revisions are clear.",
+        "Offers scenario selection and Play all. Each scenario has a clear start, matching captions, and an outcome. Play all resets between scenarios and runs each once; valid and invalid branches never appear as one execution.",
+        "Keeps background delivery separate from request completion. Does not invent an order between responding and sending the queued email, or claim measured timing.",
+        "Starts static and follows the existing arrows with a dot while nodes and labels stay still. Completion restores the full static diagram.",
+        "Browser checks cover every scenario, pause/resume, replay, repeated clicks, and changing scenarios mid-run. Old events cannot skip steps or start overlapping runs.",
+        "Keyboard controls, reduced motion on load and on change, and the no-JavaScript fallback keep every scenario usable. Desktop and 320–375px layouts remain readable without page overflow. Reports missing coverage and checks that could not be run."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Animate this job process in HTML. Try sending a message. On success, complete the job. On failure, retry once. If the retry succeeds, complete the job; if it fails, put the job in the dead-letter queue. Show how the process works.",
+      "capabilities": ["browser"],
+      "expected_output": "Playback covers immediate success, success after retry, and failure after retry as separate selectable scenarios.",
+      "files": [],
+      "expectations": [
+        "Covers all three outcomes, including the failure branch, retry, and dead-letter path; no outcome is left as static context only.",
+        "Each scenario follows its stated conditions and makes no more than two send attempts. Success and failure outcomes never play as one run.",
+        "Play all runs the three scenarios once with a clear reset between them and then stops. The static view and explanations cover the same outcomes."
       ]
     }
   ]
