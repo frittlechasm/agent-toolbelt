@@ -3,4 +3,4 @@ interface:
   short_description: "Find recurring friction in agent history"
   default_prompt: "Use $agent-history-audit to audit the requested Claude and Codex histories and report normalized usage, repeated failures, and evidence-backed improvements."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

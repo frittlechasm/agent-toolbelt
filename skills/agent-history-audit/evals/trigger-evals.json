@@ -19,12 +19,12 @@
     {
       "id": 4,
       "prompt": "Audit my recent Claude and Codex history and recommend improvements.",
-      "should_trigger": false
+      "should_trigger": true
     },
     {
       "id": 5,
       "prompt": "Compare the agent sessions on my Mac and WSL machine.",
-      "should_trigger": false
+      "should_trigger": true
     },
     {
       "id": 6,

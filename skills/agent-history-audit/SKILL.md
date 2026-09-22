@@ -1,11 +1,10 @@
 ---
 name: agent-history-audit
-description: Audit Claude and Codex session histories for usage, recurring failures, and reusable workflows across a requested period or machines.
+description: Audit Claude and Codex history for recurring issues, usage, instruction changes, and reusable workflows across machines.
 metadata:
   scope: global
   agents: all
   machines: all
-disable-model-invocation: true
 ---
 
 # Agent History Audit
@@ -15,7 +14,7 @@ Never modify history, global instructions, installed skills, or remote machines.
 
 ## Scope and collect
 
-- Review the last 30 days for regressions unless the user specifies another window.
+- Review the last 30 days as a rolling window unless the user specifies another period.
 - Use full history to identify skill candidates.
 - Match the requested agent, period, and machines. If unspecified, use both agents on the current machine and the last 30 days.
 - If the user supplies history roots, machine limits, or exclusions, use exactly that scope.
@@ -31,7 +30,8 @@ trap 'rm -rf "$audit_dir"' EXIT
 python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --agent all --recent-days 30 --recent-only > "$audit_dir/history.jsonl"
 ```
 
-- The collector redacts credentials, marks injected messages, omits Claude subagents, fingerprints duplicates, and normalizes usage.
+- Collect all requested machines in one run with `--ssh-host HOST`. Use `--no-local` for a remote-only audit.
+- The collector redacts credentials, identifies message origin and injected content, removes duplicates, omits Claude subagents, fingerprints sessions, and normalizes usage.
 - Use `--recent-only` for bounded audits. Omit it only when full history is required.
 - For calendar periods, use inclusive `--since` and exclusive `--until` ISO-8601 timestamps with an explicit timezone. Exact bounds take precedence over `--recent-only`.
 - Run the collector even for supplied local roots and use its normalized output as the only history evidence.
@@ -54,7 +54,8 @@ Keep vendor-specific cache and reasoning fields separate; cross-vendor token tot
 - Use normalized collector output as evidence and identify sessions by basename.
 - Prefer direct corrections and observed failures.
 - Ignore injected messages, command caveats, tool wrappers, Claude subagent records, and duplicate snapshots or forks.
-- Delegated sessions are supporting evidence, not direct feedback.
+- Treat delegated sessions as supporting evidence. Do not assume an unknown CLI origin is direct feedback, especially for reviewer prompts.
+- Report prompt frequency separately from verified failures. Repetition alone does not prove failure.
 
 - A skill candidate must be a repeated, stable workflow that would reduce prompting or prevent a demonstrated mistake.
 - Prefer updating an existing skill. Keep broad preferences in global instructions.

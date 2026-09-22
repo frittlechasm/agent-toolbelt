@@ -33,11 +33,20 @@ KNOWN_TOKEN = re.compile(r"\b(sk-[A-Za-z0-9_-]{12,}|gh[oprsu]_[A-Za-z0-9_]{12,}|
 URI_PASSWORD = re.compile(
     r"(?i)(\b[a-z][a-z0-9+.-]*://[^\s/:@]+:)([^\s/@]+)(@)"
 )
-INJECTED_MARKERS = (
+INJECTED_PREFIXES = (
     "<local-command-caveat>",
     "<task-notification>",
     "<system-reminder>",
     "<command-name>",
+    "<recommended_plugins>",
+    "<skills_instructions>",
+    "<skill ",
+    "<environment_context>",
+    "<permissions instructions>",
+    "<apps_instructions>",
+    "<plugins_instructions>",
+    "<collaboration_mode>",
+    "# agents.md instructions",
 )
 CODEX_USAGE_MIRROR_WINDOW_SECONDS = 60
 
@@ -63,6 +72,21 @@ def content_text(content: object) -> str:
         if item.get("type") in {"text", "input_text", "output_text"} and isinstance(item.get("text"), str):
             parts.append(item["text"])
     return "\n".join(parts)
+
+
+def injected_text(text: str) -> bool:
+    normalized = text.lstrip().lower()
+    return any(normalized.startswith(prefix) for prefix in INJECTED_PREFIXES)
+
+
+def codex_content_item_kinds(payload: dict) -> list[str]:
+    metadata = payload.get("internal_chat_message_metadata_passthrough")
+    if not isinstance(metadata, dict):
+        return []
+    kinds = metadata.get("content_item_kinds")
+    if not isinstance(kinds, list):
+        return []
+    return [kind for kind in kinds if isinstance(kind, str)]
 
 
 def parse_time(value: object) -> datetime | None:
@@ -95,6 +119,9 @@ def make_record(
     *,
     model: str | None = None,
     usage: dict | None = None,
+    event_id: str | None = None,
+    injected: bool | None = None,
+    content_item_kinds: list[str] | None = None,
 ) -> dict:
     cleaned = redact(text)
     return {
@@ -109,7 +136,9 @@ def make_record(
         "record_type": "message",
         "model": model,
         "usage": usage,
-        "injected": any(marker in cleaned.lower() for marker in INJECTED_MARKERS),
+        "event_id": event_id,
+        "content_item_kinds": content_item_kinds or [],
+        "injected": injected_text(cleaned) if injected is None else injected,
         "delegated": False,
     }
 
@@ -192,19 +221,36 @@ def collect_claude(root: Path, machine: str) -> list[dict]:
                 continue
             text = content_text(message.get("content"))
             if text:
-                records.append(
-                    make_record(
-                        "claude",
-                        machine,
-                        path,
-                        root,
-                        line_number,
-                        item.get("timestamp"),
-                        message["role"],
-                        text,
-                        model=message.get("model") if isinstance(message.get("model"), str) else None,
-                    )
+                event_id = item.get("uuid") if isinstance(item.get("uuid"), str) else None
+                if event_id is None and isinstance(message.get("id"), str):
+                    text_fingerprint = hashlib.sha256(text.encode()).hexdigest()
+                    event_id = f"{message['id']}:{text_fingerprint}"
+                record = make_record(
+                    "claude",
+                    machine,
+                    path,
+                    root,
+                    line_number,
+                    item.get("timestamp"),
+                    message["role"],
+                    text,
+                    model=message.get("model") if isinstance(message.get("model"), str) else None,
+                    event_id=event_id,
+                    injected=(
+                        True
+                        if item.get("sourceToolAssistantUUID") is not None
+                        or item.get("toolUseResult") is not None
+                        else None
+                    ),
                 )
+                record["session_id"] = item.get("sessionId")
+                record["entrypoint"] = item.get("entrypoint")
+                record["user_type"] = item.get("userType")
+                record["delegated"] = item.get("isSidechain") is True
+                record["delegation_status"] = (
+                    "delegated" if record["delegated"] else "unknown"
+                )
+                records.append(record)
             message_id = message.get("id")
             if message["role"] == "assistant" and message_id not in seen_usage_ids:
                 usage_record = make_usage_record(
@@ -223,6 +269,7 @@ def collect_claude(root: Path, machine: str) -> list[dict]:
                     records.append(usage_record)
                     if message_id is not None:
                         seen_usage_ids.add(message_id)
+    records = deduplicate_message_records(records)
     return deduplicate_usage_records(records)
 
 
@@ -340,6 +387,10 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
                 continue
             text = content_text(payload.get("content"))
             if text:
+                content_item_kinds = codex_content_item_kinds(payload)
+                injected = None
+                if payload["role"] == "user" and content_item_kinds:
+                    injected = "user.text" not in content_item_kinds
                 message_records.append(
                     make_record(
                         "codex",
@@ -351,6 +402,9 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
                         payload["role"],
                         text,
                         model=current_model if payload["role"] == "assistant" else None,
+                        event_id=payload.get("id") if isinstance(payload.get("id"), str) else None,
+                        injected=injected,
+                        content_item_kinds=content_item_kinds,
                     )
                 )
         usage_records = response_usage_records + legacy_usage_records
@@ -358,6 +412,13 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
         delegated = delegated or parent_thread_id is not None
         for record in pending:
             record["delegated"] = delegated
+            record["delegation_status"] = (
+                "delegated"
+                if delegated
+                else "unknown"
+                if "exec" in session_sources
+                else "direct"
+            )
             record["thread_id"] = thread_id
             record["parent_thread_id"] = parent_thread_id
             record["agent_path"] = agent_path
@@ -366,6 +427,7 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
             record["session_sources"] = session_sources
         records.extend(sorted(pending, key=lambda record: record["line"]))
     mark_codex_thread_roots(records)
+    records = deduplicate_message_records(records)
     records = deduplicate_usage_records(records)
     return reconcile_codex_usage(records)
 
@@ -433,6 +495,40 @@ def deduplicate_usage_records(records: list[dict]) -> list[dict]:
                     seen[key]["legacy_mirror_ids"] = list(dict.fromkeys(existing_ids + incoming_ids))
                 continue
             seen[key] = record
+        result.append(record)
+    return result
+
+
+def deduplicate_message_records(records: list[dict]) -> list[dict]:
+    """Remove copied message events from resumed or synchronized sessions."""
+    result = []
+    seen = {}
+    provenance_rank = {"delegated": 0, "unknown": 1, "direct": 2}
+    for record in records:
+        if record.get("record_type") != "message":
+            result.append(record)
+            continue
+        event_id = record.get("event_id")
+        if isinstance(event_id, str):
+            key = ("event", record.get("agent"), event_id)
+        else:
+            key = (
+                "legacy",
+                record.get("agent"),
+                record.get("machine"),
+                record.get("timestamp"),
+                record.get("role"),
+                record.get("text"),
+            )
+        existing_index = seen.get(key)
+        if existing_index is not None:
+            existing = result[existing_index]
+            if provenance_rank.get(record.get("delegation_status"), 1) > provenance_rank.get(
+                existing.get("delegation_status"), 1
+            ):
+                result[existing_index] = record
+            continue
+        seen[key] = len(result)
         result.append(record)
     return result
 
@@ -592,6 +688,7 @@ def main() -> int:
     parser.add_argument("--since", help="inclusive ISO-8601 timestamp")
     parser.add_argument("--until", help="exclusive ISO-8601 timestamp")
     parser.add_argument("--ssh-host", action="append", default=[])
+    parser.add_argument("--no-local", action="store_true", help="collect only SSH hosts")
     parser.add_argument("--machine")
     parser.add_argument("--agent", choices=("all", "claude", "codex"), default="all")
     parser.add_argument("--claude-root", default="~/.claude")
@@ -609,7 +706,7 @@ def main() -> int:
     if since is not None and until is not None and since >= until:
         parser.error("--since must be earlier than --until")
 
-    records = collect_local(args)
+    records = [] if args.no_local else collect_local(args)
     failures = []
     for host in args.ssh_host:
         try:
@@ -618,6 +715,7 @@ def main() -> int:
             failures.append(str(error))
 
     mark_codex_thread_roots(records)
+    records = deduplicate_message_records(records)
     records = deduplicate_usage_records(records)
     records = reconcile_codex_usage(records)
     mark_sessions(records, args.recent_days)

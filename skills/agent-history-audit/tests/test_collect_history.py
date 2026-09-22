@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).parents[1] / "scripts" / "collect_history.py"
@@ -73,12 +74,82 @@ class CollectHistoryTests(unittest.TestCase):
 
             messages = [record for record in records if record["record_type"] == "message"]
             usage = [record for record in records if record["record_type"] == "usage"]
-            self.assertEqual(2, len(messages))
+            self.assertEqual(1, len(messages))
             self.assertEqual("claude-test", messages[0]["model"])
             self.assertEqual(1, len(usage))
             self.assertEqual(10, usage[0]["usage"]["input_tokens"])
             self.assertEqual("assistant_message", usage[0]["usage_source"])
             self.assertEqual("msg-1", usage[0]["message_id"])
+
+    def test_claude_retains_uuid_and_marks_cli_provenance_unknown(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            event = {
+                "type": "user",
+                "uuid": "event-1",
+                "sessionId": "session-1",
+                "entrypoint": "cli",
+                "userType": "external",
+                "isSidechain": False,
+                "timestamp": "2026-09-01T00:00:00Z",
+                "message": {"role": "user", "content": "Review this change"},
+            }
+            for name in ("session-a.jsonl", "session-b.jsonl"):
+                write_jsonl(root / "projects" / name, [event])
+
+            records = collect_history.collect_claude(root, "test-machine")
+
+            self.assertEqual(1, len(records))
+            self.assertEqual("event-1", records[0]["event_id"])
+            self.assertEqual("session-1", records[0]["session_id"])
+            self.assertEqual("unknown", records[0]["delegation_status"])
+
+    def test_claude_legacy_message_id_preserves_distinct_text_blocks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            messages = []
+            for timestamp, text in (
+                ("2026-09-01T00:00:00Z", "First block"),
+                ("2026-09-01T00:00:01Z", "Second block"),
+            ):
+                messages.append(
+                    {
+                        "type": "assistant",
+                        "timestamp": timestamp,
+                        "message": {
+                            "role": "assistant",
+                            "id": "shared-message-id",
+                            "content": [{"type": "text", "text": text}],
+                        },
+                    }
+                )
+            write_jsonl(root / "projects" / "session.jsonl", messages)
+
+            records = collect_history.collect_claude(root, "test-machine")
+
+            message_records = [record for record in records if record["record_type"] == "message"]
+            self.assertEqual(2, len(message_records))
+            self.assertEqual({"First block", "Second block"}, {record["text"] for record in message_records})
+
+    def test_claude_marks_tool_generated_user_messages_as_injected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_jsonl(
+                root / "projects" / "session.jsonl",
+                [
+                    {
+                        "type": "user",
+                        "uuid": "event-1",
+                        "sourceToolAssistantUUID": "assistant-event",
+                        "timestamp": "2026-09-01T00:00:00Z",
+                        "message": {"role": "user", "content": "Tool-generated notice"},
+                    }
+                ],
+            )
+
+            records = collect_history.collect_claude(root, "test-machine")
+
+            self.assertTrue(records[0]["injected"])
 
     def test_claude_deduplicates_usage_across_resumed_session_files(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -146,6 +217,76 @@ class CollectHistoryTests(unittest.TestCase):
             self.assertEqual("gpt-test", records[1]["model"])
             self.assertEqual(2, records[1]["usage"]["reasoning_output_tokens"])
             self.assertEqual("token_count", records[1]["usage_source"])
+
+    def test_codex_uses_content_metadata_and_deduplicates_message_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            injected = {
+                "type": "response_item",
+                "timestamp": "2026-09-01T00:00:00Z",
+                "payload": {
+                    "type": "message",
+                    "id": "message-injected",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": "Injected context"}],
+                    "internal_chat_message_metadata_passthrough": {
+                        "content_item_kinds": ["agents_md.instructions"]
+                    },
+                },
+            }
+            direct = {
+                "type": "response_item",
+                "timestamp": "2026-09-01T00:00:01Z",
+                "payload": {
+                    "type": "message",
+                    "id": "message-direct",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": "Audit my history"}],
+                    "internal_chat_message_metadata_passthrough": {
+                        "content_item_kinds": ["user.text"]
+                    },
+                },
+            }
+            for name in ("session-a.jsonl", "session-b.jsonl"):
+                write_jsonl(root / "sessions" / name, [injected, direct])
+
+            records = collect_history.collect_codex(root, "test-machine")
+
+            self.assertEqual(2, len(records))
+            by_id = {record["event_id"]: record for record in records}
+            self.assertTrue(by_id["message-injected"]["injected"])
+            self.assertEqual(
+                ["agents_md.instructions"],
+                by_id["message-injected"]["content_item_kinds"],
+            )
+            self.assertFalse(by_id["message-direct"]["injected"])
+
+    def test_codex_recognizes_modern_injected_wrapper_without_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_jsonl(
+                root / "sessions" / "session.jsonl",
+                [
+                    {
+                        "type": "response_item",
+                        "timestamp": "2026-09-01T00:00:00Z",
+                        "payload": {
+                            "type": "message",
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "input_text",
+                                    "text": "<recommended_plugins>injected</recommended_plugins>",
+                                }
+                            ],
+                        },
+                    }
+                ],
+            )
+
+            records = collect_history.collect_codex(root, "test-machine")
+
+            self.assertTrue(records[0]["injected"])
 
     def test_codex_prefers_response_usage_and_deduplicates_response_id(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -655,6 +796,28 @@ class CollectHistoryTests(unittest.TestCase):
 
         self.assertEqual(["root", "root", "root"], [record["root_thread_id"] for record in records])
 
+    def test_message_deduplication_prefers_direct_occurrence_in_any_order(self):
+        direct = {
+            "agent": "codex",
+            "record_type": "message",
+            "event_id": "event-1",
+            "delegation_status": "direct",
+            "session": "parent.jsonl",
+        }
+        delegated = {
+            "agent": "codex",
+            "record_type": "message",
+            "event_id": "event-1",
+            "delegation_status": "delegated",
+            "session": "child.jsonl",
+        }
+
+        for records in ([delegated, direct], [direct, delegated]):
+            with self.subTest(order=[record["session"] for record in records]):
+                deduplicated = collect_history.deduplicate_message_records(records)
+                self.assertEqual(1, len(deduplicated))
+                self.assertEqual("parent.jsonl", deduplicated[0]["session"])
+
     def test_codex_does_not_classify_top_level_exec_as_delegated(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -742,6 +905,22 @@ class CollectHistoryTests(unittest.TestCase):
         )
 
         self.assertEqual([records[1]], filtered)
+
+    def test_main_no_local_skips_local_collection(self):
+        arguments = ["collect_history.py", "--no-local", "--no-local-summary"]
+        output = io.StringIO()
+
+        original_arguments = sys.argv
+        try:
+            sys.argv = arguments
+            with patch.object(collect_history, "collect_local") as collect_local:
+                with redirect_stdout(output):
+                    self.assertEqual(0, collect_history.main())
+                collect_local.assert_not_called()
+        finally:
+            sys.argv = original_arguments
+
+        self.assertEqual("", output.getvalue())
 
 
 if __name__ == "__main__":
