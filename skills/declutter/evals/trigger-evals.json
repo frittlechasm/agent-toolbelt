@@ -1,0 +1,50 @@
+{
+  "skill_name": "declutter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Hunt for slop in this PR: unnecessary wrappers, duplicate code, and useless tests.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Do a simplification pass across the repository and fix worthwhile findings.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Review this module for redundant tests and abstractions we no longer need.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Clean up duplicated React components and check for avoidable work on hot paths.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Review this service for performance improvements, especially repeated database queries and wasted work.",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "Fix the null pointer exception in the login handler.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Review this service for security vulnerabilities.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Refactor this function solely to bring its complexity score below 15.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Why does this dashboard design look generic?",
+      "should_trigger": false
+    }
+  ]
+}
