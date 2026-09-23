@@ -12,6 +12,7 @@
         "Stacks the variants in alphabetical order and labels them visibly as A, B, and C without direction names or rationale.",
         "Preserves the same title, search field, Invite member button, columns, and supplied rows in every variant.",
         "Makes the variants meaningfully different design or layout directions rather than cosmetic color, type, or spacing changes.",
+        "Shows a visible, theme-aligned keyboard focus state on controls without a clashing default outline.",
         "Keeps the comparison usable at narrow and desktop widths and verifies it for clipping, horizontal page overflow, and ambiguous labels.",
         "Leaves production code and assets untouched, then waits for the user's selection."
       ]

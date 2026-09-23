@@ -44,7 +44,7 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 - When imagery, illustration, iconography, or texture is central to a direction, use supplied, generated, inline SVG, or embedded assets.
 - Do not add images as filler.
 - Keep controls presentational. Do not add application logic, persistence, routing, or data fetching.
-- Use semantic HTML, accessible labels, and visible focus styles.
+- Use semantic HTML and accessible labels. Give keyboard focus a visible, theme-aligned `:focus-visible` style instead of a clashing browser-default outline; never hide focus.
 - Keep the page usable at about 320px wide without page-level horizontal scrolling for mobile devices.
 
 ## Motion
