@@ -5,11 +5,11 @@ Downloads everything a reviewer needs and writes a validated bundle under
 ~/.bitbucket-reviews. Later calls fetch only PR metadata and reuse an unchanged
 bundle across sessions. Use --refresh to force a complete download.
 
-Auth uses HTTP Basic with a Bitbucket app password, read from a .env file
+Auth uses HTTP Basic with a scoped Bitbucket API token, read from a .env file
 (copy .env.example to .env). The file must define:
-    BITBUCKET_USERNAME        your Atlassian/Bitbucket username (not email)
-    BITBUCKET_APP_PASSWORD    an app password with "Pull requests: Read" and
-                              "Repositories: Read" scopes
+    BITBUCKET_EMAIL        your Atlassian account email
+    BITBUCKET_API_TOKEN    an API token with read:pullrequest:bitbucket and
+                           read:repository:bitbucket scopes
 
 Only the Python standard library is used, so no `pip install` is required.
 
@@ -76,8 +76,8 @@ def read_env_file(path):
 
 def has_bitbucket_credentials(values):
     return bool(
-        values.get("BITBUCKET_USERNAME")
-        and values.get("BITBUCKET_APP_PASSWORD")
+        values.get("BITBUCKET_EMAIL")
+        and values.get("BITBUCKET_API_TOKEN")
     )
 
 
@@ -97,8 +97,9 @@ def load_env_file(explicit_path=None):
         values = read_env_file(explicit_path)
         if not has_bitbucket_credentials(values):
             die(
-                "the --env-file must define BITBUCKET_USERNAME and "
-                "BITBUCKET_APP_PASSWORD"
+                "the --env-file must define BITBUCKET_EMAIL and "
+                "BITBUCKET_API_TOKEN. Use your Atlassian account email "
+                "and a scoped Bitbucket API token."
             )
         CREDS.update(values)
         return
@@ -122,8 +123,9 @@ def load_env_file(explicit_path=None):
     locations = ", ".join(dict.fromkeys(os.path.dirname(p) for p in candidates))
     die(
         "no usable .env file found. Copy .env.example to .env and define "
-        "BITBUCKET_USERNAME and BITBUCKET_APP_PASSWORD, or pass "
+        "BITBUCKET_EMAIL and BITBUCKET_API_TOKEN, or pass "
         "--env-file <path>.\n"
+        "Use your Atlassian account email and a scoped Bitbucket API token.\n"
         f"Looked in: {locations}"
     )
 
@@ -161,18 +163,15 @@ def parse_pr_url(url):
 
 
 def auth_header():
-    username = CREDS.get("BITBUCKET_USERNAME")
-    app_password = CREDS.get("BITBUCKET_APP_PASSWORD")
-    if not username or not app_password:
+    email = CREDS.get("BITBUCKET_EMAIL")
+    api_token = CREDS.get("BITBUCKET_API_TOKEN")
+    if not email or not api_token:
         die(
-            "missing credentials. Your .env file must define BITBUCKET_USERNAME "
-            "and BITBUCKET_APP_PASSWORD (see .env.example).\n"
-            "Create an app password at "
-            "https://bitbucket.org/account/settings/app-passwords/ with "
-            '"Pull requests: Read" and "Repositories: Read" scopes.'
+            "missing credentials. Your .env file must define BITBUCKET_EMAIL "
+            "and BITBUCKET_API_TOKEN (see .env.example)."
         )
-    token = base64.b64encode(f"{username}:{app_password}".encode()).decode()
-    return f"Basic {token}"
+    encoded_credentials = base64.b64encode(f"{email}:{api_token}".encode()).decode()
+    return f"Basic {encoded_credentials}"
 
 
 def request(url, accept="application/json"):
@@ -186,10 +185,10 @@ def request(url, accept="application/json"):
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
         if exc.code == 401:
-            die("401 Unauthorized — check BITBUCKET_USERNAME / "
-                "BITBUCKET_APP_PASSWORD.")
+            die("401 Unauthorized — check BITBUCKET_EMAIL / "
+                "BITBUCKET_API_TOKEN and the API token's expiry.")
         if exc.code == 403:
-            die("403 Forbidden — the app password lacks the required scopes, "
+            die("403 Forbidden — the API token lacks the required scopes, "
                 "or you cannot access this repository.")
         if exc.code == 404:
             die("404 Not Found — the workspace, repository, or PR id is wrong, "
@@ -543,8 +542,8 @@ def main():
     )
     parser.add_argument(
         "--env-file",
-        help="Path to the .env file with BITBUCKET_USERNAME / "
-             "BITBUCKET_APP_PASSWORD. Defaults to .env in the current "
+        help="Path to the .env file with BITBUCKET_EMAIL / "
+             "BITBUCKET_API_TOKEN. Defaults to .env in the current "
              "directory, then the skill directory.",
     )
     parser.add_argument(
