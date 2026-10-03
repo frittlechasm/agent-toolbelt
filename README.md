@@ -19,7 +19,7 @@ Reusable agent skills and supporting utilities.
 | `html-document` | Creates standalone HTML documents. |
 | `sync-upstream` | Syncs all branches in a fork with upstream. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. |
-| `ui-mocks` | Creates side-by-side HTML UI mockups. |
+| `ui-mocks` | Creates HTML UI mockups, stacked vertically by default. |
 | `visual-design-review` | Reviews rendered UI for visual quality and polish. |
 
 ## Install
@@ -39,6 +39,8 @@ npx skills add frittlechasm/agent-toolbelt --skill '*' -y
 
 For a checkout you control, use `sync-skills` below.
 
+Edit public skills in `skills/<name>/` and private skills in the separate `skills/private/` Git repository. Check the owning Git root before staging. Global agent instructions belong to dotfiles.
+
 ## Scripts
 
 | Command | What it does |
@@ -46,12 +48,14 @@ For a checkout you control, use `sync-skills` below.
 | `./scripts/check` | Validates skills and evals, then runs Python unit tests. |
 | `./scripts/eval triggers [skill ...]` | Prepares trigger evals for the calling agent. |
 | `./scripts/eval workflows [skill ...]` | Prepares workflow evals and isolated workspaces. |
-| `./scripts/sync-skills check [--host <host>]` | Shows which skills would be installed. |
+| `./scripts/sync-skills check [--host <host>]` | Reports missing skills, changed remote content, and incorrect installation links. |
 | `./scripts/sync-skills apply [--host <host>]` | Installs skills for the selected machine. |
 
-`scripts/eval` prints a JSON manifest and does not invoke a model.
-The calling agent runs each subject, checks the result, and removes workflow workspaces.
+`./scripts/check` validates public and private skills without requiring PyYAML.
+
+`scripts/eval` prints a JSON manifest and does not invoke a model. The calling agent runs each subject, checks the result, and removes workflow workspaces.
 It must record the model, reasoning effort, and available capabilities declared by the manifest.
 
-`sync-skills apply` follows each skill's `machines` metadata and preserves machine-local `.env` and `.env.local` files.
-Remote operations require `rsync` on both machines.
+`sync-skills` selects skills by `agents` and `machines` metadata.
+Local installs link to this checkout; SSH installs copy skills with `rsync` (required on both machines) and preserve machine-local `.env` and `.env.local` files.
+Source edits do not refresh remote copies; run `check` for the target host before and after `apply`.
