@@ -15,7 +15,8 @@ Create a source-grounded interactive ERD, either as a standalone HTML file or as
 
 1. Establish scope and source authority.
    - Prefer DDL and migrations over ORM mappings, and ORM mappings over prose, unless the user names another source of truth.
-   - Render only supported tables, columns, constraints, and relationships. Report conflicts instead of merging them. Mark unenforced relationships `logical` or `derived`.
+   - Render only supported tables, columns, constraints, and relationships. Report conflicts instead of merging them.
+     Mark unenforced relationships `logical` or `derived`.
    - Record the important inspected files in the model's source fields.
    - Preserve composite-key order, nullability, uniqueness, cardinality, and referential actions. Omit unknown relationships rather than guessing.
 2. Read [references/schema-model.md](references/schema-model.md) and create the normalized JSON model.

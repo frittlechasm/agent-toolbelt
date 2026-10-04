@@ -1,6 +1,6 @@
 ---
 name: visual-design-review
-description: Review rendered UI screenshots for visual quality, variant comparison, or final critique. Do not use for implementation, accessibility-only audits, or code review.
+description: Review UI screenshots for visual quality, variant comparison, or final critique. Not for implementation, accessibility-only audits, or code review.
 metadata:
     scope: global
     agents: all

@@ -20,9 +20,11 @@ Use inline SVG when a diagram communicates the supplied content more clearly tha
 - At the chosen natural width, render node titles at 14 CSS pixels, secondary labels at 11 CSS pixels, and connector labels at 10 CSS pixels.
 - Compute `scale = rendered SVG width / viewBox width`, then set each SVG source font size to `target rendered size / scale`.
 - For flow diagrams, use connector strokes near 1.5 rendered CSS pixels with `vector-effect="non-scaling-stroke"`.
-- For flow diagrams, define terminal markers with `markerUnits="strokeWidth"`, `orient="auto"`, and one `marker-end`; size the marker to render near 7–9 CSS pixels.
+- For flow diagrams, define terminal markers with `markerUnits="strokeWidth"`, `orient="auto"`, and one `marker-end`;
+  size the marker to render near 7–9 CSS pixels.
 - Put the marker reference point at the arrow tip.
-- End each connector on the nearest target-node edge after a clear straight terminal segment, and keep the arrowhead clear of labels, bends, and unrelated nodes.
+- End each connector on the nearest target-node edge after a clear straight terminal segment, and keep the arrowhead clear of labels, bends,
+  and unrelated nodes.
 
 ## Fit and access
 

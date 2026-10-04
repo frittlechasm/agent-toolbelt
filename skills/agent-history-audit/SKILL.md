@@ -31,9 +31,11 @@ python3 /absolute/path/to/agent-history-audit/scripts/collect_history.py --agent
 ```
 
 - Collect all requested machines in one run with `--ssh-host HOST`. Use `--no-local` for a remote-only audit.
-- The collector redacts credentials, identifies message origin and injected content, removes duplicates, omits Claude subagents, fingerprints sessions, and normalizes usage.
+- The collector redacts credentials, identifies message origin and injected content, removes duplicates, omits Claude subagents, fingerprints sessions,
+  and normalizes usage.
 - Use `--recent-only` for bounded audits. Omit it only when full history is required.
-- For calendar periods, use inclusive `--since` and exclusive `--until` ISO-8601 timestamps with an explicit timezone. Exact bounds take precedence over `--recent-only`.
+- For calendar periods, use inclusive `--since` and exclusive `--until` ISO-8601 timestamps with an explicit timezone.
+  Exact bounds take precedence over `--recent-only`.
 - Run the collector even for supplied local roots and use its normalized output as the only history evidence.
 - Never parse, link to, quote, or expose raw history.
 - If parsing fails, report the files and inspect a minimal redacted sample before changing the collector.

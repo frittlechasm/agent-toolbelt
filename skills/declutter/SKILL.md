@@ -17,7 +17,8 @@ Find worthwhile simplifications and performance improvements in the requested co
 - Check callers, existing helpers, and tests before judging code unnecessary.
 - Prioritize dead or duplicate code, needless wrappers and abstractions, repeated UI components, and redundant tests.
 - Check for avoidable repeated work, inefficient queries or I/O, and unnecessary rendering where relevant.
-- Keep a test if it covers a distinct behavior, even when its setup resembles another test. Share a UI component only when its behavior and design are genuinely common.
+- Keep a test if it covers a distinct behavior, even when its setup resembles another test.
+  Share a UI component only when its behavior and design are genuinely common.
 - Treat performance ideas as hypotheses until a benchmark, profile, or clear complexity analysis supports them. Do not add caching or memoization by default.
 - Report the few worthwhile findings with file references, expected benefit, and behavior risk. Say when no change is justified.
 

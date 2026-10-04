@@ -44,7 +44,8 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 - When imagery, illustration, iconography, or texture is central to a direction, use supplied, generated, inline SVG, or embedded assets.
 - Do not add images as filler.
 - Keep controls presentational. Do not add application logic, persistence, routing, or data fetching.
-- Use semantic HTML and accessible labels. Give keyboard focus a visible, theme-aligned `:focus-visible` style instead of a clashing browser-default outline; never hide focus.
+- Use semantic HTML and accessible labels. Give keyboard focus a visible, theme-aligned `:focus-visible` style instead of a clashing browser-default outline;
+  never hide focus.
 - Keep the page usable at about 320px wide without page-level horizontal scrolling for mobile devices.
 
 ## Motion
@@ -65,6 +66,8 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 - Review composition and hierarchy first, then type, spacing, color, controls, and polish. Compare with supplied references without copying them.
 - Make one or two improvement passes. Fix the largest gaps first.
 - Remove anything that adds no information, hierarchy, identity, or required behavior.
-- Remove generic hero layouts, arbitrary gradients or glows, excess containers, decorative labels, random accent colors, and repeated rounded cards unless the direction calls for them.
+- Remove generic hero layouts, arbitrary gradients or glows, excess containers, decorative labels, random accent colors,
+  and repeated rounded cards unless the direction calls for them.
 - Check labels, dimensions, clipping, overflow, semantics, focus styles, and reduced motion before delivery.
-- Present the variants and wait for the user's selection before editing production code or assets. If the user explicitly asks you to choose and implement, follow that request.
+- Present the variants and wait for the user's selection before editing production code or assets.
+  If the user explicitly asks you to choose and implement, follow that request.

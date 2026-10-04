@@ -39,7 +39,8 @@ npx skills add frittlechasm/agent-toolbelt --skill '*' -y
 
 For a checkout you control, use `sync-skills` below.
 
-Edit public skills in `skills/<name>/` and private skills in the separate `skills/private/` Git repository. Check the owning Git root before staging. Global agent instructions belong to dotfiles.
+Edit public skills in `skills/<name>/` and private skills in the separate `skills/private/` Git repository.
+Check the owning Git root before staging. Global agent instructions belong to dotfiles.
 
 ## Scripts
 
@@ -60,7 +61,8 @@ It must record the model, reasoning effort, and available capabilities declared 
 
 `sync-skills` selects skills by `agents` and `machines` metadata.
 A folder without its own `SKILL.md` groups related skills one level deep; grouped skills keep their own names when installed or exported.
-Local installs link to this checkout; SSH installs copy skills with `rsync` (required on both machines) and preserve machine-local `.env` and `.env.local` files.
+Local installs link to this checkout.
+SSH installs copy skills with `rsync` (required on both machines) and preserve machine-local `.env` and `.env.local` files.
 Source edits do not refresh remote copies; run `check` for the target host before and after `apply`.
 
 For ChatGPT, export one ZIP per skill,

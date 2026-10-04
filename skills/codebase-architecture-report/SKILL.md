@@ -92,13 +92,15 @@ When the report concludes that a requested component or flow is absent, summariz
 
 ## Decisions, security, and gaps
 
-Prefer documented architecture decisions. When a decision is inferred from code, say so and explain the evidence, tradeoff, and consequence without inventing intent.
+Prefer documented architecture decisions.
+When a decision is inferred from code, say so and explain the evidence, tradeoff, and consequence without inventing intent.
 
 When explaining why a design exists, distinguish current mechanism from historical intent.
 Inspect local git history and, when available, linked PRs, issues, ADRs, and long-form documentation.
 Treat code shape alone as evidence of what exists, not proof of why it was chosen.
 
-Include security controls when the request, audience, or scope calls for them. Read [references/security-controls.md](references/security-controls.md) for that review.
+Include security controls when the request, audience, or scope calls for them.
+Read [references/security-controls.md](references/security-controls.md) for that review.
 Describe concrete controls and residual gaps; never claim that the system is secure.
 Do not turn an architecture report into a standalone vulnerability review unless requested.
 

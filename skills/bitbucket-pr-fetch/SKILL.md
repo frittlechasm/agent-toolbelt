@@ -62,6 +62,7 @@ metadata:
   - Keep the current assessment and open findings. Preserve stable finding IDs across re-reviews.
   - Move verified fixed findings to a concise resolved section.
   - Append one compact row to a review history table for each completed review.
-- On a re-review, compare the checkpoint with the current fetched artifacts, carry forward unresolved findings, and update the file only when the review finishes successfully.
+- On a re-review, compare the checkpoint with the current fetched artifacts, carry forward unresolved findings,
+  and update the file only when the review finishes successfully.
 - Prepare the complete replacement before atomically replacing the file.
 - An interrupted review must leave the prior checkpoint intact.

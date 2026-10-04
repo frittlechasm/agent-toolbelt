@@ -29,7 +29,8 @@ metadata:
 
 - Staged changes win. Do not mix in unstaged changes unless the user asks for a message covering the whole working tree.
 - Prefer the narrowest accurate type. A dependency bump that fixes a bug can be `fix`; routine metadata churn is usually `chore`.
-- If the diff combines unrelated changes, suggest one message only when they are intentionally being committed together; otherwise mention that separate commits would be clearer.
+- If the diff combines unrelated changes, suggest one message only when they are intentionally being committed together;
+  otherwise mention that separate commits would be clearer.
 
 ## Format
 

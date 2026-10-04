@@ -6,7 +6,8 @@ Use interactions only when the user requests them. Prefer native HTML and add on
 
 - Use tabs only for long, mutually exclusive views that readers do not need to compare, search, or print together.
 - Keep short alternatives, sequential steps, comparisons, and essential content visible.
-- Implement semantic relationships, pointer and keyboard navigation, managed focus and selected state, and a fallback that keeps the content usable without JavaScript.
+- Implement semantic relationships, pointer and keyboard navigation, managed focus and selected state,
+  and a fallback that keeps the content usable without JavaScript.
 
 ## Copy controls
 

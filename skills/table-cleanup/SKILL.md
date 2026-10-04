@@ -40,13 +40,15 @@ The script prints to stdout by default. Use `--in-place` only when the user expl
 
 Review the result for cleanup that requires judgment:
 
-- The script preserves every emoji. Remove marker emoji only when they are pure decoration, such as a 🔹 prefixing every row; keep emoji that carry meaning, such as ✅/❌ in a Status column.
+- The script preserves every emoji. Remove marker emoji only when they are pure decoration, such as a 🔹 prefixing every row;
+  keep emoji that carry meaning, such as ✅/❌ in a Status column.
 - Keep literal cell pipes escaped as `\|` so they are not confused with column separators.
 - Remove Markdown forms the script does not handle, such as `_underscore_` emphasis or `~~strikethrough~~`.
 
 ## Gotchas
 
-- Preserve the user's non-sensitive data exactly. Cleanup changes presentation, not values, labels, order, or meaning. Credential redaction under **Output** is the only exception.
+- Preserve the user's non-sensitive data exactly. Cleanup changes presentation, not values, labels, order, or meaning.
+  Credential redaction under **Output** is the only exception.
 - Do not mistake ordinary identifiers such as version numbers, commit hashes, or UUIDs for credentials.
 - Do not remove symbols that carry meaning, such as checkmarks, warning markers, currency, units, or version prefixes.
 - If the input mixes table and prose, clean the table and keep the prose readable instead of forcing everything into a table.

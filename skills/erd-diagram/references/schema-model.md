@@ -61,7 +61,8 @@ Prepare one UTF-8 JSON object for `scripts/render_erd.py`. Array order controls 
 - `id`, `name`, `group`, and a non-empty `columns` array are required.
 - `existing` defaults to `false`. Use it for referenced tables outside the requested or proposed scope.
 - `note`, `source`, and `constraints` are optional.
-- A column requires `name` and `type`. `nullable` defaults to `true`; `primaryKey` and `unique` default to `false`. Primary-key columns are normalized to non-null.
+- A column requires `name` and `type`. `nullable` defaults to `true`; `primaryKey` and `unique` default to `false`.
+  Primary-key columns are normalized to non-null.
 - A constraint requires `kind` and `text`. Kinds are `primary-key`, `unique`, `check`, `index`, `exclusion`, and `invariant`.
 - A `primary-key` or `unique` constraint requires an ordered `columns` array. The renderer uses it to verify foreign-key targets.
 - Column-level `primaryKey` and `unique` flags remain useful for single-column keys and visual markers.
