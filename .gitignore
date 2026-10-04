@@ -11,3 +11,5 @@ skills/*-workspace/
 
 # Private skills maintained in a separate nested Git repository
 /skills/private/
+
+.chatgpt/

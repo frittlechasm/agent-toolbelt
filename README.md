@@ -50,6 +50,8 @@ Edit public skills in `skills/<name>/` and private skills in the separate `skill
 | `./scripts/eval workflows [skill ...]` | Prepares workflow evals and isolated workspaces. |
 | `./scripts/sync-skills check [--host <host>]` | Reports missing skills, changed remote content, and incorrect installation links. |
 | `./scripts/sync-skills apply [--host <host>]` | Installs skills for the selected machine. |
+| `./scripts/sync-skills check --target chatgpt` | Checks whether local ChatGPT upload ZIPs match the selected skills. |
+| `./scripts/sync-skills apply --target chatgpt` | Creates or updates one upload ZIP per selected ChatGPT skill. |
 
 `./scripts/check` validates public and private skills without requiring PyYAML.
 
@@ -59,3 +61,18 @@ It must record the model, reasoning effort, and available capabilities declared 
 `sync-skills` selects skills by `agents` and `machines` metadata.
 Local installs link to this checkout; SSH installs copy skills with `rsync` (required on both machines) and preserve machine-local `.env` and `.env.local` files.
 Source edits do not refresh remote copies; run `check` for the target host before and after `apply`.
+
+For ChatGPT, export one ZIP per skill,
+then upload each one under **Skills** → **New Skill** → **Upload from your computer** ([guide][chatgpt-upload]):
+
+```bash
+./scripts/sync-skills apply --target chatgpt   # writes Git-ignored .chatgpt/skills/; --output-dir overrides
+```
+
+- Export uses the same `machines` filter as local installs and includes skills whose `agents` is `all` or includes `chatgpt`.
+- Skills whose `agents` is only `chatgpt` are export-only; local and SSH installs skip them.
+- ZIPs leave out `.env` files (except `.env.example`), caches, and Git internals. Skills containing symlinks are rejected.
+- The script only builds ZIPs. It never uploads them or checks what ChatGPT has installed.
+- Skills that need local scripts or credentials will not work in ChatGPT without them.
+
+[chatgpt-upload]: https://developers.openai.com/cookbook/examples/chatgpt/chatgpt_prompt_guide/chatgpt_prompt_guide

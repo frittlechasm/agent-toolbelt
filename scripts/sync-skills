@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Check or apply metadata-aware skill installs locally or over SSH."""
+"""Check or apply skill installs locally, over SSH, or as ChatGPT upload ZIPs."""
 
 from __future__ import annotations
 
 import argparse
+import io
 import os
 import re
 import shlex
 import shutil
 import socket
 import subprocess
+import tempfile
+import zipfile
 from pathlib import Path
 
 
@@ -50,46 +53,50 @@ def metadata(path: Path) -> dict[str, str]:
     return values
 
 
-def skills_for(machine: str) -> list[tuple[Path, str]]:
+def skills_for(machine: str) -> list[tuple[Path, set[str]]]:
     """Select public and private skills assigned to the target machine."""
     roots = [REPO_ROOT / "skills"]
     private = REPO_ROOT / "skills/private"
     if private.is_dir():
         roots.append(private)
 
-    selected: dict[str, tuple[Path, str]] = {}
-    for root in roots:
-        for skill in sorted(root.iterdir()):
-            if not skill.is_dir() or not (skill / "SKILL.md").is_file() or skill.name == "private":
-                continue
-            if not SKILL_NAME.fullmatch(skill.name):
-                raise SystemExit(f"invalid skill name: {skill.name}")
-            info = metadata(skill)
-            missing = {key for key in ("agents", "machines") if not info.get(key)}
-            if missing:
-                raise SystemExit(f"{skill.name}: missing metadata: {', '.join(sorted(missing))}")
-            machines = {item.strip() for item in info["machines"].split(",")}
-            if "all" not in machines and machine not in machines:
-                continue
-            if skill.name in selected:
-                raise SystemExit(f"duplicate skill name: {skill.name}")
-            selected[skill.name] = (skill, info["agents"])
+    selected: dict[str, tuple[Path, set[str]]] = {}
+    skills = sorted(
+        (skill for root in roots for skill in root.iterdir()
+         if skill.is_dir() and skill.name != "private" and (skill / "SKILL.md").is_file()),
+        key=lambda skill: skill.name,
+    )
+    for skill in skills:
+        if not SKILL_NAME.fullmatch(skill.name):
+            raise SystemExit(f"invalid skill name: {skill.name}")
+        info = metadata(skill)
+        missing = {key for key in ("agents", "machines") if not info.get(key)}
+        if missing:
+            raise SystemExit(f"{skill.name}: missing metadata: {', '.join(sorted(missing))}")
+        machines = {item.strip() for item in info["machines"].split(",")}
+        if "all" not in machines and machine not in machines:
+            continue
+        if skill.name in selected:
+            raise SystemExit(f"duplicate skill name: {skill.name}")
+        agents = {item.strip() for item in info["agents"].split(",")} - {""}
+        if not agents:
+            raise SystemExit(f"{skill.name}: missing metadata: agents")
+        selected[skill.name] = (skill, agents)
     return list(selected.values())
 
 
-def destinations(skill: Path, agents: str) -> dict[str, str]:
+def destinations(skill: Path, agents: set[str]) -> dict[str, str]:
     """Map a skill to its primary install path and compatibility links."""
-    names = {item.strip() for item in agents.split(",")}
-    if "all" in names:
+    if "all" in agents:
         return {
             "primary": f".agents/skills/{skill.name}",
             "claude_link": f".claude/skills/{skill.name}",
         }
-    if names == {"claude"}:
+    if agents == {"claude"}:
         return {"primary": f".claude/skills/{skill.name}"}
-    if names == {"codex"}:
+    if agents == {"codex"}:
         return {"primary": f".codex/skills/{skill.name}"}
-    raise SystemExit(f"unsupported agents metadata for {skill.name}: {agents}")
+    raise SystemExit(f"unsupported agents metadata for {skill.name}: {', '.join(sorted(agents))}")
 
 
 def expected_claude_link(skill_name: str) -> str:
@@ -125,7 +132,7 @@ def require_remote_rsync(host: str) -> None:
         raise SystemExit(f"{host}: rsync is required but was not found in PATH")
 
 
-def remote_state(host: str, selected: list[tuple[Path, str]]) -> dict[str, tuple[str, str]]:
+def remote_state(host: str, selected: list[tuple[Path, set[str]]]) -> dict[str, tuple[str, str]]:
     """Read the type and link target of selected remote install paths."""
     lines = ["set -eu"]
     for skill, agents in selected:
@@ -166,7 +173,7 @@ def rsync_skill(skill: Path, host: str, destination: str, dry_run: bool) -> bool
     return bool(result.stdout.strip())
 
 
-def prepare_remote(host: str, selected: list[tuple[Path, str]]) -> None:
+def prepare_remote(host: str, selected: list[tuple[Path, set[str]]]) -> None:
     """Create remote parent directories and remove legacy primary links."""
     lines = ["set -eu"]
     parents = set()
@@ -182,7 +189,7 @@ def prepare_remote(host: str, selected: list[tuple[Path, str]]) -> None:
         raise SystemExit(result.stderr.decode(errors="replace").strip())
 
 
-def update_remote_links(host: str, selected: list[tuple[Path, str]]) -> None:
+def update_remote_links(host: str, selected: list[tuple[Path, set[str]]]) -> None:
     """Create or repair Claude links for shared remote skills."""
     lines = ["set -eu"]
     for skill, agents in selected:
@@ -215,7 +222,7 @@ def replace_with_link(destination: Path, target: str) -> None:
     destination.symlink_to(target)
 
 
-def check_local(selected: list[tuple[Path, str]]) -> bool:
+def check_local(selected: list[tuple[Path, set[str]]]) -> bool:
     """Report whether local skill links match the selected sources."""
     clean = True
     home = Path.home()
@@ -236,7 +243,7 @@ def check_local(selected: list[tuple[Path, str]]) -> bool:
     return clean
 
 
-def apply_local(selected: list[tuple[Path, str]]) -> None:
+def apply_local(selected: list[tuple[Path, set[str]]]) -> None:
     """Install selected local skills as links to this checkout."""
     home = Path.home()
     for skill, agents in selected:
@@ -248,7 +255,7 @@ def apply_local(selected: list[tuple[Path, str]]) -> None:
         print(f"UPDATED {skill.name}")
 
 
-def check_remote(host: str, selected: list[tuple[Path, str]]) -> bool:
+def check_remote(host: str, selected: list[tuple[Path, set[str]]]) -> bool:
     """Report missing, changed, or incorrectly linked remote skills."""
     state = remote_state(host, selected)
     clean = True
@@ -273,7 +280,7 @@ def check_remote(host: str, selected: list[tuple[Path, str]]) -> bool:
     return clean
 
 
-def apply_remote(host: str, selected: list[tuple[Path, str]]) -> None:
+def apply_remote(host: str, selected: list[tuple[Path, set[str]]]) -> None:
     """Probe rsync, copy selected remote skills, and repair their links."""
     state = remote_state(host, selected)
     for skill, agents in selected:
@@ -288,23 +295,115 @@ def apply_remote(host: str, selected: list[tuple[Path, str]]) -> None:
     update_remote_links(host, selected)
 
 
+def chatgpt_bundle(skill: Path) -> bytes:
+    """Package one skill, excluding credentials, caches, and Git internals."""
+    def excluded(name: str) -> bool:
+        if name == ".env.example":
+            return False
+        return (
+            name in {".env", ".DS_Store", "__pycache__", ".git"}
+            or name.startswith(".env.")
+            or name.endswith(".pyc")
+        )
+
+    files = []
+    directories = [skill]
+    while directories:
+        for path in directories.pop().iterdir():
+            if excluded(path.name):
+                continue
+            if path.is_symlink():
+                raise SystemExit(f"{skill.name}: cannot package symlink: {path.relative_to(skill)}")
+            if path.is_dir():
+                directories.append(path)
+            else:
+                files.append(path)
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(files):
+            # Fixed timestamps make checks depend on content and permissions,
+            # rather than checkout times. Preserve executable script permissions.
+            entry = zipfile.ZipInfo(f"{skill.name}/{path.relative_to(skill).as_posix()}")
+            entry.create_system = 3
+            entry.external_attr = (path.stat().st_mode & 0xFFFF) << 16
+            entry.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(entry, path.read_bytes())
+    return buffer.getvalue()
+
+
+def sync_chatgpt(selected: list[tuple[Path, set[str]]], output: Path, apply: bool) -> bool:
+    """Check or atomically refresh ZIPs for manual upload in ChatGPT."""
+    bundles = [(skill.name, chatgpt_bundle(skill)) for skill, _ in selected]
+    clean = True
+    for name, bundle in bundles:
+        destination = output / f"{name}.zip"
+        if destination.is_symlink():
+            status = "LINK"
+        elif not destination.exists():
+            status = "MISSING"
+        elif not destination.is_file():
+            raise SystemExit(f"{name}: ZIP destination is not a file: {destination}")
+        else:
+            status = "OK" if destination.read_bytes() == bundle else "DRIFT"
+        if apply and status != "OK":
+            output.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=output, delete=False) as temporary:
+                temporary_path = Path(temporary.name)
+                try:
+                    temporary.write(bundle)
+                    temporary.close()
+                    temporary_path.replace(destination)
+                finally:
+                    temporary_path.unlink(missing_ok=True)
+            status = "UPDATED"
+        print(f"{status:7} {name} -> {destination}")
+        clean = clean and status in {"OK", "UPDATED"}
+    print("ZIP export only; upload these files through ChatGPT's Skills UI.")
+    return clean
+
+
 def main() -> int:
-    """Parse arguments and run the requested local or remote operation."""
+    """Run the requested local install, remote install, or ChatGPT ZIP export."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("check", "apply"))
+    parser.add_argument(
+        "--target", choices=("local", "chatgpt"), default="local",
+        help="local/SSH installation (default) or ChatGPT upload ZIPs",
+    )
     parser.add_argument("--host", help="SSH host; omit for this machine")
     parser.add_argument("--machine", help="machine metadata name; defaults to host or local hostname")
+    parser.add_argument(
+        "--output-dir", type=Path,
+        help="ChatGPT ZIP directory; defaults to .chatgpt/skills in this checkout",
+    )
     args = parser.parse_args()
 
     if args.host and args.host.startswith("-"):
         parser.error("--host cannot start with '-'")
+    if args.target == "chatgpt" and args.host:
+        parser.error("--host cannot be used with --target chatgpt; ZIPs are exported locally")
+    if args.output_dir is not None and args.target != "chatgpt":
+        parser.error("--output-dir requires --target chatgpt")
     machine = args.machine or args.host or socket.gethostname().split(".")[0]
     selected = skills_for(machine)
+    if args.target == "chatgpt":
+        selected = [(skill, agents) for skill, agents in selected if agents & {"all", "chatgpt"}]
+    else:
+        # ChatGPT is only an export target, so drop it before resolving install paths.
+        # Skills left with no other agent are skipped.
+        selected = [(skill, agents - {"chatgpt"}) for skill, agents in selected if agents - {"chatgpt"}]
     if not selected:
         raise SystemExit(f"no skills selected for machine: {machine}")
-    print(f"Target: {args.host or 'local'} ({machine}); selected skills: {len(selected)}")
+    print(f"Target: {args.host or args.target} ({machine}); selected skills: {len(selected)}")
 
-    if args.host:
+    if args.target == "chatgpt":
+        output = (args.output_dir or REPO_ROOT / ".chatgpt/skills").expanduser().resolve()
+        for skill, _ in selected:
+            if output.is_relative_to(skill.resolve()):
+                parser.error("--output-dir cannot be inside a selected skill")
+        clean = sync_chatgpt(selected, output, apply=args.action == "apply")
+    elif args.host:
         require_remote_rsync(args.host)
         if args.action == "apply":
             apply_remote(args.host, selected)
