@@ -11,7 +11,11 @@ REQUIRED_METADATA = ("scope", "agents", "machines")
 
 
 def skill_directories(skills_root: Path) -> list[Path]:
-    """Return public and private skill directories in stable order."""
+    """Return public and private skill directories in stable order.
+
+    A directory without SKILL.md is a group; its direct children are skills.
+    Groups only organize the source tree and cannot be nested.
+    """
     roots = [skills_root]
     private = skills_root / "private"
     if private.is_dir():
@@ -19,11 +23,16 @@ def skill_directories(skills_root: Path) -> list[Path]:
 
     skills = []
     for root in roots:
-        skills.extend(
-            path
-            for path in root.iterdir()
-            if path.is_dir() and path.name != "private" and (path / "SKILL.md").is_file()
-        )
+        for path in root.iterdir():
+            if not path.is_dir() or path.name == "private":
+                continue
+            if (path / "SKILL.md").is_file():
+                skills.append(path)
+            else:
+                skills.extend(
+                    child for child in path.iterdir()
+                    if child.is_dir() and (child / "SKILL.md").is_file()
+                )
     return sorted(skills, key=lambda path: path.name)
 
 

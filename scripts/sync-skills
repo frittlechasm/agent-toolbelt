@@ -11,9 +11,13 @@ import shlex
 import shutil
 import socket
 import subprocess
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from checks.validate_skills import skill_directories  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -54,19 +58,9 @@ def metadata(path: Path) -> dict[str, str]:
 
 
 def skills_for(machine: str) -> list[tuple[Path, set[str]]]:
-    """Select public and private skills assigned to the target machine."""
-    roots = [REPO_ROOT / "skills"]
-    private = REPO_ROOT / "skills/private"
-    if private.is_dir():
-        roots.append(private)
-
+    """Select public, private, and grouped skills assigned to the target machine."""
     selected: dict[str, tuple[Path, set[str]]] = {}
-    skills = sorted(
-        (skill for root in roots for skill in root.iterdir()
-         if skill.is_dir() and skill.name != "private" and (skill / "SKILL.md").is_file()),
-        key=lambda skill: skill.name,
-    )
-    for skill in skills:
+    for skill in skill_directories(REPO_ROOT / "skills"):
         if not SKILL_NAME.fullmatch(skill.name):
             raise SystemExit(f"invalid skill name: {skill.name}")
         info = metadata(skill)

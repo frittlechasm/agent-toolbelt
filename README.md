@@ -59,6 +59,7 @@ Edit public skills in `skills/<name>/` and private skills in the separate `skill
 It must record the model, reasoning effort, and available capabilities declared by the manifest.
 
 `sync-skills` selects skills by `agents` and `machines` metadata.
+A folder without its own `SKILL.md` groups related skills one level deep; grouped skills keep their own names when installed or exported.
 Local installs link to this checkout; SSH installs copy skills with `rsync` (required on both machines) and preserve machine-local `.env` and `.env.local` files.
 Source edits do not refresh remote copies; run `check` for the target host before and after `apply`.
 

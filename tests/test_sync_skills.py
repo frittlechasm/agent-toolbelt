@@ -219,6 +219,24 @@ class ChatGPTExportTest(unittest.TestCase):
         self.assertEqual((self.home / ".claude/skills/claude-only").resolve(), claude.resolve())
         self.assertFalse(self.output.exists())
 
+    def test_grouped_skills_keep_flat_install_and_export_names(self) -> None:
+        shared = self.make_skill("mailbox-review/grouped-shared", private=True)
+        self.make_skill("mailbox-review/grouped-chatgpt", agents="chatgpt", private=True)
+        # Groups are one level deep; a group inside a group is not scanned.
+        self.make_skill("mailbox-review/nested/too-deep", private=True)
+
+        self.assertEqual(self.run_main("apply")[0], 0)
+        self.assertEqual((self.home / ".agents/skills/grouped-shared").resolve(), shared.resolve())
+        self.assertFalse((self.home / ".agents/skills/grouped-chatgpt").exists())
+        self.assertFalse((self.home / ".agents/skills/too-deep").exists())
+        self.assertEqual(self.chatgpt("apply")[0], 0)
+        self.assertEqual(
+            {path.name for path in self.output.iterdir()},
+            {"grouped-shared.zip", "grouped-chatgpt.zip"},
+        )
+        with zipfile.ZipFile(self.output / "grouped-chatgpt.zip") as archive:
+            self.assertEqual(archive.namelist(), ["grouped-chatgpt/SKILL.md"])
+
     def test_local_install_skips_chatgpt_only_skills(self) -> None:
         self.make_skill("shared")
         self.make_skill("chatgpt-only", agents="chatgpt", private=True)
