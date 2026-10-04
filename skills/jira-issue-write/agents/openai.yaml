@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jira Issue Write"
+  short_description: "Create and update Jira Cloud issues"
+  default_prompt: "Use $jira-issue-write to prepare and apply the Jira issue changes requested."

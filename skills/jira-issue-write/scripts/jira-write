@@ -1,0 +1,467 @@
+#!/usr/bin/env python3
+"""Create or update one Jira Cloud issue. Writes preview by default; --apply writes once."""
+import argparse
+import base64
+import http.client
+import json
+import os
+import re
+import shlex
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+API = "/rest/api/3"
+CONFIG_KEYS = ("JIRA_SITE_URL", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_CLOUD_ID")
+ISSUE_KEY = r"[A-Za-z][A-Za-z0-9_]*-[1-9][0-9]*"
+VERSIONED = {"edit", "assign", "transition", "comment-edit"}
+
+HELP = """Workflow:
+  Write commands preview by default. A preview makes live reads but no writes.
+  Add --apply to write once. Writes are never retried.
+  edit, assign, transition, and comment-edit also need --expected-updated
+  with the timestamp from their preview. Run "<command> --help" for its inputs.
+  The final timestamp check is not atomic, so keep updates minimal.
+  Write output reports applied, verified, and any warning from the read-back.
+
+Scope:
+  One issue per run. No deletes, archives, attachments, bulk writes, or project moves.
+  Jira notifications and automation still run.
+
+Exit codes:
+  0  read, preview, or verified write
+  1  input or API failure; the error says when a write outcome is unknown
+  2  invalid arguments
+  3  Jira accepted the write but read-back failed or differs; inspect it first
+
+Configuration:
+  Set JIRA_SITE_URL (https://<site>.atlassian.net), JIRA_EMAIL, and JIRA_API_TOKEN.
+  For a scoped token, also set JIRA_CLOUD_ID to the site's UUID.
+  Prefer a scoped token limited to the needed permissions.
+  Environment variables override the skill's .env. --env-file PATH replaces that file.
+  The file is parsed, not executed. Quote values containing spaces.
+  401: check the email, token expiry, and Cloud ID. 403: check scopes and permissions.
+  404 can also mean the issue is not visible to this account.
+
+Examples:
+  jira-write create-meta DEMO --issue-type 10001
+  jira-write create --project DEMO --issue-type 10001 --fields-file /tmp/fields.json
+  jira-write edit DEMO-123 --fields-file /tmp/fields.json --expected-updated '<ts>' --apply
+  jira-write assignees --issue DEMO-123 --query 'Ray'
+  jira-write transition DEMO-123 --transition-id 31 --expected-updated '<ts>' --apply
+"""
+
+COMMAND_HELP = {
+    "create": """Create one issue. The fields file is a field map without project or issuetype.
+Required fields come from create-meta. A subtask also needs its parent field.""",
+    "edit": """Change only the supplied fields; get the allowed fields from edit-meta.
+Arrays such as labels replace the whole field. Use null only for a requested clear.
+Plain text for description, environment, or textarea fields becomes ADF paragraphs.
+Supply an ADF document instead to keep formatting, mentions, links, or tables.""",
+    "assign": "Set or clear the assignee. Find the account ID with assignees.",
+    "transition": """Run a transition listed by transitions. The fields file holds that transition's fields.
+Fields already set on the issue need not be resent. Status changes only through a transition.""",
+    "comment": """Add a comment with normal issue visibility.
+Restricted comments and Jira Service Management internal notes are not supported.
+Plain text uses one paragraph per line; extra blank lines are kept.""",
+    "comment-edit": "Replace a comment's body and keep its visibility. Use the comment's timestamp.",
+}
+
+
+class JiraError(Exception):
+    pass
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(req.full_url, code, "Redirect refused", headers, fp)
+
+
+def settings(env_file=None):
+    values = {}
+    path = Path(env_file) if env_file else Path(__file__).resolve().parents[1] / ".env"
+    if env_file or path.is_file():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            key, sep, value = line.strip().removeprefix("export ").partition("=")
+            key = key.strip()
+            if sep and key in CONFIG_KEYS and key not in os.environ:
+                parts = shlex.split(value, comments=True)
+                if len(parts) > 1:
+                    raise JiraError("Quote values containing spaces in the configuration file.")
+                values[key] = parts[0] if parts else ""
+    values.update({key: os.environ[key] for key in CONFIG_KEYS if key in os.environ})
+    missing = [key for key in CONFIG_KEYS[:3] if not values.get(key)]
+    if missing:
+        raise JiraError("Missing configuration: " + ", ".join(missing))
+    return values
+
+
+def site_url(value):
+    parsed = urllib.parse.urlsplit(value)
+    if (parsed.scheme != "https" or not parsed.hostname
+            or not re.fullmatch(r"[a-z0-9-]+\.atlassian\.net", parsed.hostname)
+            or parsed.username or parsed.password or parsed.port
+            or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
+        raise JiraError("JIRA_SITE_URL must be an HTTPS Jira Cloud site, without a path or credentials.")
+    return "https://" + parsed.hostname
+
+
+def issue_key(value, site):
+    if "://" in value:
+        parsed = urllib.parse.urlsplit(value)
+        if (parsed.scheme != "https" or parsed.netloc.lower() != urllib.parse.urlsplit(site).netloc
+                or parsed.username or parsed.password):
+            raise JiraError("Issue URL must belong to the configured Jira site.")
+        match = re.fullmatch(rf"/browse/({ISSUE_KEY})/?", parsed.path)
+        if not match:
+            raise JiraError("Use a Jira /browse/KEY-123 URL or issue key.")
+        value = match.group(1)
+    if not re.fullmatch(ISSUE_KEY, value):
+        raise JiraError("Invalid issue key; expected KEY-123.")
+    return value.upper()
+
+
+def identifier(value):
+    if not re.fullmatch(r"[A-Za-z0-9_:-]+", value):
+        raise JiraError("Invalid project, issue type, comment, or account identifier.")
+    return value
+
+
+class Client:
+    def __init__(self, config):
+        self.site = site_url(config["JIRA_SITE_URL"])
+        cloud_id = config.get("JIRA_CLOUD_ID")
+        if cloud_id and not re.fullmatch(r"[a-fA-F0-9-]{36}", cloud_id):
+            raise JiraError("JIRA_CLOUD_ID must be the site's UUID.")
+        self.base = "https://api.atlassian.com/ex/jira/" + cloud_id if cloud_id else self.site
+        token = config["JIRA_API_TOKEN"]
+        encoded = base64.b64encode((config["JIRA_EMAIL"] + ":" + token).encode()).decode()
+        self.auth = "Basic " + encoded
+        self.secrets = (token, encoded, self.auth)
+        self.opener = urllib.request.build_opener(NoRedirect())
+
+    def redact(self, text):
+        for secret in self.secrets:
+            text = text.replace(secret, "[REDACTED]")
+        return text
+
+    def request(self, method, path, *, body=None, query=None):
+        if not path.startswith(API + "/") or any(c in path for c in ("?", "#", "..", "\\")):
+            raise JiraError("Invalid API path.")
+        mutation = method != "GET"
+        url = self.base + path
+        if query:
+            url += "?" + urllib.parse.urlencode(query)
+        request = urllib.request.Request(
+            url, data=None if body is None else json.dumps(body).encode(), method=method,
+            headers={"Authorization": self.auth, "Accept": "application/json",
+                     "Content-Type": "application/json"},
+        )
+        try:
+            with self.opener.open(request, timeout=45) as response:
+                raw = response.read()
+            return json.loads(raw) if raw else None
+        except urllib.error.HTTPError as error:
+            advice = {
+                401: "Check the email, token expiry, and scoped-token cloud ID.",
+                403: "Check token scopes and Jira project/issue permissions.",
+                404: "Check the target and your access to it.",
+                409: "Conflict: read the current state before trying again.",
+                429: "Rate limited; wait for Retry-After before a new attempt.",
+            }.get(error.code, "Request failed.")
+            if error.code == 429 and error.headers.get("Retry-After"):
+                advice += " Retry-After: " + error.headers["Retry-After"]
+            if mutation and (error.code >= 500 or error.code in (408, 429)):
+                advice += " The write outcome may be unknown. Read Jira before any retry."
+            # Never echo a response body: it can contain submitted content or credentials.
+            error.close()
+            raise JiraError(f"HTTP {error.code}. {advice}") from None
+        except (OSError, ValueError, http.client.HTTPException):
+            advice = "The write outcome is unknown. Read Jira before any retry." if mutation else "Read failed."
+            raise JiraError(advice + " Network failure or invalid JSON response.") from None
+
+    def get(self, path, **query):
+        return self.request("GET", path, query=query)
+
+    def issue(self, key, fields="*all"):
+        return self.get(API + "/issue/" + key, fields=fields)
+
+    def create_meta(self, project, issue_type=None):
+        path = API + "/issue/createmeta/" + identifier(project) + "/issuetypes"
+        item_key = "issueTypes"
+        if issue_type:
+            path += "/" + identifier(issue_type)
+            item_key = "fields"
+        items = []
+        while True:
+            page = self.get(path, startAt=len(items), maxResults=100)
+            batch = page[item_key]
+            if not isinstance(batch, list):
+                raise JiraError("Unexpected creation metadata response.")
+            items.extend(batch)
+            total = page.get("total")
+            if page.get("isLast") is True or (total is not None and len(items) >= total):
+                return items
+            if not batch or (total is None and "isLast" not in page):
+                raise JiraError("Creation metadata stopped before completion.")
+
+
+def json_object(path):
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise JiraError("JSON input must be an object.")
+    return value
+
+
+def adf(text):
+    return {"type": "doc", "version": 1, "content": [
+        {"type": "paragraph", "content": [{"type": "text", "text": line}] if line else []}
+        for line in text.splitlines() or [""]
+    ]}
+
+
+def document(value):
+    if isinstance(value, str):
+        return adf(value)
+    if (not isinstance(value, dict) or value.get("type") != "doc"
+            or value.get("version") != 1 or not isinstance(value.get("content"), list)):
+        raise JiraError("Rich text must be plain text or an ADF document object.")
+    return value
+
+
+def fields_from_file(path, metadata, *, required=False, current=None):
+    fields = json_object(path) if path else {}
+    for key, value in fields.items():
+        if key not in metadata or "set" not in metadata[key].get("operations", []):
+            raise JiraError(f"Field {key!r} cannot be set in this operation; inspect metadata.")
+        if key in {"status", "comment", "attachment", "issuelinks", "project", "issuetype"}:
+            raise JiraError(f"Field {key!r} requires a dedicated operation.")
+        schema = metadata[key].get("schema", {})
+        if value is not None and (key in {"description", "environment"}
+                                  or schema.get("custom", "").endswith(":textarea")):
+            fields[key] = document(value)
+        if metadata[key].get("required") and value in (None, "", []):
+            raise JiraError(f"Required field {key!r} cannot be cleared.")
+    if required:
+        missing = [key for key, meta in metadata.items()
+                   if key not in {"project", "issuetype"} and meta.get("required")
+                   and not meta.get("hasDefaultValue") and key not in fields
+                   and (current or {}).get(key) in (None, "", [])]
+        if missing:
+            raise JiraError("Missing required fields: " + ", ".join(missing))
+    return fields
+
+
+def matches(expected, actual):
+    """Jira expands reference objects; compare supplied properties, preserving list order."""
+    if isinstance(expected, dict):
+        return isinstance(actual, dict) and all(k in actual and matches(v, actual[k]) for k, v in expected.items())
+    if isinstance(expected, list):
+        return isinstance(actual, list) and len(expected) == len(actual) and all(
+            matches(a, b) for a, b in zip(expected, actual))
+    return expected == actual
+
+
+def field_matches(name, expected, actual):
+    if name in {"labels", "components", "fixVersions", "versions"} and isinstance(expected, list):
+        if not isinstance(actual, list) or len(expected) != len(actual):
+            return False
+        remaining = list(actual)
+        for value in expected:
+            index = next((i for i, item in enumerate(remaining) if matches(value, item)), None)
+            if index is None:
+                return False
+            remaining.pop(index)
+        return True
+    return matches(expected, actual)
+
+
+def prepare(client, args):
+    """Construct one request using fresh metadata and the current issue/comment."""
+    command = args.command
+    if command == "create":
+        project = identifier(args.project)
+        issue_type = identifier(args.issue_type)
+        metadata = {f["fieldId"]: f for f in client.create_meta(project, issue_type)}
+        fields = fields_from_file(args.fields_file, metadata, required=True)
+        fields.update(project={"id" if project.isdigit() else "key": project}, issuetype={"id": issue_type})
+        return {"method": "POST", "path": API + "/issue", "body": {"fields": fields},
+                "before": None, "expected_fields": fields}
+
+    key = issue_key(args.issue, client.site)
+    path = API + "/issue/" + key
+    current = client.issue(key)
+    plan = {"method": "PUT", "path": path, "key": key, "expected_updated": current["fields"]["updated"]}
+    if command == "edit":
+        metadata = client.get(path + "/editmeta")["fields"]
+        fields = fields_from_file(args.fields_file, metadata)
+        if not fields:
+            raise JiraError("Supply at least one field to edit.")
+        plan.update(body={"fields": fields}, expected_fields=fields,
+                    before={k: current["fields"].get(k) for k in fields})
+    elif command == "assign":
+        account = None if args.unassign else identifier(args.account_id)
+        if account is not None:
+            users = client.get(API + "/user/assignable/search", issueKey=key, accountId=account)
+            if not any(u.get("accountId") == account and u.get("active") is True for u in users):
+                raise JiraError("Account is not an active assignable user for this issue.")
+        plan.update(path=path + "/assignee", body={"accountId": account},
+                    expected_fields={"assignee": None if account is None else {"accountId": account}},
+                    before={"assignee": current["fields"].get("assignee")})
+    elif command == "transition":
+        transitions = client.get(path + "/transitions", expand="transitions.fields")["transitions"]
+        selected = [t for t in transitions if t["id"] == args.transition_id]
+        if len(selected) != 1:
+            raise JiraError("Transition ID is not currently available for this issue.")
+        transition = selected[0]
+        fields = fields_from_file(args.fields_file, transition.get("fields", {}),
+                                  required=True, current=current["fields"])
+        plan.update(method="POST", path=path + "/transitions",
+                    body={"transition": {"id": transition["id"]}, "fields": fields},
+                    target_status=transition["to"],
+                    expected_fields={**fields, "status": {"id": transition["to"]["id"]}},
+                    before={"status": current["fields"]["status"],
+                            **{k: current["fields"].get(k) for k in fields}})
+    else:
+        body = document(json_object(args.adf_file) if args.adf_file
+                        else Path(args.body_file).read_text(encoding="utf-8"))
+        if command == "comment":
+            plan.update(method="POST", path=path + "/comment", body={"body": body}, before=None)
+            plan.pop("expected_updated")
+        else:
+            comment_path = path + "/comment/" + identifier(args.comment_id)
+            comment = client.get(comment_path)
+            plan.update(path=comment_path, body={"body": body}, before=comment,
+                        expected_updated=comment["updated"])
+    return plan
+
+
+def execute(client, args):
+    plan = prepare(client, args)
+    if not args.apply:
+        preview = {"operation": args.command, "applied": False,
+                   **{key: value for key, value in plan.items() if key != "expected_fields"}}
+        if "key" in plan:
+            preview["url"] = client.site + "/browse/" + plan["key"]
+        return preview
+
+    # Check the caller's preview timestamp immediately before the one write, after the slower reads above.
+    if args.command in VERSIONED:
+        if args.command == "comment-edit":
+            version = client.get(plan["path"])["updated"]
+        else:
+            version = client.issue(plan["key"], "updated")["fields"]["updated"]
+        if version != args.expected_updated:
+            raise JiraError("The --expected-updated timestamp is stale. Read a new preview and reconcile changes.")
+    receipt = client.request(plan["method"], plan["path"], body=plan["body"])
+    result = {"operation": args.command, "applied": True, "verified": False}
+    try:
+        key = issue_key(receipt["key"], client.site) if args.command == "create" else plan["key"]
+        result.update(key=key, url=client.site + "/browse/" + key)
+        if args.command in {"comment", "comment-edit"}:
+            comment_id = identifier(str(receipt["id"])) if args.command == "comment" else args.comment_id
+            result["comment_id"] = comment_id
+            after = client.get(API + "/issue/" + key + "/comment/" + comment_id)
+            result.update(after=after, verified=matches(plan["body"]["body"], after["body"]))
+            if args.command == "comment-edit":
+                result["visibility_preserved"] = after.get("visibility") == plan["before"].get("visibility")
+                result["verified"] = result["verified"] and result["visibility_preserved"]
+        else:
+            after = client.issue(key)
+            checks = {k: field_matches(k, v, after["fields"].get(k)) for k, v in plan["expected_fields"].items()}
+            result.update(after=after, verified_fields=checks, verified=all(checks.values()))
+    except (JiraError, OSError, ValueError, KeyError, TypeError):
+        result["warning"] = "Write succeeded but read-back failed. Inspect Jira; do not repeat the write."
+    if not result["verified"]:
+        result.setdefault("warning", "Read-back differs from the request. Inspect Jira before any further change.")
+    return result
+
+
+def parser():
+    raw = argparse.RawDescriptionHelpFormatter
+    root = argparse.ArgumentParser(description=__doc__, epilog=HELP, formatter_class=raw)
+    root.add_argument("--env-file", help="Configuration file to read instead of the skill's .env")
+    commands = root.add_subparsers(dest="command", required=True, metavar="command")
+    for name in ("create", "edit", "assign", "transition", "comment", "comment-edit"):
+        command = commands.add_parser(name, help=COMMAND_HELP[name].split(".")[0], description=COMMAND_HELP[name],
+                                      formatter_class=raw)
+        command.add_argument("--apply", action="store_true", help="Execute the authorized write once")
+        if name == "create":
+            command.add_argument("--project", required=True, help="Project key or ID")
+            command.add_argument("--issue-type", required=True, help="Numeric issue type ID from create-meta")
+        else:
+            command.add_argument("issue", help="Issue key or /browse/ URL on the configured site")
+        if name in {"create", "edit", "transition"}:
+            command.add_argument("--fields-file", required=name != "transition",
+                                 help="JSON field map, without an outer fields key")
+        if name in VERSIONED:
+            command.add_argument("--expected-updated", help="Timestamp from the preview; required with --apply")
+        if name == "assign":
+            assignee = command.add_mutually_exclusive_group(required=True)
+            assignee.add_argument("--account-id")
+            assignee.add_argument("--unassign", action="store_true")
+        if name == "transition":
+            command.add_argument("--transition-id", required=True)
+        if name in {"comment", "comment-edit"}:
+            body = command.add_mutually_exclusive_group(required=True)
+            body.add_argument("--body-file", help="UTF-8 plain text; no Markdown conversion")
+            body.add_argument("--adf-file", help="JSON Atlassian Document Format document")
+            if name == "comment-edit":
+                command.add_argument("--comment-id", required=True)
+    create = commands.add_parser("create-meta", help="List issue types, or one type's fields")
+    create.add_argument("project")
+    create.add_argument("--issue-type")
+    commands.add_parser("get", help="Read an issue").add_argument("issue")
+    commands.add_parser("edit-meta", help="List editable fields").add_argument("issue")
+    commands.add_parser("transitions", help="List available transitions and their fields").add_argument("issue")
+    users = commands.add_parser("assignees", help="Find assignable users; page with --start and next_start")
+    target = users.add_mutually_exclusive_group(required=True)
+    target.add_argument("--issue")
+    target.add_argument("--project")
+    users.add_argument("--query", required=True)
+    users.add_argument("--start", type=int, default=0)
+    return root
+
+
+def run(client, args):
+    if args.command == "create-meta":
+        return client.create_meta(args.project, args.issue_type)
+    if args.command == "assignees":
+        if args.start < 0:
+            raise JiraError("--start must not be negative.")
+        scope = {"issueKey": issue_key(args.issue, client.site)} if args.issue else {"project": identifier(args.project)}
+        users = client.get(API + "/user/assignable/search", query=args.query,
+                           startAt=args.start, maxResults=50, **scope)
+        return {"users": users, "next_start": args.start + len(users) if len(users) == 50 else None}
+    if args.command in {"get", "edit-meta", "transitions"}:
+        key = issue_key(args.issue, client.site)
+        if args.command == "get":
+            return client.issue(key)
+        path = API + "/issue/" + key
+        if args.command == "edit-meta":
+            return client.get(path + "/editmeta")
+        return client.get(path + "/transitions", expand="transitions.fields")
+    return execute(client, args)
+
+
+def main():
+    cli = parser()
+    args = cli.parse_args()
+    if getattr(args, "apply", False) and args.command in VERSIONED and not args.expected_updated:
+        cli.error("--apply requires --expected-updated from the preview")
+    client = None
+    try:
+        client = Client(settings(args.env_file))
+        result = run(client, args)
+        print(client.redact(json.dumps(result, ensure_ascii=False, indent=2)))
+        return 3 if isinstance(result, dict) and result.get("applied") and not result["verified"] else 0
+    except (JiraError, OSError, ValueError, KeyError, TypeError) as error:
+        message = str(error) if isinstance(error, (JiraError, OSError)) else "Invalid input or API response."
+        print("error: " + (client.redact(message) if client else message), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

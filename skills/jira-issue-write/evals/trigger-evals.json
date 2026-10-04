@@ -1,0 +1,40 @@
+{
+  "skill_name": "jira-issue-write",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Jira ticket in DEMO describing this bug.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Change the summary of DEMO-123 to 'Handle expired sessions'.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Assign DEMO-123 to Ray and move it to In Progress.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Update comment 10042 on DEMO-123 with this correction.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Read DEMO-123 and tell me whether it is ready for development.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Search Jira for open bugs.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Delete every closed ticket in DEMO.",
+      "should_trigger": false
+    }
+  ]
+}

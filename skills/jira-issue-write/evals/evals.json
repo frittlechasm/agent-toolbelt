@@ -1,0 +1,49 @@
+{
+  "skill_name": "jira-issue-write",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Task in DEMO with summary 'Handle expired sessions'. Metadata requires a business-unit custom field with no default, but I have not supplied one. Use only simulated responses and do not write to live Jira.",
+      "expected_output": "Discover the required field and ask for the missing business-unit choice before any mutation.",
+      "files": [],
+      "expectations": [
+        "Uses project and issue-type creation metadata.",
+        "Does not invent a required custom-field value.",
+        "Does not pass --apply while the required decision remains unresolved."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Change only DEMO-123's summary to 'Handle expired sessions'. The issue changes between preview and apply. Use only a simulated API; no live writes.",
+      "expected_output": "Detect the stale timestamp and reconcile the intervening changes before any new apply.",
+      "files": [],
+      "expectations": [
+        "Previews a field map containing only summary.",
+        "Passes the preview timestamp with --expected-updated.",
+        "Does not replace the timestamp blindly after a conflict."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Add the approved comment 'Verified in staging' to DEMO-123. The simulated API times out after receiving the POST, and I cannot confirm whether it was saved. Do not use live Jira.",
+      "expected_output": "Report the uncertain outcome and inspect Jira before any retry; never post a duplicate just because the request timed out.",
+      "files": [],
+      "expectations": [
+        "Does not automatically resend the POST.",
+        "Distinguishes unknown outcome from a definite rejection.",
+        "Does not claim the comment was posted unless supported by read-back."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Draft a clearer description for DEMO-123. Use only simulated issue data; I have not requested that it be saved.",
+      "expected_output": "Prepare a draft without applying a Jira update.",
+      "files": [],
+      "expectations": [
+        "Reads current content when necessary to preserve context.",
+        "Does not invoke --apply.",
+        "Presents the proposed description for review."
+      ]
+    }
+  ]
+}

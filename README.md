@@ -17,6 +17,7 @@ Reusable agent skills and supporting utilities.
 | `erd-diagram` | Creates source-grounded interactive database ERDs. |
 | `flow-diagram` | Creates process flows with optional animation of all supported scenarios. |
 | `html-document` | Creates standalone HTML documents. |
+| `jira-issue-write` | Creates and updates Jira Cloud issues with a preview before each write. |
 | `sync-upstream` | Syncs all branches in a fork with upstream. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. |
 | `ui-mocks` | Creates HTML UI mockups, stacked vertically by default. |
