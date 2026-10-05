@@ -61,6 +61,7 @@ class ChatGPTExportTest(unittest.TestCase):
         self.make_skill("chatgpt-only", agents="chatgpt")
         self.make_skill("codex-only", agents="codex")
         self.make_skill("claude-only", agents="claude")
+        self.make_skill("local-agents", agents="claude, codex")
         self.make_skill("other-machine", machines="mowork")
         self.make_skill("private-shared", private=True)
 
@@ -218,6 +219,21 @@ class ChatGPTExportTest(unittest.TestCase):
         self.assertEqual((self.home / ".codex/skills/codex-only").resolve(), codex.resolve())
         self.assertEqual((self.home / ".claude/skills/claude-only").resolve(), claude.resolve())
         self.assertFalse(self.output.exists())
+
+    def test_local_agent_pair_preserves_shared_paths_without_cloud_export(self) -> None:
+        skill = self.make_skill("local-agents", agents="claude, codex", private=True)
+        self.make_skill("portable")
+
+        self.assertEqual(self.run_main("apply")[0], 0)
+        self.assertEqual((self.home / ".agents/skills/local-agents").resolve(), skill.resolve())
+        self.assertEqual((self.home / ".claude/skills/local-agents").resolve(), skill.resolve())
+        self.assertEqual(self.run_main("check")[0], 0)
+        self.assertEqual(SYNC["destinations"](skill, {"claude", "codex"}), {
+            "primary": ".agents/skills/local-agents",
+            "claude_link": ".claude/skills/local-agents",
+        })
+        self.assertEqual(self.chatgpt("apply")[0], 0)
+        self.assertEqual({path.name for path in self.output.iterdir()}, {"portable.zip"})
 
     def test_grouped_skills_keep_flat_install_and_export_names(self) -> None:
         shared = self.make_skill("mailbox-review/grouped-shared", private=True)

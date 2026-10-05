@@ -3,7 +3,7 @@ name: sync-upstream
 description: Synchronize every local branch in a fork with its upstream parent. Use only for full-fork updates, not ordinary fetches or current-branch rebases.
 metadata:
   scope: global
-  agents: all
+  agents: claude, codex
   machines: all
 disable-model-invocation: true
 ---

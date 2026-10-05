@@ -81,7 +81,7 @@ def skills_for(machine: str) -> list[tuple[Path, set[str]]]:
 
 def destinations(skill: Path, agents: set[str]) -> dict[str, str]:
     """Map a skill to its primary install path and compatibility links."""
-    if "all" in agents:
+    if "all" in agents or agents == {"claude", "codex"}:
         return {
             "primary": f".agents/skills/{skill.name}",
             "claude_link": f".claude/skills/{skill.name}",

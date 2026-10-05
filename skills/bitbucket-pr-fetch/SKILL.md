@@ -3,7 +3,7 @@ name: bitbucket-pr-fetch
 description: Use this for any read-only interaction with a specific Bitbucket Cloud PR.
 metadata:
   scope: global
-  agents: all
+  agents: claude, codex
   machines: all
 ---
 

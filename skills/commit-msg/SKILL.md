@@ -3,7 +3,7 @@ name: commit-msg
 description: Draft commit messages from repository changes. Use when asked for a commit message or when committing changes.
 metadata:
   scope: global
-  agents: all
+  agents: claude, codex
   machines: all
 ---
 

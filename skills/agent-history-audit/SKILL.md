@@ -3,7 +3,7 @@ name: agent-history-audit
 description: Audit Claude and Codex history for recurring issues, usage, instruction changes, and reusable workflows across machines.
 metadata:
   scope: global
-  agents: all
+  agents: claude, codex
   machines: all
 ---
 

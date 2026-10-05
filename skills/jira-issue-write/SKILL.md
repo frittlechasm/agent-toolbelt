@@ -3,7 +3,7 @@ name: jira-issue-write
 description: Create or update Jira Cloud issues, comments, assignees, and status. Not for read-only Jira work.
 metadata:
   scope: global
-  agents: all
+  agents: claude, codex
   machines: all
 ---
 
