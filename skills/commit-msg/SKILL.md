@@ -31,6 +31,8 @@ metadata:
 - Prefer the narrowest accurate type. A dependency bump that fixes a bug can be `fix`; routine metadata churn is usually `chore`.
 - If the diff combines unrelated changes, suggest one message only when they are intentionally being committed together;
   otherwise mention that separate commits would be clearer.
+- Each commit should cover one meaningful change and include its related tests and documentation.
+- Keep commits buildable and testable when practical. Do not split changes just to increase the number of commits.
 
 ## Format
 
