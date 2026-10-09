@@ -16,7 +16,7 @@ Reusable agent skills and supporting utilities.
 | `eli5` | Creates illustrated HTML explanations for beginners. | Shared: HTML/SVG and browser tools. |
 | `erd-diagram` | Creates source-grounded interactive database ERDs. | Shared: supplied schema, bundled Python renderer, browser tools. |
 | `flow-diagram` | Creates process flows with optional animation of all supported scenarios. | Shared: supplied process, HTML/SVG and browser tools. |
-| `html-document` | Creates standalone HTML documents. | Shared: HTML and browser tools; `erd-diagram` for database content. |
+| `html-document` | Creates standalone HTML documents. | Shared: HTML and browser tools; optional `erd-diagram` for database relationships. |
 | `jira-issue-write` | Creates and updates Jira Cloud issues with a preview before each write. | Local: Python, Jira configuration and credentials, network access. |
 | `sync-upstream` | Syncs all branches in a fork with upstream. | Local: Git checkout, authenticated `gh`, Git remote credentials. |
 | `table-cleanup` | Converts Markdown tables into aligned plain text. | Shared: supplied table; optional standard-library Python helper. |

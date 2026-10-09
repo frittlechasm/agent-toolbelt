@@ -21,7 +21,7 @@ metadata:
 - For a process flow diagram, use the `flow-diagram` skill when available and embed its SVG in the document.
 - For a system architecture diagram, use the `architecture-diagram` skill when available and embed its SVG in the document.
 - Do not use a generic process-flow fallback as a system architecture diagram.
-- For database content, use the `erd-diagram` skill and include its ERD in the same HTML document.
+- When an ERD or database relationships is to be shown then use the `erd-diagram` skill when available and include it in the same HTML document.
 - If required content was not supplied and cannot be found, ask for it instead of fabricating examples or domain details.
 
 ## Output
