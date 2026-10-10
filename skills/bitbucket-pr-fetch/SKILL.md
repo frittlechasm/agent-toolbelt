@@ -2,9 +2,9 @@
 name: bitbucket-pr-fetch
 description: Use this for any read-only interaction with a specific Bitbucket Cloud PR.
 metadata:
-  scope: global
-  agents: claude, codex
-  machines: all
+    scope: global
+    agents: claude, codex
+    machines: all
 ---
 
 # Bitbucket PR Fetch
@@ -23,9 +23,9 @@ metadata:
 - The script checks PR metadata and reuses the persistent bundle under `~/.bitbucket-reviews`.
 - Format to call the script:
 
-  ```bash
-  python <skill-dir>/scripts/fetch_pr.py "<pr-url>"
-  ```
+    ```bash
+    python <skill-dir>/scripts/fetch_pr.py "<pr-url>"
+    ```
 
 - Add `--refresh` when the user's prompt says there are new or updated comments, or PR changes.
 - The script cannot infer those prompt signals, and PR metadata may not reflect every comment change.
@@ -34,16 +34,16 @@ metadata:
 ## Output
 
 - Read the output directory printed by the script.
-  - You may verify `manifest.json` first to confirm bundle identity and completeness.
-  - Then read `summary.md` and, when present, `review-summary.md` before evaluating
-    `diff.patch`, comments, commits, or metadata.
-  - Use `diff.patch` for code changes.
-  - Use `comments.json` for review threads.
-  - Use `comments.raw.json` when normalized comments omit a Bitbucket field.
-  - Use `commits.json` for complete commit data.
-  - Use `metadata.json` for complete PR data.
-  - Use `diffstat.json` for file statistics.
-  - Use `manifest.json` to verify bundle identity, freshness, and completeness.
+    - You may verify `manifest.json` first to confirm bundle identity and completeness.
+    - Then read `summary.md` and, when present, `review-summary.md` before evaluating `diff.patch`, comments, commits, or metadata.
+    - Use `diff.patch` for code changes.
+    - Use `comments.json` for review threads.
+    - Read comment thread state from `resolved`; a resolved thread's `resolution` can be `{}`, which Python treats as false.
+    - Use `comments.raw.json` when normalized comments omit a Bitbucket field.
+    - Use `commits.json` for complete commit data.
+    - Use `metadata.json` for complete PR data.
+    - Use `diffstat.json` for file statistics.
+    - Use `manifest.json` to verify bundle identity, freshness, and completeness.
 
 - If `review-summary.md` exists in the output directory, read it before evaluating detailed review
   artifacts so prior finding IDs and assessment state inform the review.
@@ -58,10 +58,10 @@ metadata:
 - Never create the file in the repository or workspace root.
 - The fetch script never creates, modifies, validates, or deletes `review-summary.md` file.
 - Treat it as a rolling checkpoint, not an append-only transcript:
-  - Record `reviewed_at` as a UTC ISO 8601 timestamp, plus `source_commit`, `destination_commit`, `pr_updated_on`, and `comment_count` in YAML frontmatter.
-  - Keep the current assessment and open findings. Preserve stable finding IDs across re-reviews.
-  - Move verified fixed findings to a concise resolved section.
-  - Append one compact row to a review history table for each completed review.
+    - Record `reviewed_at` as a UTC ISO 8601 timestamp, plus `source_commit`, `destination_commit`, `pr_updated_on`, and `comment_count` in YAML frontmatter.
+    - Keep the current assessment and open findings. Preserve stable finding IDs across re-reviews.
+    - Move verified fixed findings to a concise resolved section.
+    - Append one compact row to a review history table for each completed review.
 - On a re-review, compare the checkpoint with the current fetched artifacts, carry forward unresolved findings,
   and update the file only when the review finishes successfully.
 - Prepare the complete replacement before atomically replacing the file.

@@ -37,7 +37,7 @@ import urllib.parse
 import urllib.request
 
 API_BASE = "https://api.bitbucket.org/2.0"
-CACHE_SCHEMA_VERSION = 2
+CACHE_SCHEMA_VERSION = 3
 ARTIFACT_NAMES = (
     "summary.md",
     "metadata.json",
@@ -301,6 +301,8 @@ def normalize_comments(comments):
             "updated_on": c.get("updated_on"),
             "content": (c.get("content") or {}).get("raw"),
             "resolution": c.get("resolution"),
+            # A resolved thread's resolution can be {}, which Python treats as false.
+            "resolved": c.get("resolution") is not None,
             "inline": {
                 "path": inline.get("path"),
                 "from": inline.get("from"),
