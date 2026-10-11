@@ -15,7 +15,7 @@ Find worthwhile simplifications and performance improvements in the requested co
 
 - Follow the requested scope: diff, commit, module, or repository. If unstated, choose a reasonable scope from context and say what you inspected.
 - Check callers, existing helpers, and tests before judging code unnecessary.
-- Prioritize dead or duplicate code, needless wrappers and abstractions, repeated UI components, and redundant tests.
+- Prioritize dead or duplicate code, custom code that a suitable standard-library, platform, or current-dependency feature could replace, needless wrappers and abstractions, repeated UI components, and redundant tests.
 - Check for avoidable repeated work, inefficient queries or I/O, and unnecessary rendering where relevant.
 - Keep a test if it covers a distinct behavior, even when its setup resembles another test.
   Share a UI component only when its behavior and design are genuinely common.
