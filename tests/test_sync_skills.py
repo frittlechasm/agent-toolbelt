@@ -235,6 +235,18 @@ class ChatGPTExportTest(unittest.TestCase):
         self.assertEqual(self.chatgpt("apply")[0], 0)
         self.assertEqual({path.name for path in self.output.iterdir()}, {"portable.zip"})
 
+    def test_exact_skill_selection_leaves_other_installs_untouched(self) -> None:
+        self.make_skill("selected")
+        self.make_skill("untouched")
+        code, output = self.run_main("apply", "--skill", "selected")
+        self.assertEqual(code, 0)
+        self.assertTrue((self.home / ".agents/skills/selected").is_symlink())
+        self.assertFalse((self.home / ".agents/skills/untouched").exists())
+        self.assertNotIn("UPDATED untouched", output)
+        with contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                self.run_main("apply", "--skill", "not-real")
+
     def test_grouped_skills_keep_flat_install_and_export_names(self) -> None:
         shared = self.make_skill("mailbox-review/grouped-shared", private=True)
         self.make_skill("mailbox-review/grouped-chatgpt", agents="chatgpt", private=True)
@@ -266,6 +278,189 @@ class ChatGPTExportTest(unittest.TestCase):
         self.assertFalse((self.home / ".agents/skills/chatgpt-trailing-comma").exists())
         self.assertEqual((self.home / ".codex/skills/codex-chatgpt").resolve(), codex.resolve())
         self.assertEqual(self.run_main("check")[0], 0)
+
+    def make_stale_installs(self) -> None:
+        """Install skills that metadata no longer selects, next to third-party installs."""
+        self.make_skill("kept")
+        moved = self.make_skill("now-cloud-only", agents="chatgpt", private=True)
+        self.make_skill("other-machine", agents="codex", machines="workstation")
+        self.make_skill("vendor-collision", machines="workstation")
+        for root in (".agents/skills", ".claude/skills", ".codex/skills"):
+            (self.home / root).mkdir(parents=True)
+        (self.home / ".agents/skills/now-cloud-only").symlink_to(moved)
+        (self.home / ".claude/skills/now-cloud-only").symlink_to("../../.agents/skills/now-cloud-only")
+        (self.home / ".codex/skills/other-machine").mkdir()
+        # Third-party and agent-managed entries must survive pruning.
+        for relative in (".agents/skills/vendor", ".agents/skills/vendor-collision", ".codex/skills/.system"):
+            (self.home / relative).mkdir()
+        (self.home / ".claude/skills/vendor").symlink_to("../../.agents/skills/vendor")
+        (self.home / ".agents/.skill-lock.json").write_text(
+            '{"version": 3, "skills": {"vendor": {}, "vendor-collision": {}}}'
+        )
+
+    def assert_only_stale_installs_removed(self) -> None:
+        for relative in (".agents/skills/now-cloud-only", ".claude/skills/now-cloud-only", ".codex/skills/other-machine"):
+            self.assertFalse(os.path.lexists(self.home / relative), relative)
+        for relative in (
+            ".agents/skills/vendor", ".claude/skills/vendor", ".agents/skills/vendor-collision",
+            ".codex/skills/.system",
+        ):
+            self.assertTrue(os.path.lexists(self.home / relative), relative)
+        self.assertTrue((self.repo / "skills/private/now-cloud-only/SKILL.md").is_file())
+
+    def test_check_reports_stale_installs_and_apply_removes_only_ours(self) -> None:
+        self.make_stale_installs()
+
+        code, output = self.run_main("check")
+        self.assertEqual(code, 1)
+        self.assertIn("STALE   now-cloud-only", output)
+        self.assertNotIn("vendor", output)
+        self.assertTrue((self.home / ".codex/skills/other-machine").exists())
+
+        code, output = self.run_main("apply", "--skill", "kept")
+        self.assertNotIn("STALE", output)
+        self.assertTrue((self.home / ".codex/skills/other-machine").exists())
+
+        code, output = self.run_main("apply")
+        self.assertEqual(code, 0)
+        self.assertIn("REMOVED other-machine", output)
+        self.assert_only_stale_installs_removed()
+        self.assertTrue((self.home / ".agents/skills/kept").is_symlink())
+        self.assertEqual(self.run_main("check")[0], 0)
+
+    def commit_repo(self) -> None:
+        git = ["git", "-C", str(self.repo), "-c", "user.name=Test", "-c", "user.email=test@example.com"]
+        for command in (["init", "-q"], ["add", "."], ["commit", "-qm", "fixture"]):
+            subprocess.run([*git, *command], check=True)
+
+    def test_installs_of_skills_deleted_from_source_are_pruned(self) -> None:
+        self.make_skill("kept")
+        retired = self.make_skill("retired")
+        self.commit_repo()
+        shutil.rmtree(retired)
+        (self.home / ".agents/skills/retired").mkdir(parents=True)
+        (self.home / ".claude/skills").mkdir(parents=True)
+        (self.home / ".claude/skills/retired").symlink_to("../../.agents/skills/retired")
+
+        code, output = self.run_main("apply")
+
+        self.assertEqual(code, 0)
+        self.assertIn("REMOVED retired", output)
+        self.assertFalse(os.path.lexists(self.home / ".agents/skills/retired"))
+        self.assertFalse(os.path.lexists(self.home / ".claude/skills/retired"))
+
+    def local_ssh(self, host: str, script: str) -> subprocess.CompletedProcess:
+        """Run a remote script with a POSIX shell and the fixture home."""
+        return subprocess.run(
+            ["sh", "-s"], input=script.encode(), env={**os.environ, "HOME": str(self.home)},
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+        )
+
+    def prune_remote(self, apply: bool) -> tuple[bool, str]:
+        selected = SYNC["skills_for"]("laptop")
+        selected = [(skill, agents - {"chatgpt"}) for skill, agents in selected if agents - {"chatgpt"}]
+        output = io.StringIO()
+        with patch.dict(SYNC["main"].__globals__, {"run_ssh": self.local_ssh}), contextlib.redirect_stdout(output):
+            return SYNC["prune_remote"]("workstation", selected, apply=apply), output.getvalue()
+
+    def test_remote_prune_removes_only_ours(self) -> None:
+        self.make_stale_installs()
+
+        clean, output = self.prune_remote(apply=False)
+        self.assertFalse(clean)
+        self.assertIn("STALE   now-cloud-only -> workstation:~/.agents/skills/now-cloud-only", output)
+        self.assertTrue(self.prune_remote(apply=True)[0])
+        self.assert_only_stale_installs_removed()
+
+    def test_stale_copies_with_machine_local_env_files_are_kept(self) -> None:
+        self.make_stale_installs()
+        (self.home / ".codex/skills/other-machine/.env").write_text("TOKEN=fixture\n")
+
+        clean, output = self.prune_remote(apply=True)
+        self.assertFalse(clean)
+        self.assertIn("KEPT    other-machine -> workstation:~/.codex/skills/other-machine", output)
+        self.assertTrue((self.home / ".codex/skills/other-machine/.env").is_file())
+        self.assertFalse(os.path.lexists(self.home / ".agents/skills/now-cloud-only"))
+
+        code, output = self.run_main("apply")
+        self.assertEqual(code, 1)
+        self.assertIn("KEPT    other-machine", output)
+        self.assertTrue((self.home / ".codex/skills/other-machine/.env").is_file())
+
+    def test_env_example_alone_does_not_keep_a_stale_copy(self) -> None:
+        self.make_stale_installs()
+        (self.home / ".codex/skills/other-machine/.env.example").write_text("TOKEN=\n")
+        self.assertTrue(self.prune_remote(apply=True)[0])
+        self.assertFalse((self.home / ".codex/skills/other-machine").exists())
+
+    def test_unreadable_remote_lock_stops_pruning(self) -> None:
+        self.make_stale_installs()
+        lock = self.home / ".agents/.skill-lock.json"
+        lock.chmod(0)
+        self.addCleanup(lock.chmod, 0o644)
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            self.prune_remote(apply=True)
+        self.assertTrue((self.home / ".agents/skills/vendor-collision").exists())
+        self.assertTrue((self.home / ".codex/skills/other-machine").exists())
+
+    def test_empty_lock_stops_pruning(self) -> None:
+        self.make_stale_installs()
+        (self.home / ".agents/.skill-lock.json").write_text("")
+        for prune in (lambda: self.prune_remote(apply=True), lambda: self.run_main("apply")):
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                prune()
+        self.assertTrue((self.home / ".agents/skills/vendor-collision").exists())
+
+    def test_unreadable_local_copy_stops_pruning(self) -> None:
+        self.make_stale_installs()
+        hidden = self.home / ".codex/skills/other-machine/hidden"
+        hidden.mkdir()
+        hidden.chmod(0)
+        self.addCleanup(hidden.chmod, 0o755)
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            self.run_main("apply")
+        self.assertTrue(hidden.exists())
+        self.assertTrue(os.path.lexists(self.home / ".agents/skills/now-cloud-only"))
+
+    def test_only_direct_children_of_install_roots_are_candidates(self) -> None:
+        self.make_skill("retired-name", agents="chatgpt")
+        # A remote entry named "odd\nretired-name" lists as these two lines.
+        installed = [".agents/skills/odd", "retired-name", ".agents/skills/retired-name"]
+        self.assertEqual(SYNC["stale_installs"](installed, [], None), [".agents/skills/retired-name"])
+
+    def test_history_only_counts_skill_files_in_skill_layouts(self) -> None:
+        self.make_skill("kept")
+        self.make_skill("mailbox-review/grouped")
+        for relative in ("tests/vendor/SKILL.md", "docs/other/NOT-SKILL.md", "skills/kept/evals/fixtures/deep/SKILL.md"):
+            path = self.repo / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("fixture\n")
+        self.commit_repo()
+
+        self.assertEqual(SYNC["owned_skill_names"](), {"kept", "grouped"})
+
+    def test_install_root_inside_checkout_stops_pruning(self) -> None:
+        self.make_skill("kept")
+        (self.home / ".codex").mkdir(parents=True)
+        (self.home / ".codex/skills").symlink_to(self.repo / "skills")
+        for options in (("check",), ("apply",), ("apply", "--skill", "kept")):
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                self.run_main(*options)
+        self.assertTrue((self.repo / "skills/kept/SKILL.md").is_file())
+        self.assertFalse(os.path.lexists(self.home / ".agents/skills/kept"))
+
+    def test_failed_remote_credential_scan_stops_pruning(self) -> None:
+        self.make_stale_installs()
+        (self.home / ".codex/skills/other-machine/.env").write_text("TOKEN=fixture\n")
+        bin_dir = self.root / "bin"
+        bin_dir.mkdir()
+        (bin_dir / "find").write_text("#!/bin/sh\nexit 1\n")
+        (bin_dir / "find").chmod(0o755)
+        with patch.dict(os.environ, {"PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}"}):
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                self.prune_remote(apply=True)
+        self.assertTrue((self.home / ".codex/skills/other-machine/.env").is_file())
+        self.assertTrue(os.path.lexists(self.home / ".agents/skills/now-cloud-only"))
 
 
 @unittest.skipUnless(shutil.which("rsync"), "rsync is required")

@@ -72,8 +72,8 @@ Check the owning Git root before staging. Global agent instructions belong to do
 | `./scripts/check` | Validates skills and evals, then runs Python unit tests. |
 | `./scripts/eval triggers [skill ...]` | Prepares trigger evals for the calling agent. |
 | `./scripts/eval workflows [skill ...]` | Prepares workflow evals and isolated workspaces. |
-| `./scripts/sync-skills check [--host <host>]` | Reports missing skills, changed remote content, and incorrect installation links. |
-| `./scripts/sync-skills apply [--host <host>]` | Installs skills for the selected machine. |
+| `./scripts/sync-skills check [--host <host>] [--skill <name>]` | Reports missing, changed, mislinked, or stale installs. |
+| `./scripts/sync-skills apply [--host <host>] [--skill <name>]` | Installs skills for the selected machine and removes stale installs. |
 | `./scripts/sync-skills check --target chatgpt` | Checks whether local ChatGPT upload ZIPs match the selected skills. |
 | `./scripts/sync-skills apply --target chatgpt` | Creates or updates one upload ZIP per selected ChatGPT skill. |
 
@@ -87,6 +87,11 @@ A folder without its own `SKILL.md` groups related skills one level deep; groupe
 Local installs link to this checkout.
 SSH installs copy skills with `rsync` (required on both machines) and preserve machine-local `.env` and `.env.local` files.
 Source edits do not refresh remote copies; run `check` for the target host before and after `apply`.
+
+- A stale install is a skill this checkout ships, or once shipped, at a path the metadata no longer selects.
+- Pruning leaves `npx skills` installs (listed in `~/.agents/.skill-lock.json`) and unknown entries alone.
+- Stale copies holding a machine-local `.env` file are reported as `KEPT`; remove them by hand.
+- `--skill <name>` limits a run to the named skills and skips pruning.
 
 For ChatGPT, export one ZIP per skill,
 then upload each one under **Skills** → **Create** → **Upload from your computer** ([guide][chatgpt-upload]):

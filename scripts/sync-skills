@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import os
 import re
 import shlex
@@ -34,6 +35,10 @@ RSYNC_OPTIONS = (
     "--exclude=__pycache__/",
     "--exclude=*.pyc",
 )
+INSTALL_ROOTS = (".agents/skills", ".claude/skills", ".codex/skills")
+# `npx skills` records third-party installs here; never prune those names.
+THIRD_PARTY_LOCK = ".agents/.skill-lock.json"
+LOCK_MARKER = "--skill-lock--"
 
 
 def metadata(path: Path) -> dict[str, str]:
@@ -289,6 +294,151 @@ def apply_remote(host: str, selected: list[tuple[Path, set[str]]]) -> None:
     update_remote_links(host, selected)
 
 
+def owned_skill_names() -> set[str]:
+    """Return every skill name this checkout ships now or shipped in Git history.
+
+    History lets pruning recognize installs of deleted or renamed skills. Only
+    `SKILL.md` files in a supported layout count: `<name>/` or `<group>/<name>/`
+    under `skills/` in this repository, or at the root of the private repository.
+    """
+    names = {skill.name for skill in skill_directories(REPO_ROOT / "skills")}
+    for repo, base in ((REPO_ROOT, "skills/"), (REPO_ROOT / "skills/private", "")):
+        # Without its own .git, `git -C` would read the enclosing repository instead.
+        if not (repo / ".git").exists():
+            continue
+        result = subprocess.run(
+            ["git", "-C", str(repo), "log", "--all", "--format=", "--name-only", "--",
+             f":(glob){base}*/SKILL.md", f":(glob){base}*/*/SKILL.md"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False,
+        )
+        if result.returncode:
+            raise SystemExit(f"{repo}: could not read skill history: {result.stderr.strip()}")
+        names.update(Path(line).parent.name for line in result.stdout.splitlines())
+    return {name for name in names if SKILL_NAME.fullmatch(name)}
+
+
+def third_party_names(lock: str | None) -> set[str]:
+    """Read skill names from an `npx skills` lock file's contents, or None when it is missing."""
+    if lock is None:
+        return set()
+    try:
+        skills = json.loads(lock).get("skills", {})
+    except (ValueError, AttributeError) as error:
+        raise SystemExit(f"cannot read {THIRD_PARTY_LOCK}; not pruning: {error}") from error
+    if not isinstance(skills, dict):
+        raise SystemExit(f"cannot read {THIRD_PARTY_LOCK}; not pruning: 'skills' is not an object")
+    return set(skills)
+
+
+def stale_installs(installed: list[str], selected: list[tuple[Path, set[str]]], lock: str | None) -> list[str]:
+    """Select installs of our skills that current metadata no longer places there."""
+    owned = owned_skill_names() - third_party_names(lock)
+    expected = {path for skill, agents in selected for path in destinations(skill, agents).values()}
+    return sorted(
+        path for path in installed
+        # Only direct children of an install root; this also drops fragments of
+        # remote listing lines split by a newline inside an entry name.
+        if str(Path(path).parent) in INSTALL_ROOTS and Path(path).name in owned and path not in expected
+    )
+
+
+def has_credentials(path: Path) -> bool:
+    """Report whether a copied install holds machine-local env files that rsync never sends."""
+    if path.is_symlink() or not path.is_dir():
+        return False
+
+    def fail(error: OSError) -> None:
+        # Path.rglob skips unreadable directories; an unscanned copy must not be pruned.
+        raise SystemExit(f"{path}: cannot scan for .env files; not pruning: {error}")
+
+    return any(
+        name == ".env" or (name.startswith(".env.") and name != ".env.example")
+        for _, dirs, files in os.walk(path, onerror=fail)
+        for name in (*dirs, *files)
+    )
+
+
+def report_prune(name: str, location: str, apply: bool, kept: bool) -> None:
+    """Print one stale install's outcome."""
+    if kept:
+        print(f"KEPT    {name} -> {location} (machine-local .env; remove manually)")
+    else:
+        print(f"{'REMOVED' if apply else 'STALE':7} {name} -> {location}")
+
+
+def require_roots_outside_checkout() -> None:
+    """Stop before local changes if an install root resolves into this checkout.
+
+    Installing or pruning there would replace or delete skill sources.
+    """
+    for root in INSTALL_ROOTS:
+        if (Path.home() / root).resolve().is_relative_to(REPO_ROOT.resolve()):
+            raise SystemExit(f"~/{root} resolves into this checkout; refusing to install or prune")
+
+
+def prune_local(selected: list[tuple[Path, set[str]]], apply: bool) -> bool:
+    """Report or remove stale local installs."""
+    home = Path.home()
+    installed = [
+        f"{root}/{entry.name}"
+        for root in INSTALL_ROOTS if (home / root).is_dir()
+        for entry in (home / root).iterdir()
+    ]
+    lock = home / THIRD_PARTY_LOCK
+    stale = stale_installs(installed, selected, lock.read_text() if os.path.lexists(lock) else None)
+    kept = {relative for relative in stale if has_credentials(home / relative)}
+    for relative in stale:
+        path = home / relative
+        if apply and relative not in kept:
+            if path.is_dir() and not path.is_symlink():
+                shutil.rmtree(path)
+            else:
+                path.unlink()
+        report_prune(path.name, str(path), apply, relative in kept)
+    return not stale or (apply and not kept)
+
+
+def prune_remote(host: str, selected: list[tuple[Path, set[str]]], apply: bool) -> bool:
+    """Report or remove stale remote installs."""
+    script = ["set -eu"]
+    for root in INSTALL_ROOTS:
+        script.append(
+            f'for entry in {remote_path(root)}/*; do '
+            f'if [ -e "$entry" ] || [ -L "$entry" ]; then '
+            f'printf "%s/%s\\n" {shlex.quote(root)} "${{entry##*/}}"; fi; done'
+        )
+    lock_path = remote_path(THIRD_PARTY_LOCK)
+    # The marker separates the listing from the lock and tells an empty lock from a
+    # missing one; only a missing lock may count as having no third-party names.
+    script.append(f"if [ -e {lock_path} ] || [ -L {lock_path} ]; then echo {LOCK_MARKER}; cat -- {lock_path}; fi")
+    result = run_ssh(host, "\n".join(script) + "\n")
+    if result.returncode:
+        raise SystemExit(result.stderr.decode(errors="replace").strip())
+    listing, marker, lock = result.stdout.decode(errors="replace").partition(f"{LOCK_MARKER}\n")
+    stale = stale_installs(listing.splitlines(), selected, lock if marker else None)
+    if not stale:
+        return True
+
+    credentials = run_ssh(host, "set -eu\n" + "".join(
+        f"if [ -d {remote_path(path)} ] && [ ! -L {remote_path(path)} ]; then "
+        f"found=$(find {remote_path(path)} \\( -name .env -o -name '.env.*' \\) ! -name .env.example -print) || exit 1; "
+        f"if [ -n \"$found\" ]; then printf '%s\\n' {shlex.quote(path)}; fi; fi\n"
+        for path in stale
+    ))
+    if credentials.returncode:
+        raise SystemExit(credentials.stderr.decode(errors="replace").strip())
+    kept = set(credentials.stdout.decode(errors="replace").splitlines())
+    removable = [path for path in stale if path not in kept]
+    if apply and removable:
+        # Without a trailing slash, rm removes a symlink itself, not its target.
+        removal = run_ssh(host, "set -eu\n" + "".join(f"rm -rf -- {remote_path(path)}\n" for path in removable))
+        if removal.returncode:
+            raise SystemExit(removal.stderr.decode(errors="replace").strip())
+    for relative in stale:
+        report_prune(Path(relative).name, f"{host}:~/{relative}", apply, relative in kept)
+    return apply and not kept
+
+
 def chatgpt_bundle(skill: Path) -> bytes:
     """Package one skill, excluding credentials, caches, and Git internals."""
     def excluded(name: str) -> bool:
@@ -366,6 +516,7 @@ def main() -> int:
         help="local/SSH installation (default) or ChatGPT upload ZIPs",
     )
     parser.add_argument("--host", help="SSH host; omit for this machine")
+    parser.add_argument("--skill", action="append", default=[], help="limit to this skill name; repeatable; skips pruning")
     parser.add_argument("--machine", help="machine metadata name; defaults to host or local hostname")
     parser.add_argument(
         "--output-dir", type=Path,
@@ -381,6 +532,12 @@ def main() -> int:
         parser.error("--output-dir requires --target chatgpt")
     machine = args.machine or args.host or socket.gethostname().split(".")[0]
     selected = skills_for(machine)
+    if args.skill:
+        requested = set(args.skill)
+        available = {skill.name for skill, _ in selected}
+        if requested - available:
+            parser.error("unknown/unavailable skills: " + ", ".join(sorted(requested - available)))
+        selected = [(skill, agents) for skill, agents in selected if skill.name in requested]
     if args.target == "chatgpt":
         selected = [(skill, agents) for skill, agents in selected if agents & {"all", "chatgpt"}]
     else:
@@ -402,10 +559,16 @@ def main() -> int:
         if args.action == "apply":
             apply_remote(args.host, selected)
         clean = check_remote(args.host, selected)
+        # An exact --skill selection is partial, so everything else would look stale.
+        if not args.skill:
+            clean = prune_remote(args.host, selected, apply=args.action == "apply") and clean
     else:
+        require_roots_outside_checkout()
         if args.action == "apply":
             apply_local(selected)
         clean = check_local(selected)
+        if not args.skill:
+            clean = prune_local(selected, apply=args.action == "apply") and clean
     return 0 if clean else 1
 
 
