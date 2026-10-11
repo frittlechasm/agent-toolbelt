@@ -48,7 +48,7 @@ class ChatGPTExportTest(unittest.TestCase):
         return skill
 
     def run_main(self, action: str, *options: str) -> tuple[int, str]:
-        arguments = [str(SCRIPT), action, "--machine", "fmp", *options]
+        arguments = [str(SCRIPT), action, "--machine", "laptop", *options]
         output = io.StringIO()
         with patch.object(sys, "argv", arguments), contextlib.redirect_stdout(output):
             return SYNC["main"](), output.getvalue()
@@ -62,7 +62,7 @@ class ChatGPTExportTest(unittest.TestCase):
         self.make_skill("codex-only", agents="codex")
         self.make_skill("claude-only", agents="claude")
         self.make_skill("local-agents", agents="claude, codex")
-        self.make_skill("other-machine", machines="mowork")
+        self.make_skill("other-machine", machines="workstation")
         self.make_skill("private-shared", private=True)
 
         code, output = self.chatgpt("apply")
@@ -181,7 +181,7 @@ class ChatGPTExportTest(unittest.TestCase):
     def test_invalid_options_do_not_create_exports_or_local_installs(self) -> None:
         skill = self.make_skill("portable")
         for options in (
-            ("--target", "chatgpt", "--host", "mowork"),
+            ("--target", "chatgpt", "--host", "workstation"),
             ("--output-dir", str(self.output)),
             ("--target", "chatgpt", "--output-dir", str(skill / "exports")),
         ):

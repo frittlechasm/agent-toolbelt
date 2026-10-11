@@ -8,7 +8,7 @@
     },
     {
       "id": 2,
-      "prompt": "$agent-history-audit compare agent behavior on fmp and mowork and identify instruction drift.",
+      "prompt": "$agent-history-audit compare agent behavior on laptop and workstation and identify instruction drift.",
       "should_trigger": true
     },
     {
