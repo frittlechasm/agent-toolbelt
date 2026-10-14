@@ -2,12 +2,10 @@
 name: jira-issue-write
 description: Create or update Jira Cloud issues, comments, assignees, and status. Not for read-only Jira work.
 metadata:
-  scope: global
-  agents: claude, codex
-  machines: all
+    scope: global
+    agents: claude, codex
+    machines: all
 ---
-
-# Jira Issue Write
 
 Changes one Jira Cloud issue per run; every write previews first. Requires Python 3.9+.
 Use the bundled utility. Run `--help` for commands, setup, and exit codes, and `<command> --help` for its inputs:
