@@ -74,6 +74,8 @@ class JiraError(Exception):
     pass
 
 
+# Configuration, URL validation, and transport mirror jira-issue-read's jira-read so each
+# skill installs alone. Keep security fixes consistent across both copies.
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         raise urllib.error.HTTPError(req.full_url, code, "Redirect refused", headers, fp)
