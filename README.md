@@ -17,6 +17,7 @@ Reusable agent skills and supporting utilities.
 | `erd-diagram` | Creates source-grounded interactive database ERDs. | Shared |
 | `flow-diagram` | Creates process flows with optional animation of all supported scenarios. | Shared |
 | `html-document` | Creates standalone HTML documents. | Shared |
+| `jira-issue-read` | Searches and reads Jira Cloud issues, comments, and change history without changing them. | Local |
 | `jira-issue-write` | Creates and updates Jira Cloud issues with a preview before each write. | Local |
 | `linked-references` | Resolves and formats repository and Jira identifier links. | Shared |
 | `sync-upstream` | Syncs all branches in a fork with upstream. | Local |

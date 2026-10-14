@@ -1,0 +1,40 @@
+{
+  "skill_name": "jira-issue-read",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Find Jira issues assigned to me that were updated this week.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Summarize DEMO-123 and its comments from our configured Jira Cloud site.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Search Jira with JQL: project = DEMO AND statusCategory != Done.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "How many open bugs are in DEMO right now?",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Create a Jira bug for the login failure.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Move DEMO-123 to Done and add a comment.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Use the private jira-search middleware to find tickets for Acme.",
+      "should_trigger": false
+    }
+  ]
+}
