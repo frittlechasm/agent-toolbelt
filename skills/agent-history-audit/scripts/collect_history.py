@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import socket
 import subprocess
@@ -33,21 +34,33 @@ KNOWN_TOKEN = re.compile(r"\b(sk-[A-Za-z0-9_-]{12,}|gh[oprsu]_[A-Za-z0-9_]{12,}|
 URI_PASSWORD = re.compile(
     r"(?i)(\b[a-z][a-z0-9+.-]*://[^\s/:@]+:)([^\s/@]+)(@)"
 )
+PROSE_SECRET = re.compile(
+    r"(?i)(\b(?:password|passwd|token|api[ _-]?key|secret)\s+"
+    r"(?:would be|will be|is|was)\s*:?\s*)"
+    r"(?:`[^`\n]+`|\"[^\"\n]+\"|'[^'\n]+'|[^\s,;]+)"
+)
 INJECTED_PREFIXES = (
     "<local-command-caveat>",
     "<task-notification>",
     "<system-reminder>",
     "<command-name>",
+    "<command-message>",
     "<recommended_plugins>",
     "<skills_instructions>",
     "<skill ",
+    "<skill>",
     "<environment_context>",
     "<permissions instructions>",
     "<apps_instructions>",
     "<plugins_instructions>",
     "<collaboration_mode>",
     "# agents.md instructions",
+    "delegated task node:",
+    "context handoff (manual_context):",
+    "[request interrupted",
 )
+SCHEDULED_PROMPT = re.compile(r"\AAutomation:[^\n]+\nAutomation ID:[^\n]+(?:\n|$)", re.IGNORECASE)
+REVIEWER_PROMPT = re.compile(r"\AAct as (?:a )?review(?:er)? sub-agent\b", re.IGNORECASE)
 CODEX_USAGE_MIRROR_WINDOW_SECONDS = 60
 
 
@@ -56,6 +69,7 @@ def redact(text: str) -> str:
     text = AUTHORIZATION.sub(lambda match: match.group(1) + REDACTED + match.group(3), text)
     text = BEARER_TOKEN.sub(lambda match: match.group(1) + REDACTED, text)
     text = ASSIGNED_SECRET.sub(lambda match: match.group(1) + REDACTED + match.group(3), text)
+    text = PROSE_SECRET.sub(lambda match: match.group(1) + REDACTED, text)
     text = KNOWN_TOKEN.sub(REDACTED, text)
     return URI_PASSWORD.sub(lambda match: match.group(1) + REDACTED + match.group(3), text)
 
@@ -98,13 +112,57 @@ def parse_time(value: object) -> datetime | None:
         return None
 
 
-def read_jsonl(path: Path):
-    with path.open(encoding="utf-8", errors="replace") as handle:
-        for line_number, line in enumerate(handle, 1):
-            try:
-                yield line_number, json.loads(line)
-            except json.JSONDecodeError:
-                continue
+def collection_issue(diagnostics: dict | None, path: Path, **details) -> None:
+    if diagnostics is not None:
+        diagnostics["complete"] = False
+        diagnostics["issues"].append({"path": str(path), **details})
+
+
+def history_files(directory: Path, diagnostics: dict | None, *, skip_subagents: bool = False):
+    if not directory.is_dir():
+        collection_issue(diagnostics, directory, error="missing_or_not_directory")
+        return
+
+    def walk_error(error: OSError) -> None:
+        collection_issue(diagnostics, Path(error.filename or directory), error=type(error).__name__)
+
+    for parent, directories, names in os.walk(directory, onerror=walk_error):
+        if skip_subagents:
+            directories[:] = [name for name in directories if name != "subagents"]
+        for name in sorted(names):
+            if name.endswith(".jsonl"):
+                if diagnostics is not None:
+                    diagnostics["files_seen"] += 1
+                yield Path(parent) / name
+
+
+def read_jsonl(path: Path, diagnostics: dict | None = None):
+    invalid_count = 0
+    first_invalid_lines = []
+    try:
+        with path.open("rb") as handle:
+            for line_number, line in enumerate(handle, 1):
+                try:
+                    item = json.loads(line.decode("utf-8"))
+                    if not isinstance(item, dict):
+                        raise ValueError("expected an object")
+                except (UnicodeDecodeError, ValueError):
+                    invalid_count += 1
+                    if len(first_invalid_lines) < 5:
+                        first_invalid_lines.append(line_number)
+                    continue
+                yield line_number, item
+        if diagnostics is not None:
+            diagnostics["files_read"] += 1
+    except OSError as error:
+        collection_issue(diagnostics, path, error=type(error).__name__)
+    if invalid_count:
+        if diagnostics is not None:
+            diagnostics["invalid_records"] += invalid_count
+        collection_issue(
+            diagnostics, path, error="invalid_jsonl_record", count=invalid_count,
+            first_lines=first_invalid_lines,
+        )
 
 
 def make_record(
@@ -138,7 +196,7 @@ def make_record(
         "usage": usage,
         "event_id": event_id,
         "content_item_kinds": content_item_kinds or [],
-        "injected": injected_text(cleaned) if injected is None else injected,
+        "injected": bool(injected) or injected_text(cleaned),
         "delegated": False,
     }
 
@@ -204,16 +262,12 @@ def make_usage_record(
     }
 
 
-def collect_claude(root: Path, machine: str) -> list[dict]:
+def collect_claude(root: Path, machine: str, diagnostics: dict | None = None) -> list[dict]:
     records = []
     projects = root / "projects"
-    if not projects.exists():
-        return records
-    for path in projects.rglob("*.jsonl"):
-        if "subagents" in path.parts:
-            continue
+    for path in history_files(projects, diagnostics, skip_subagents=True):
         seen_usage_ids = set()
-        for line_number, item in read_jsonl(path):
+        for line_number, item in read_jsonl(path, diagnostics):
             if item.get("type") not in {"user", "assistant"} or item.get("isMeta") is True:
                 continue
             message = item.get("message")
@@ -270,15 +324,14 @@ def collect_claude(root: Path, machine: str) -> list[dict]:
                     if message_id is not None:
                         seen_usage_ids.add(message_id)
     records = deduplicate_message_records(records)
+    mark_message_origins(records)
     return deduplicate_usage_records(records)
 
 
-def collect_codex(root: Path, machine: str) -> list[dict]:
+def collect_codex(root: Path, machine: str, diagnostics: dict | None = None) -> list[dict]:
     records = []
     sessions = root / "sessions"
-    if not sessions.exists():
-        return records
-    for path in sessions.rglob("*.jsonl"):
+    for path in history_files(sessions, diagnostics):
         delegated = False
         current_model = None
         thread_id = None
@@ -292,7 +345,7 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
         response_usage_records = []
         legacy_usage_records = []
         seen_legacy_snapshots = set()
-        for line_number, item in read_jsonl(path):
+        for line_number, item in read_jsonl(path, diagnostics):
             payload = item.get("payload")
             if not isinstance(payload, dict):
                 continue
@@ -416,7 +469,7 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
                 "delegated"
                 if delegated
                 else "unknown"
-                if "exec" in session_sources
+                if not session_sources or "exec" in session_sources
                 else "direct"
             )
             record["thread_id"] = thread_id
@@ -429,7 +482,29 @@ def collect_codex(root: Path, machine: str) -> list[dict]:
     mark_codex_thread_roots(records)
     records = deduplicate_message_records(records)
     records = deduplicate_usage_records(records)
+    mark_message_origins(records)
     return reconcile_codex_usage(records)
+
+
+def mark_message_origins(records: list[dict]) -> None:
+    """Keep prompt shape distinct from metadata-backed delegation provenance."""
+    for record in records:
+        if record.get("record_type") != "message":
+            continue
+        text = record.get("text", "").lstrip()
+        if record.get("role") != "user":
+            origin = "assistant"
+        elif record.get("injected"):
+            origin = "injected"
+        elif SCHEDULED_PROMPT.match(text):
+            origin = "scheduled"
+        elif record.get("delegated"):
+            origin = "delegated"
+        elif REVIEWER_PROMPT.match(text):
+            origin = "reviewer_prompt"
+        else:
+            origin = record.get("delegation_status", "unknown")
+        record["message_origin"] = origin
 
 
 def mark_codex_thread_roots(records: list[dict]) -> None:
@@ -649,10 +724,20 @@ def filter_time_range(
 def collect_local(args: argparse.Namespace) -> list[dict]:
     machine = args.machine or socket.gethostname().split(".")[0]
     records = []
-    if args.agent in {"all", "claude"}:
-        records.extend(collect_claude(Path(args.claude_root).expanduser(), machine))
-    if args.agent in {"all", "codex"}:
-        records.extend(collect_codex(Path(args.codex_root).expanduser(), machine))
+    for agent, root_value, collector in (
+        ("claude", args.claude_root, collect_claude),
+        ("codex", args.codex_root, collect_codex),
+    ):
+        if args.agent not in {"all", agent}:
+            continue
+        root = Path(root_value).expanduser()
+        diagnostics = {
+            "record_type": "collection_diagnostics", "machine": machine, "agent": agent,
+            "root": str(root), "complete": True, "files_seen": 0, "files_read": 0,
+            "invalid_records": 0, "issues": [],
+        }
+        records.extend(collector(root, machine, diagnostics))
+        print(redact(json.dumps(diagnostics, ensure_ascii=False)), file=sys.stderr)
     return records
 
 
@@ -671,10 +756,12 @@ def collect_remote(host: str, agent: str) -> list[dict]:
             check=False,
         )
     except OSError as error:
-        raise RuntimeError(f"{host}: could not start SSH: {error}") from error
+        raise RuntimeError(redact(f"{host}: could not start SSH: {error}")) from error
+    stderr = redact(result.stderr.decode(errors="replace").strip())
     if result.returncode != 0:
-        error = result.stderr.decode(errors="replace").strip()
-        raise RuntimeError(f"{host}: history collection failed: {error}")
+        raise RuntimeError(f"{host}: history collection failed: {stderr}")
+    if stderr:
+        print(stderr, file=sys.stderr)
     try:
         return [json.loads(line) for line in result.stdout.decode(errors="replace").splitlines() if line.strip()]
     except json.JSONDecodeError as error:
