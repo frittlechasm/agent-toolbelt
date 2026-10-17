@@ -18,16 +18,22 @@ def write(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def run_git(workspace: Path, *args: str) -> None:
+def run_git(workspace: Path, *args: str) -> str:
     result = subprocess.run(
         ["git", *args], cwd=workspace, text=True, capture_output=True, check=False
     )
     if result.returncode:
         raise RuntimeError(result.stderr.strip() or result.stdout.strip())
+    return result.stdout.strip()
 
 
-def create_repository(workspace: Path, add_remote: bool, scenario: str) -> None:
-    audit_parameter = "request_id" if scenario in {"refresh", "existing"} else "token"
+def create_repository(workspace: Path, add_remote: bool, scenario: str) -> tuple[str, str, str]:
+    run_git(workspace, "init", "-q", "-b", "main")
+    run_git(workspace, "config", "user.name", "Eval Fixture")
+    run_git(workspace, "config", "user.email", "eval@example.invalid")
+    run_git(workspace, "commit", "-q", "--allow-empty", "-m", "PR destination fixture")
+    destination_commit = run_git(workspace, "rev-parse", "HEAD")
+    audit_parameter = "token"
     write(
         workspace / "src/access.py",
         f"""def can_view(user, resource):
@@ -48,11 +54,13 @@ def audit_view(logger, user, {audit_parameter}):
 # No test defines which resources an administrator may view.
 """,
     )
-    run_git(workspace, "init", "-q", "-b", "main")
-    run_git(workspace, "config", "user.name", "Eval Fixture")
-    run_git(workspace, "config", "user.email", "eval@example.invalid")
     run_git(workspace, "add", "src/access.py", "tests/test_access.py")
     run_git(workspace, "commit", "-q", "-m", "Add PR head fixture")
+    prior_commit = run_git(workspace, "rev-parse", "HEAD")
+    if scenario in {"refresh", "existing"}:
+        path = workspace / "src/access.py"
+        write(path, path.read_text().replace("token", "request_id"))
+        run_git(workspace, "commit", "-q", "-am", "Use request IDs in audit logging")
     if add_remote:
         run_git(
             workspace,
@@ -61,44 +69,18 @@ def audit_view(logger, user, {audit_parameter}):
             "origin",
             f"git@bitbucket.org:{WORKSPACE}/{REPOSITORY}.git",
         )
+    return destination_commit, prior_commit, run_git(workspace, "rev-parse", "HEAD")
 
 
-def bundle_files(pr_number: int, scenario: str) -> dict[str, str]:
-    commit_marker = {"refresh": "b", "existing": "c"}.get(scenario, "a")
-    source_commit = commit_marker * 40
+def bundle_files(pr_number: int, source_commit: str, destination_commit: str, diff: str) -> dict[str, str]:
     summary = f"""# PR #{pr_number}: Tighten resource access
 
 - Source: `{source_commit}`
-- Destination: `{'d' * 40}`
+- Destination: `{destination_commit}`
 - Updated: `2026-08-28T13:30:00Z`
 - Comments: 1
 
 The PR changes administrator access and request audit logging in `src/access.py`.
-"""
-    if scenario in {"refresh", "existing"}:
-        diff = """diff --git a/src/access.py b/src/access.py
-@@
- def can_view(user, resource):
-     if user.role == "admin":
-         return True
-     return resource.owner_id == user.id
-@@
--def audit_view(logger, user, token):
--    logger.info("resource viewed", extra={"user_id": user.id, "token": token})
-+def audit_view(logger, user, request_id):
-+    logger.info("resource viewed", extra={"user_id": user.id, "request_id": request_id})
-"""
-    else:
-        diff = """diff --git a/src/access.py b/src/access.py
-@@
-+def can_view(user, resource):
-+    if user.role == "admin":
-+        return True
-+    return resource.owner_id == user.id
-+
-+
-+def audit_view(logger, user, token):
-+    logger.info("resource viewed", extra={"user_id": user.id, "token": token})
 """
     comments = [
         {
@@ -113,7 +95,7 @@ The PR changes administrator access and request audit logging in `src/access.py`
         "title": "Tighten resource access",
         "state": "OPEN",
         "source": {"commit": {"hash": source_commit}},
-        "destination": {"commit": {"hash": "d" * 40}},
+        "destination": {"commit": {"hash": destination_commit}},
         "updated_on": "2026-08-28T13:30:00Z",
     }
     return {
@@ -138,11 +120,11 @@ The PR changes administrator access and request audit logging in `src/access.py`
     }
 
 
-def prior_checkpoint() -> str:
+def prior_checkpoint(source_commit: str, destination_commit: str) -> str:
     return f"""---
 reviewed_at: 2026-08-27T12:00:00Z
-source_commit: {'a' * 40}
-destination_commit: {'d' * 40}
+source_commit: {source_commit}
+destination_commit: {destination_commit}
 pr_updated_on: 2026-08-27T11:30:00Z
 comment_count: 0
 ---
@@ -156,15 +138,15 @@ comment_count: 0
 
 | Reviewed at | Source | Result |
 | --- | --- | --- |
-| 2026-08-27T12:00:00Z | `{'a' * 12}` | 2 open |
+| 2026-08-27T12:00:00Z | `{source_commit[:12]}` | 2 open |
 """
 
 
-def existing_checkpoint() -> str:
+def existing_checkpoint(source_commit: str, destination_commit: str) -> str:
     return f"""---
 reviewed_at: 2026-08-28T10:00:00Z
-source_commit: {'c' * 40}
-destination_commit: {'d' * 40}
+source_commit: {source_commit}
+destination_commit: {destination_commit}
 pr_updated_on: 2026-08-28T09:30:00Z
 comment_count: 0
 ---
@@ -177,17 +159,18 @@ comment_count: 0
 
 | Reviewed at | Source | Result |
 | --- | --- | --- |
-| 2026-08-28T10:00:00Z | `{'c' * 12}` | 1 open |
+| 2026-08-28T10:00:00Z | `{source_commit[:12]}` | 1 open |
 """
 
 
-def create_bundle(bundle: Path, pr_number: int, scenario: str) -> None:
-    for relative, content in bundle_files(pr_number, scenario).items():
+def create_bundle(bundle: Path, pr_number: int, scenario: str, revisions: tuple[str, str, str], diff: str) -> None:
+    destination_commit, prior_commit, source_commit = revisions
+    for relative, content in bundle_files(pr_number, source_commit, destination_commit, diff).items():
         write(bundle / relative, content)
     if scenario == "refresh":
-        write(bundle / "review-summary.md", prior_checkpoint())
+        write(bundle / "review-summary.md", prior_checkpoint(prior_commit, destination_commit))
     if scenario == "existing":
-        write(bundle / "review-summary.md", existing_checkpoint())
+        write(bundle / "review-summary.md", existing_checkpoint(source_commit, destination_commit))
         write(
             bundle / "comments.json",
             json.dumps(
@@ -257,11 +240,12 @@ def main() -> None:
     pr_number = 184 if scenario == "bare-number" else 42
     url = f"https://bitbucket.org/{WORKSPACE}/{REPOSITORY}/pull-requests/{pr_number}"
     if scenario != "unresolvable":
-        create_repository(workspace, scenario == "bare-number", scenario)
+        revisions = create_repository(workspace, scenario == "bare-number", scenario)
 
     bundle = workspace / ("bitbucket-review" if scenario == "existing" else ".eval/bundle")
     if scenario != "unresolvable":
-        create_bundle(bundle, pr_number, scenario)
+        diff = run_git(workspace, "diff", revisions[0], revisions[2]) + "\n"
+        create_bundle(bundle, pr_number, scenario, revisions, diff)
 
     create_fetch_shim(
         workspace,

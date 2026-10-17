@@ -15,7 +15,7 @@ metadata:
 - For a bare PR number, infer the workspace and repository if current repo has one `bitbucket.org` remote.
 - If unable to resolve the URL, ask the user to provide one.
 
-## Fetch the PR
+## Fetch or reuse the PR
 
 - Reuse the output directory already returned in the current session.
 - Do not call the script again merely to continue the same review or address another existing comment.
@@ -31,7 +31,7 @@ metadata:
 - The script cannot infer those prompt signals, and PR metadata may not reflect every comment change.
 - Do not force a refresh for a re-review when the user has not indicated that the PR changed.
 
-## Output
+## Read the review bundle
 
 - Read the output directory printed by the script.
     - You may verify `manifest.json` first to confirm bundle identity and completeness.
@@ -45,11 +45,27 @@ metadata:
     - Use `diffstat.json` for file statistics.
     - Use `manifest.json` to verify bundle identity, freshness, and completeness.
 
-- If `review-summary.md` exists in the output directory, read it before evaluating detailed review
-  artifacts so prior finding IDs and assessment state inform the review.
-- It records the last completed review and is not a fetched Bitbucket artifact.
+- Use `review-summary.md` for prior finding IDs and assessment state. It records the last completed review and is not a fetched artifact.
 
 - Complete the requested task using the fetched artifacts and the checked-out repo where relevant.
+
+## Check revisions and deployment
+
+- Read source and destination commit IDs from the bundle. Confirm the local revision before using checked-out files as evidence.
+  - If the checkout differs, inspect the recorded revisions with Git.
+- Compare against the PR's actual destination.
+  - For merge-related claims, inspect the relevant parents and merge base.
+  - A migration on another feature branch does not prove it was released or applied.
+  - Verify deployment history before claiming migration immutability or checksum breakage.
+
+## Validate findings
+
+- For each defect, identify a reachable scenario, expected behavior, and the changed code that violates it.
+  - Check product requirements, supported configurations, and data invariants before treating a hypothetical case as a bug.
+- Respect documented operational intent, including non-production switches and deliberate restrictions.
+  - If reachability or intent is unclear, state the uncertainty or ask a focused question instead of claiming a confirmed defect.
+- On re-review, distinguish new defects from existing comments and resolved findings.
+  - Recheck claims against the current source and destination revisions before carrying them forward.
 
 ## Record a completed review
 
@@ -62,7 +78,7 @@ metadata:
     - Keep the current assessment and open findings. Preserve stable finding IDs across re-reviews.
     - Move verified fixed findings to a concise resolved section.
     - Append one compact row to a review history table for each completed review.
-- On a re-review, compare the checkpoint with the current fetched artifacts, carry forward unresolved findings,
-  and update the file only when the review finishes successfully.
+- On re-review, compare the checkpoint with current artifacts and carry forward unresolved findings.
+    - Update the file only after the review succeeds.
 - Prepare the complete replacement before atomically replacing the file.
 - An interrupted review must leave the prior checkpoint intact.
