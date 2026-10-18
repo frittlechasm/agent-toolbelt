@@ -171,20 +171,21 @@ def create_bundle(bundle: Path, pr_number: int, scenario: str, revisions: tuple[
         write(bundle / "review-summary.md", prior_checkpoint(prior_commit, destination_commit))
     if scenario == "existing":
         write(bundle / "review-summary.md", existing_checkpoint(source_commit, destination_commit))
+        comments = [
+            {
+                "id": 601,
+                "user": "author",
+                "created_on": "2026-08-28T11:00:00Z",
+                "content": "request_id is generated per request and is never an authentication credential.",
+            }
+        ]
         write(
             bundle / "comments.json",
-            json.dumps(
-                [
-                    {
-                        "id": 601,
-                        "user": "author",
-                        "created_on": "2026-08-28T11:00:00Z",
-                        "content": "request_id is generated per request and is never an authentication credential.",
-                    }
-                ],
-                indent=2,
-            )
-            + "\n",
+            json.dumps(comments, indent=2) + "\n",
+        )
+        write(
+            bundle / "comments.raw.json",
+            json.dumps({"values": comments}, indent=2) + "\n",
         )
 
 
