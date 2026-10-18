@@ -58,6 +58,23 @@
         "Avoids large continuously repainting effects and does not add unrelated ambient animation.",
         "Renders and checks the animated and reduced-motion states for clipping, clarity, and consistent comparison."
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "I chose variant B in mocks/queue.html.\n- Correct its totals and percentage labels using data/queue.json.\n- Fix clipping at 320px while keeping the selected design.",
+      "capabilities": [
+        "browser"
+      ],
+      "expected_output": "The selected queue chart remains visible and accurate, its narrow layout fits, and the other variants and production source remain intact.",
+      "files": [],
+      "fixture": "fixtures/selected-chart",
+      "expectations": [
+        "Uses the supplied 72 standard and 48 priority jobs to show 120 total, 60% standard, and 40% priority in variant B.",
+        "Keeps the selected donut chart, legend, and visual direction; corrects segment proportions and accessible text as well as visible labels.",
+        "Preserves variants A and C, their supplied content, and the comparison order.",
+        "Renders and inspects the result at 320px and desktop widths; fixes page overflow without hiding or clipping the required chart or labels.",
+        "Leaves src/dashboard.ts and data/queue.json unchanged and does not add application behavior or runtime dependencies."
+      ]
     }
   ]
 }

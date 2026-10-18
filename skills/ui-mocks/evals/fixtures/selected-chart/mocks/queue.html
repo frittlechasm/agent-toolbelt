@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Queue overview directions</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f2f2ef; color: #202520; font: 16px system-ui, sans-serif; }
+    main { width: 960px; margin: 32px auto; padding: 24px; }
+    section { margin-bottom: 32px; }
+    .label { font-size: 14px; font-weight: 700; }
+    .surface { padding: 28px; background: white; border: 1px solid #cccfc8; }
+    h1 { margin-top: 0; font-size: 24px; }
+    .chart-layout { display: flex; align-items: center; gap: 48px; width: 700px; }
+    .chart { flex: 0 0 240px; width: 240px; height: 240px; }
+    .legend { min-width: 260px; padding: 0; list-style: none; }
+    .legend li { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .swatch { width: 14px; height: 14px; background: #35745a; }
+    .priority { background: #c68a35; }
+    .stats { display: flex; gap: 32px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #cccfc8; }
+  </style>
+</head>
+<body>
+  <main>
+    <section id="variant-a" aria-label="Variant A">
+      <p class="label">A</p>
+      <div class="surface">
+        <h1>Queue overview</h1>
+        <div class="stats"><p>Standard <strong>72</strong></p><p>Priority <strong>48</strong></p></div>
+        <p>120 queued jobs</p>
+      </div>
+    </section>
+    <section id="variant-b" aria-label="Variant B">
+      <p class="label">B</p>
+      <div class="surface">
+        <h1>Queue overview</h1>
+        <p>100 queued jobs</p>
+        <div class="chart-layout">
+          <svg class="chart" viewBox="0 0 240 240" role="img" aria-labelledby="queue-title queue-description">
+            <title id="queue-title">Queued jobs by class</title>
+            <desc id="queue-description">Standard 72%, Priority 48%. Total 100 jobs.</desc>
+            <circle cx="120" cy="120" r="86" fill="none" stroke="#c68a35" stroke-width="30" />
+            <circle cx="120" cy="120" r="86" fill="none" stroke="#35745a" stroke-width="30"
+                    pathLength="100" stroke-dasharray="72 28" transform="rotate(-90 120 120)" />
+            <text x="120" y="118" text-anchor="middle" font-size="32" fill="currentColor">100</text>
+            <text x="120" y="144" text-anchor="middle" font-size="14" fill="currentColor">queued jobs</text>
+          </svg>
+          <ul class="legend">
+            <li><span class="swatch"></span>Standard: 72 jobs (72%)</li>
+            <li><span class="swatch priority"></span>Priority: 48 jobs (48%)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section id="variant-c" aria-label="Variant C">
+      <p class="label">C</p>
+      <div class="surface">
+        <h1>Queue overview</h1>
+        <table>
+          <thead><tr><th>Class</th><th>Queued jobs</th></tr></thead>
+          <tbody><tr><td>Standard</td><td>72</td></tr><tr><td>Priority</td><td>48</td></tr></tbody>
+        </table>
+        <p>120 queued jobs</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
