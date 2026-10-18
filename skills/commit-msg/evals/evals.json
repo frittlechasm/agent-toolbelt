@@ -52,6 +52,23 @@
         "Returns one concise conventional commit message with an imperative lowercase subject.",
         "Does not stage or commit the file."
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Commit only the timeout change in src/server.ts with a conventional commit message.",
+      "expected_output": "One commit containing only the timeout change, with unrelated staged, unstaged, and untracked work preserved.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_git_repo.py",
+        "scoped-commit"
+      ],
+      "expectations": [
+        "Inspects repository status and staged changes before choosing the commit scope.",
+        "Creates exactly one commit containing only src/server.ts and its requestTimeoutMs change.",
+        "Derives a conventional commit message from the timeout change, without unrelated documentation or attribution trailers.",
+        "Preserves the unrelated README.md staged blob and its distinct unstaged contents.",
+        "Leaves the unrelated untracked notes.txt unchanged and untracked."
+      ]
     }
   ]
 }

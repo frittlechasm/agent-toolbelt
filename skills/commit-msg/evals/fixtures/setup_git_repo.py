@@ -26,7 +26,7 @@ def write(path: Path, contents: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("scenario", choices=("staged", "unstaged", "untracked"))
+    parser.add_argument("scenario", choices=("staged", "unstaged", "untracked", "scoped-commit"))
     parser.add_argument("workspace", type=Path)
     args = parser.parse_args()
     root = args.workspace
@@ -51,8 +51,14 @@ def main() -> None:
         root / "src" / "server.ts",
         "export const port = 3000\nexport const requestTimeoutMs = 5000\n",
     )
-    if args.scenario == "staged":
+    if args.scenario in {"staged", "scoped-commit"}:
         git(root, "add", "src/server.ts")
+
+    if args.scenario == "scoped-commit":
+        write(root / "README.md", "# Fixture service\n\nDeployment guide draft.\n")
+        git(root, "add", "README.md")
+        write(root / "README.md", "# Fixture service\n\nDeployment guide draft.\nLocal notes in progress.\n")
+        write(root / "notes.txt", "Unrelated investigation notes.\n")
 
 
 if __name__ == "__main__":

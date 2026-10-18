@@ -9,30 +9,38 @@ metadata:
 
 # Commit Message Generator
 
-## Workflow
+## Inspect changes
 
 - Run `git status --short` so untracked files are visible.
 - Run `git diff --cached` to inspect staged changes.
-- If staged changes exist, base the message only on the staged diff; otherwise run `git diff` for unstaged changes.
+- For a message-only request, use the staged diff when present; otherwise inspect `git diff` for unstaged changes.
 - If only untracked files remain, inspect their relevant contents before writing the message.
 - If there are no changes, say there are no changes to summarize.
-- If the user only asked for a message, return the message with no recap, alternatives, or command instructions.
-- If the user explicitly asked to commit, use the generated message for the commit after normal repository checks.
-- Generate a commit message following the format below.
+
+## Commit scope
+
+- When asked to commit, use the user's requested files or task as the boundary. Staging alone does not authorize unrelated changes.
+- Inspect the diff for the authorized changes and derive the message from what the commit will contain.
+- Commit only those changes after normal repository checks. Preserve unrelated staged and unstaged changes, including their index state.
+- Each commit should cover one meaningful change and include its related tests and documentation.
+- Keep commits buildable and testable when practical. Do not split changes just to increase the number of commits.
+
+## Write the message
+
+- For a message-only request, return the message with no recap, alternatives, or command instructions.
+- Follow the format below.
 - Choose the type and optional scope from the actual behavioral intent of the diff.
-- Generate the subject based on the diff and actual intent of the change based on user's original prompt.
-- Always write a concise, human-readable subject that explains why the change matters.
+- Write a concise, human-readable subject that reflects the diff and the user's intent.
 - Do not add commit trailers or attribution lines such as `Co-authored-by:`.
-- Add `!` before colon — `feat(auth)!: remove OAuth 1.0` for breaking changes.
+- For breaking changes, add `!` before the colon: `feat(auth)!: remove OAuth 1.0`.
 
 ## Gotchas
 
-- Staged changes win. Do not mix in unstaged changes unless the user asks for a message covering the whole working tree.
+- For message-only requests, do not mix staged and unstaged changes unless the user asks to cover the whole working tree.
 - Prefer the narrowest accurate type. A dependency bump that fixes a bug can be `fix`; routine metadata churn is usually `chore`.
-- If the diff combines unrelated changes, suggest one message only when they are intentionally being committed together;
-  otherwise mention that separate commits would be clearer.
-- Each commit should cover one meaningful change and include its related tests and documentation.
-- Keep commits buildable and testable when practical. Do not split changes just to increase the number of commits.
+- If the diff combines unrelated changes:
+  - Suggest one message only when the user intends to commit them together.
+  - Otherwise, mention that separate commits would be clearer.
 
 ## Format
 
