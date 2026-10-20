@@ -1,6 +1,6 @@
 ---
 name: declutter
-description: Review existing code for simplification and performance improvements when asked to declutter, simplify, or optimize it.
+description: Review code or skills for simplification, redundant guidance, and performance improvements when asked to declutter, simplify, or optimize.
 metadata:
     scope: global
     agents: all
@@ -9,22 +9,22 @@ metadata:
 
 # Declutter
 
-Find worthwhile simplifications and performance improvements in the requested code without changing its intended behavior.
+Find worthwhile simplifications in the requested code or skills while preserving intended behavior and essential guidance.
 
 ## Review
 
-- Follow the requested scope: diff, commit, module, or repository. If unstated, choose a reasonable scope from context and say what you inspected.
+- Follow the requested scope: diff, commit, module, skill, or repository. If unstated, choose a reasonable scope from context and say what you inspected.
 - Check callers, existing helpers, and tests before judging code unnecessary.
-- Prioritize the following:
-    - dead or duplicate code
-    - custom code that a suitable standard-library, platform, or current-dependency feature could replace
-    - needless wrappers and abstractions
-    - repeated UI components
-    - redundant tests
+- In skills, comments, and documentation, remove generic advice, repetition, and explanations the model can readily infer from the code or surrounding context.
+    - Keep non-obvious intent, constraints, contracts, and gotchas that affect decisions or prevent mistakes.
+- Prioritize dead or duplicate code, needless wrappers, redundant tests, and custom code a standard library, platform, or current dependency can replace.
+- Share a UI component only when its behavior and design are genuinely common.
 - Check for avoidable repeated work, inefficient queries or I/O, and unnecessary rendering where relevant.
-- Keep a test if it covers a distinct behavior, even when its setup resembles another test.
-  Share a UI component only when its behavior and design are genuinely common.
+- Keep tests that cover distinct behavior, even when their setup is similar.
 - Treat performance ideas as hypotheses until a benchmark, profile, or clear complexity analysis supports them. Do not add caching or memoization by default.
+    - Verify that timed work completes correctly; count errors and skipped work.
+    - Compare equivalent workloads and conditions. Repeat consequential comparisons and report variation.
+    - Separate measured improvement from inferred cause, and relate microbenchmarks to the complete user path.
 - Report the few worthwhile findings with file references, expected benefit, and behavior risk. Say when no change is justified.
 
 ## Changes
