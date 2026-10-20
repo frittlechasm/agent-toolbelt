@@ -1,0 +1,117 @@
+{
+  "skill_name": "bitbucket",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review https://bitbucket.org/example-workspace/example-repo/pull-requests/42. This is a new session, and I have not said that the PR changed.",
+      "expected_output": "The assistant fetches the PR once without forcing a refresh, reads the returned review bundle, completes a source-aware review, and records the completed review checkpoint only after the review succeeds.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_bitbucket_review.py",
+        "new-url"
+      ],
+      "expectations": [
+        "Calls scripts/fetch_pr.py exactly once at the start of the session with the supplied PR URL and without --refresh.",
+        "Uses the output directory printed by the script and reads summary.md before analyzing diff.patch, comments.json, and other detailed artifacts; manifest identity verification may happen first.",
+        "Uses the checked-out repository where relevant instead of reviewing only the summary text.",
+        "Creates or replaces review-summary.md only after the review completes, with the required freshness fields, current findings, and one compact history row."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review Bitbucket PR #184 in this repo. The current Git repository has exactly one bitbucket.org remote.",
+      "expected_output": "The assistant infers the workspace and repository from the unambiguous Bitbucket remote, constructs the PR URL, fetches it once, and reviews the resulting artifacts without asking for information it can discover.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_bitbucket_review.py",
+        "bare-number"
+      ],
+      "expectations": [
+        "Inspects the current repository remotes and uses the sole bitbucket.org remote to resolve the bare PR number.",
+        "Does not ask the user for a URL when the workspace and repository are unambiguous.",
+        "Calls scripts/fetch_pr.py once with the resolved Bitbucket Cloud PR URL.",
+        "Reads the printed output directory and uses the fetched bundle to complete the review."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Re-review https://bitbucket.org/example-workspace/example-repo/pull-requests/42. The PR has new commits and updated comments since the last review.",
+      "expected_output": "The assistant forces one refresh, reads the previous review checkpoint and refreshed artifacts, carries unresolved findings forward, and updates the checkpoint atomically after the re-review completes.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_bitbucket_review.py",
+        "refresh"
+      ],
+      "expectations": [
+        "Calls scripts/fetch_pr.py exactly once with the supplied URL and --refresh because the prompt explicitly says the PR changed.",
+        "Reads review-summary.md when it exists before evaluating the refreshed diff, comments, commits, and metadata.",
+        "Preserves stable IDs for unresolved findings and moves only verified fixes to the resolved section.",
+        "Updates review-summary.md only after a successful re-review and appends one compact review-history row."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Earlier in this session, fetch_pr.py returned ./bitbucket-review for this PR. Continue by checking whether the existing comments change your assessment.",
+      "expected_output": "The assistant reuses the output directory already returned in the session, reads the existing comment and review artifacts, and continues the assessment without fetching the PR again.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_bitbucket_review.py",
+        "existing"
+      ],
+      "expectations": [
+        "Does not call scripts/fetch_pr.py again merely to continue the same review.",
+        "Reads ./bitbucket-review/summary.md and the relevant comment artifacts.",
+        "Reads review-summary.md if present and treats it as the prior completed assessment rather than a fetched Bitbucket artifact.",
+        "Completes the requested comment assessment using the existing bundle."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Review Bitbucket PR #27. This directory is not a Git repository, and I have not provided a workspace or repository name.",
+      "expected_output": "The assistant asks for the Bitbucket Cloud PR URL because it cannot resolve the bare number safely, and it does not guess identifiers or invoke the fetch script with an invented URL.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_bitbucket_review.py",
+        "unresolvable"
+      ],
+      "expectations": [
+        "Recognizes that the bare PR number cannot be resolved without a Bitbucket remote or supplied identifiers.",
+        "Asks the user for the full Bitbucket Cloud PR URL.",
+        "Does not invent a workspace or repository name.",
+        "Does not call scripts/fetch_pr.py until the PR URL can be resolved."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Earlier in this session, fetch_pr.py returned ./bitbucket-review. Review the migration changes in that PR and tell me whether the V2 checksum change will break deployed databases.",
+      "expected_output": "A revision-aware assessment that identifies the real release destination, checks deployment evidence, and explains that V2 is new to the deployed baseline rather than claiming a confirmed checksum failure from another feature branch.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_review_claims.py"
+      ],
+      "expectations": [
+        "Reuses the existing bundle without another fetch.",
+        "Reads source and destination IDs and detects that the current checkout is a different feature branch.",
+        "Inspects the recorded release destination and source revisions instead of treating the current checkout as the baseline.",
+        "Uses OPERATIONS.md and Git history to establish that only V1 was deployed; does not claim that the feature-only V2 was applied.",
+        "Leaves the repository checkout and tracked files unchanged during the read-only review."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Earlier in this session, fetch_pr.py returned ./bitbucket-review. Review the worker changes for defects, including the new polling switch and failure/retry behavior.",
+      "expected_output": "A review that respects the documented non-production switch and production configuration while identifying the reachable cursor-before-handler data-loss regression.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_review_claims.py"
+      ],
+      "expectations": [
+        "Reads the recorded PR revisions and operational contract before making claims about the checked-out worker.",
+        "Does not label disabled staging polling as a defect when documentation explicitly permits it and production enables polling.",
+        "Identifies the cursor advancing before a handler exception as a confirmed defect, with the affected source lines and a concrete retry scenario.",
+        "Explains expected versus changed behavior against the actual destination revision.",
+        "Does not invent unsupported configurations or deployment assumptions to inflate the findings."
+      ]
+    }
+  ]
+}

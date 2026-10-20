@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bitbucket PR Fetch"
+  short_description: "Fetch Bitbucket PR details"
+  default_prompt: "Use $bitbucket to fetch Bitbucket Cloud PR details."

@@ -1,0 +1,310 @@
+#!/usr/bin/env python3
+"""Search and read Jira Cloud issues. Never changes Jira."""
+import argparse
+import base64
+import http.client
+import json
+import os
+import re
+import shlex
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+API = "/rest/api/3"
+CONFIG_KEYS = ("JIRA_SITE_URL", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_CLOUD_ID")
+ISSUE_KEY = r"[A-Za-z][A-Za-z0-9_]*-[1-9][0-9]*"
+# Search, count, and JQL validation use POST without changing anything; every other request must be a GET.
+READ_POSTS = {API + "/search/jql", API + "/search/approximate-count", API + "/jql/parse"}
+SEARCH_FIELDS = "summary,status,assignee,priority,issuetype,updated"
+# Link-only keys that roughly triple the size of issue output; none of the logic below reads them.
+NOISE = {"avatarUrls", "iconUrl", "self"}
+# Command name -> (issue sub-path, item key in each page).
+COLLECTIONS = {"comments": ("comment", "comments"), "changelog": ("changelog", "values")}
+
+HELP = """Scope:
+  Read-only: search, count, and read issues, comments, change history, and field definitions.
+  Output is compact JSON. Issue bodies and comments stay in Atlassian Document Format.
+  API self links, icon URLs, and avatar URLs are dropped; search results gain browse URLs.
+
+Paging:
+  search stops at --limit. If complete is false, resume with --page-token set to
+  next_page_token and the same JQL and fields.
+  comments and changelog resume with --start set to next_start.
+  count is approximate and can lag recent changes.
+  search and count validate JQL first, so an unknown field, value, or project fails
+  instead of returning nothing. An empty result after validation is a real empty result.
+
+Exit codes:
+  0  success
+  1  input, configuration, or API failure
+  2  invalid arguments
+
+Configuration:
+  Set JIRA_SITE_URL (https://<site>.atlassian.net), JIRA_EMAIL, and JIRA_API_TOKEN.
+  For a scoped token, also set JIRA_CLOUD_ID to the site's UUID.
+  Prefer a scoped token limited to read scopes.
+  Environment variables override the skill's .env. --env-file PATH replaces that file.
+  The file is parsed, not executed. Quote values containing spaces.
+  400: Jira's message explains the problem, such as unbounded JQL.
+  401: check the email, token expiry, and Cloud ID. 403: check scopes and permissions.
+  404 can also mean the issue is not visible to this account.
+
+Examples:
+  jira-read search --jql 'project = DEMO AND statusCategory != Done ORDER BY updated DESC'
+  jira-read count --jql 'project = DEMO AND type = Bug AND statusCategory != Done'
+  jira-read get DEMO-123 --comments --changelog
+  jira-read comments DEMO-123 --start 100
+  jira-read fields --name sprint
+"""
+
+
+class JiraError(Exception):
+    pass
+
+
+# Configuration, URL validation, and transport mirror jira-write so each
+# script stays self-contained. Keep security fixes consistent across both copies.
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(req.full_url, code, "Redirect refused", headers, fp)
+
+
+def settings(env_file=None):
+    values = {}
+    path = Path(env_file) if env_file else Path(__file__).resolve().parents[1] / ".env"
+    if env_file or path.is_file():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            key, sep, value = line.strip().removeprefix("export ").partition("=")
+            key = key.strip()
+            if sep and key in CONFIG_KEYS and key not in os.environ:
+                parts = shlex.split(value, comments=True)
+                if len(parts) > 1:
+                    raise JiraError("Quote values containing spaces in the configuration file.")
+                values[key] = parts[0] if parts else ""
+    values.update({key: os.environ[key] for key in CONFIG_KEYS if key in os.environ})
+    missing = [key for key in CONFIG_KEYS[:3] if not values.get(key)]
+    if missing:
+        raise JiraError("Missing configuration: " + ", ".join(missing))
+    return values
+
+
+def site_url(value):
+    parsed = urllib.parse.urlsplit(value)
+    if (parsed.scheme != "https" or not parsed.hostname
+            or not re.fullmatch(r"[a-z0-9-]+\.atlassian\.net", parsed.hostname)
+            or parsed.username or parsed.password or parsed.port
+            or parsed.path not in ("", "/") or parsed.query or parsed.fragment):
+        raise JiraError("JIRA_SITE_URL must be an HTTPS Jira Cloud site, without a path or credentials.")
+    return "https://" + parsed.hostname
+
+
+def issue_key(value, site):
+    if "://" in value:
+        parsed = urllib.parse.urlsplit(value)
+        if (parsed.scheme != "https" or parsed.netloc.lower() != urllib.parse.urlsplit(site).netloc
+                or parsed.username or parsed.password):
+            raise JiraError("Issue URL must belong to the configured Jira site.")
+        match = re.fullmatch(rf"/browse/({ISSUE_KEY})/?", parsed.path)
+        if not match:
+            raise JiraError("Use a Jira /browse/KEY-123 URL or issue key.")
+        value = match.group(1)
+    if not re.fullmatch(ISSUE_KEY, value):
+        raise JiraError("Invalid issue key; expected KEY-123.")
+    return value.upper()
+
+
+class Client:
+    def __init__(self, config):
+        self.site = site_url(config["JIRA_SITE_URL"])
+        cloud_id = config.get("JIRA_CLOUD_ID")
+        if cloud_id and not re.fullmatch(r"[a-fA-F0-9-]{36}", cloud_id):
+            raise JiraError("JIRA_CLOUD_ID must be the site's UUID.")
+        self.base = "https://api.atlassian.com/ex/jira/" + cloud_id if cloud_id else self.site
+        token = config["JIRA_API_TOKEN"]
+        encoded = base64.b64encode((config["JIRA_EMAIL"] + ":" + token).encode()).decode()
+        self.auth = "Basic " + encoded
+        self.secrets = (token, encoded, self.auth)
+        self.opener = urllib.request.build_opener(NoRedirect())
+
+    def redact(self, text):
+        for secret in self.secrets:
+            text = text.replace(secret, "[REDACTED]")
+        return text
+
+    def request(self, method, path, *, body=None, query=None):
+        if not path.startswith(API + "/") or any(c in path for c in ("?", "#", "..", "\\")):
+            raise JiraError("Invalid API path.")
+        if method != "GET" and not (method == "POST" and path in READ_POSTS):
+            raise JiraError("jira-read only reads.")
+        url = self.base + path
+        if query:
+            url += "?" + urllib.parse.urlencode(query)
+        request = urllib.request.Request(
+            url, data=None if body is None else json.dumps(body).encode(), method=method,
+            headers={"Authorization": self.auth, "Accept": "application/json",
+                     "Content-Type": "application/json"},
+        )
+        try:
+            with self.opener.open(request, timeout=45) as response:
+                raw = response.read()
+            return json.loads(raw, object_pairs_hook=lambda pairs: {k: v for k, v in pairs if k not in NOISE})
+        except urllib.error.HTTPError as error:
+            advice = {
+                400: "Jira rejected the request.",
+                401: "Check the email, token expiry, and scoped-token cloud ID.",
+                403: "Check token scopes and Jira project/issue permissions.",
+                404: "Check the target and your access to it.",
+                429: "Rate limited; wait for Retry-After before a new attempt.",
+            }.get(error.code, "Request failed.")
+            if error.code == 400:
+                # JQL mistakes are only fixable with Jira's message. Other bodies are never echoed.
+                try:
+                    payload = json.loads(error.read())
+                    advice += " " + " ".join([*payload.get("errorMessages", []), *payload.get("errors", {}).values()])
+                except (OSError, ValueError, AttributeError, TypeError):
+                    pass
+            if error.code == 429 and error.headers.get("Retry-After"):
+                advice += " Retry-After: " + error.headers["Retry-After"]
+            error.close()
+            raise JiraError(f"HTTP {error.code}. {advice}".strip()) from None
+        except (OSError, ValueError, http.client.HTTPException):
+            raise JiraError("Read failed: network failure or invalid JSON response.") from None
+
+    def get(self, path, **query):
+        return self.request("GET", path, query=query)
+
+
+def validate(client, jql):
+    """Search and count return an empty result, not an error, for unknown fields, values, or projects."""
+    errors = client.request("POST", API + "/jql/parse", body={"queries": [jql]})["queries"][0].get("errors")
+    if errors:
+        raise JiraError("Invalid JQL: " + " ".join(errors))
+
+
+def search(client, args):
+    validate(client, args.jql)
+    issues, ids, warnings = [], set(), []
+    token = args.page_token
+    while True:
+        body = {"jql": args.jql, "fields": [f.strip() for f in args.fields.split(",")],
+                "maxResults": min(100, args.limit - len(issues))}
+        if token:
+            body["nextPageToken"] = token
+        page = client.request("POST", API + "/search/jql", body=body)
+        batch = page["issues"]
+        issues.extend(batch)
+        ids.update(issue["id"] for issue in batch)
+        # Atlassian developers report page tokens that loop back to earlier pages.
+        if len(ids) < len(issues):
+            raise JiraError("Search pagination repeated issues; the results are unreliable.")
+        warnings.extend(page.get("warnings") or [])
+        token = page.get("nextPageToken")
+        # The token is null on the last page; isLast has been reported unreliable, so it is ignored.
+        complete = not token
+        if complete or len(issues) >= args.limit:
+            break
+        if not batch:
+            raise JiraError("Search stopped before completion.")
+    for issue in issues:
+        issue["url"] = client.site + "/browse/" + issue["key"]
+    return {"jql": args.jql, "issues": issues, "complete": complete,
+            "next_page_token": None if complete else token, "warnings": warnings}
+
+
+def collection(client, path, item_key, limit, start=0):
+    """Read an offset-paged collection, reporting where to resume if the limit stops it."""
+    items = []
+    offset = start
+    while len(items) < limit:
+        page = client.get(path, startAt=offset, maxResults=min(100, limit - len(items)))
+        batch = page[item_key]
+        items.extend(batch)
+        offset += len(batch)
+        total = page.get("total")
+        if page.get("isLast") is True or (total is not None and offset >= total):
+            return {"items": items, "complete": True, "next_start": None}
+        if not batch or (total is None and "isLast" not in page):
+            raise JiraError("Pagination stopped before completion.")
+    return {"items": items, "complete": False, "next_start": offset}
+
+
+def run(client, args):
+    if args.command == "search":
+        return search(client, args)
+    if args.command == "count":
+        validate(client, args.jql)
+        result = client.request("POST", API + "/search/approximate-count", body={"jql": args.jql})
+        return {"jql": args.jql, "approximate_count": result["count"]}
+    if args.command == "fields":
+        # /field/search filters server-side but omits team-managed project fields.
+        name = args.name.casefold()
+        return [field for field in client.get(API + "/field") if name in field["name"].casefold()]
+    key = issue_key(args.issue, client.site)
+    path = API + "/issue/" + key
+    if args.command in COLLECTIONS:
+        suffix, item_key = COLLECTIONS[args.command]
+        return collection(client, path + "/" + suffix, item_key, args.limit, args.start)
+    # The full comment collection replaces the embedded, possibly partial, copy.
+    fields = args.fields + ",-comment" if args.comments else args.fields
+    result = {"url": client.site + "/browse/" + key, "issue": client.get(path, fields=fields)}
+    for name in ("comments", "changelog"):
+        if getattr(args, name):
+            suffix, item_key = COLLECTIONS[name]
+            result[name] = collection(client, path + "/" + suffix, item_key, args.limit)
+    return result
+
+
+def at_least(minimum):
+    def parse(value):
+        number = int(value)
+        if number < minimum:
+            raise argparse.ArgumentTypeError(f"must be at least {minimum}")
+        return number
+    return parse
+
+
+def parser():
+    raw = argparse.RawDescriptionHelpFormatter
+    root = argparse.ArgumentParser(description=__doc__, epilog=HELP, formatter_class=raw)
+    root.add_argument("--env-file", help="Configuration file to read instead of the skill's .env")
+    commands = root.add_subparsers(dest="command", required=True, metavar="command")
+    search_cmd = commands.add_parser("search", help="Find issues with JQL")
+    search_cmd.add_argument("--jql", required=True, help="Bounded JQL, for example with a project or assignee clause")
+    search_cmd.add_argument("--fields", default=SEARCH_FIELDS, help="Comma-separated field IDs, or *all")
+    search_cmd.add_argument("--limit", type=at_least(1), default=100, help="Maximum issues to return (default 100)")
+    search_cmd.add_argument("--page-token", help="next_page_token from an incomplete result")
+    commands.add_parser("count", help="Approximate number of issues matching JQL").add_argument("--jql", required=True)
+    get = commands.add_parser("get", help="Read one issue")
+    get.add_argument("issue", help="Issue key or /browse/ URL on the configured site")
+    get.add_argument("--fields", default="*all", help="Comma-separated field IDs (default *all)")
+    get.add_argument("--comments", action="store_true", help="Also read the full comment collection")
+    get.add_argument("--changelog", action="store_true", help="Also read the change history")
+    get.add_argument("--limit", type=at_least(1), default=100, help="Maximum items per collection (default 100)")
+    for name in COLLECTIONS:
+        command = commands.add_parser(name, help=f"Read one issue's {name}")
+        command.add_argument("issue", help="Issue key or /browse/ URL on the configured site")
+        command.add_argument("--start", type=at_least(0), default=0, help="next_start from an incomplete result")
+        command.add_argument("--limit", type=at_least(1), default=100, help="Maximum items to return (default 100)")
+    fields = commands.add_parser("fields", help="List field IDs, names, and schemas")
+    fields.add_argument("--name", default="", help="Case-insensitive part of the field name; omit to list every field")
+    return root
+
+
+def main():
+    args = parser().parse_args()
+    client = None
+    try:
+        client = Client(settings(args.env_file))
+        print(client.redact(json.dumps(run(client, args), ensure_ascii=False)))
+        return 0
+    except (JiraError, OSError, ValueError, KeyError, TypeError) as error:
+        message = str(error) if isinstance(error, (JiraError, OSError)) else "Invalid input or API response."
+        print("error: " + (client.redact(message) if client else message), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

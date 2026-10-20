@@ -1,4 +1,0 @@
-interface:
-  display_name: "Linked References"
-  short_description: "Format repository and Jira identifiers as links"
-  default_prompt: "Use $linked-references to resolve and format repository and Jira identifier links"

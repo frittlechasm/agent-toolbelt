@@ -6,24 +6,22 @@ Reusable agent skills and supporting utilities.
 
 | Skill | What it does | Runtime |
 | --- | --- | --- |
-| `agent-history-audit` | Reviews Claude and Codex history for repeated problems and workflow improvements. | Local |
-| `architecture-diagram` | Creates source-grounded architecture maps with optional animation of all supported flows. | Shared |
-| `bitbucket-pr-fetch` | Fetches and reviews a Bitbucket Cloud PR without changing it. | Local |
-| `code-change-explainer-html` | Creates an HTML explainer for code changes. | Shared |
-| `codebase-architecture-report` | Creates source-backed architecture reports. | Shared |
-| `commit-msg` | Writes conventional commit messages from Git changes. | Local |
+| `architecture` | Creates source-backed architecture reports. | Shared |
+| `bitbucket` | Fetches and reviews a Bitbucket Cloud PR without changing it. | Local |
+| `commit` | Writes conventional commit messages from Git changes. | Local |
+| `critique` | Reviews rendered UI for visual quality and polish. | Shared |
 | `declutter` | Reviews code for simplification and performance improvements. | Shared |
 | `eli5` | Creates illustrated HTML explanations for beginners. | Shared |
-| `erd-diagram` | Creates source-grounded interactive database ERDs. | Shared |
-| `flow-diagram` | Creates process flows with optional animation of all supported scenarios. | Shared |
-| `html-document` | Creates standalone HTML documents. | Shared |
-| `jira-issue-read` | Searches and reads Jira Cloud issues, comments, and change history without changing them. | Local |
-| `jira-issue-write` | Creates and updates Jira Cloud issues with a preview before each write. | Local |
-| `linked-references` | Resolves and formats repository and Jira identifier links. | Shared |
-| `sync-upstream` | Syncs all branches in a fork with upstream. | Local |
-| `table-cleanup` | Converts Markdown tables into aligned plain text. | Shared |
-| `ui-mocks` | Creates HTML UI mockups, stacked vertically by default. | Shared |
-| `visual-design-review` | Reviews rendered UI for visual quality and polish. | Shared |
+| `erd` | Creates source-grounded interactive database ERDs. | Shared |
+| `flowchart` | Creates process flows with optional animation of all supported scenarios. | Shared |
+| `html` | Creates standalone HTML documents. | Shared |
+| `jira` | Searches, reads, creates, and updates Jira Cloud issues; every write previews first. | Local |
+| `linkify` | Resolves and formats repository and Jira identifier links. | Shared |
+| `mockups` | Creates HTML UI mockups, stacked vertically by default. | Shared |
+| `retro` | Reviews Claude and Codex history for repeated problems and workflow improvements. | Local |
+| `topology` | Creates source-grounded architecture maps with optional animation of all supported flows. | Shared |
+| `upstream` | Syncs all branches in a fork with upstream. | Local |
+| `walkthrough` | Creates an HTML explainer for code changes. | Shared |
 
 **Shared** skills work in ChatGPT and in local Claude Code and Codex when their tools are available.
 **Local** skills need local state and work only in Claude Code and Codex.

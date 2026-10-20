@@ -1,0 +1,50 @@
+{
+  "skill_name": "architecture",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Generate a source-aware architecture overview of this repo.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Map the authentication and billing flows in this codebase with file-level evidence.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Document this system's architecture decisions, security controls, and gaps for onboarding.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Find refactoring opportunities in the service layer.",
+      "should_trigger": false
+    },
+    {
+      "id": 5,
+      "prompt": "Perform a standalone security vulnerability review of this TypeScript application.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Fix the failing authentication tests.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Explain how authentication works in this codebase with source evidence.",
+      "should_trigger": true
+    },
+    {
+      "id": 8,
+      "prompt": "Document the request and response fields for this API endpoint.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Create a standalone architecture diagram for these supplied components.",
+      "should_trigger": false
+    }
+  ]
+}

@@ -22,5 +22,5 @@ Create one visual HTML document explainer with big, purposeful illustrations and
 - Keep connector labels, when present, and text inside icons clearly smaller than node labels.
 - If the visual uses connectors, route them around nodes and labels and leave visible clearance at endpoints.
 - Make controls easy to click or tap, even when the visible icon is small.
-- Use the `html-document` skill when available.
+- Use the `html` skill when available.
 - Check the document at about 320px wide and at desktop width. Make sure nothing is cut off, overflows, or is misaligned, and test the interaction.

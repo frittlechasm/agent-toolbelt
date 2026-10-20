@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jira"
+  short_description: "Search, read, create, and update Jira Cloud issues"
+  default_prompt: "Use $jira to search or read the relevant Jira Cloud tickets, or to prepare and apply the requested issue changes."

@@ -1,0 +1,55 @@
+{
+  "skill_name": "linkify",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write a completion summary that cites commit a1b2c3d in the current Bitbucket repository.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Include links to Bitbucket PR #42 and comment 17 on it in the review summary.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Give me a brief status update for Jira ticket DEMO-123 with a link.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Format commit a1b2c3d using this GitHub repository's remote.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Use $linkify to format these identifiers.",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "What is a Git commit hash?",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Set the retry limit to 42.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Explain why this Postgres query is slow.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "The repository isn't available and all I have is PR #42. Format it without guessing a URL.",
+      "should_trigger": true
+    },
+    {
+      "id": 10,
+      "prompt": "Is it okay to use a commit hash as a database primary key?",
+      "should_trigger": false
+    }
+  ]
+}

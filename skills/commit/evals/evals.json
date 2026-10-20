@@ -1,0 +1,74 @@
+{
+  "skill_name": "commit",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Write a commit message for the staged changes in this repo. Do not commit it.",
+      "expected_output": "A conventional commit message based on git diff --cached, with only the message text and no git commit execution or attribution trailer.",
+      "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "staged"],
+      "expectations": [
+        "Inspects staged changes before unstaged changes.",
+        "Leads with the commit message; no diff recap, unrequested body, alternatives, or how-to-commit prose (at most one short caveat line allowed).",
+        "Uses a valid conventional commit header with type, optional scope, colon, and imperative lowercase subject.",
+        "Does not include Co-authored-by or other commit trailers."
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Nothing is staged yet, but I want a commit msg for my current local changes. Please just suggest the message.",
+      "expected_output": "A conventional commit message based on git diff because no staged diff exists, with an appropriate type/scope and no extra explanation.",
+      "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "unstaged"],
+      "expectations": [
+        "Falls back to unstaged changes only after confirming there are no staged changes.",
+        "Leads with the commit message; at most one short caveat line (e.g. 'nothing staged'), with no body/alternatives/how-to-commit prose.",
+        "Chooses a type that reflects the change purpose rather than defaulting to chore.",
+        "Keeps the subject concise, imperative, lowercase, and without a trailing period."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Check the staged diff and commit it with a good conventional commit message.",
+      "expected_output": "The assistant inspects the staged diff, derives a conventional commit message, and uses it for the requested commit without adding attribution trailers.",
+      "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "staged"],
+      "expectations": [
+        "Uses git diff --cached to derive the message from staged changes.",
+        "Uses a valid conventional commit header in the git commit message.",
+        "Does not include Co-authored-by or any other attribution trailer.",
+        "Does not substitute unstaged changes when staged changes exist."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The only local change is a new untracked src/health-check.ts file. Suggest a commit message without committing.",
+      "expected_output": "The assistant notices and inspects the untracked file, then returns a conventional commit message based on its purpose.",
+      "files": [],
+      "setup": ["fixtures/setup_git_repo.py", "untracked"],
+      "expectations": [
+        "Uses git status --short to discover the untracked file.",
+        "Inspects the relevant file content rather than claiming there are no changes.",
+        "Returns one concise conventional commit message with an imperative lowercase subject.",
+        "Does not stage or commit the file."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Commit only the timeout change in src/server.ts with a conventional commit message.",
+      "expected_output": "One commit containing only the timeout change, with unrelated staged, unstaged, and untracked work preserved.",
+      "files": [],
+      "setup": [
+        "fixtures/setup_git_repo.py",
+        "scoped-commit"
+      ],
+      "expectations": [
+        "Inspects repository status and staged changes before choosing the commit scope.",
+        "Creates exactly one commit containing only src/server.ts and its requestTimeoutMs change.",
+        "Derives a conventional commit message from the timeout change, without unrelated documentation or attribution trailers.",
+        "Preserves the unrelated README.md staged blob and its distinct unstaged contents.",
+        "Leaves the unrelated untracked notes.txt unchanged and untracked."
+      ]
+    }
+  ]
+}

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Jira Issue Read"
-  short_description: "Search Jira Cloud and read issue details"
-  default_prompt: "Use $jira-issue-read to search Jira Cloud and read the relevant tickets."

@@ -1,0 +1,60 @@
+{
+  "skill_name": "jira",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Find Jira issues assigned to me that were updated this week.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Summarize DEMO-123 and its comments from our configured Jira Cloud site.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Search Jira with JQL: project = DEMO AND statusCategory != Done.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "How many open bugs are in DEMO right now?",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Create a Jira ticket in DEMO describing this bug.",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "Change the summary of DEMO-123 to 'Handle expired sessions'.",
+      "should_trigger": true
+    },
+    {
+      "id": 7,
+      "prompt": "Assign DEMO-123 to Ray and move it to In Progress.",
+      "should_trigger": true
+    },
+    {
+      "id": 8,
+      "prompt": "Update comment 10042 on DEMO-123 with this correction.",
+      "should_trigger": true
+    },
+    {
+      "id": 9,
+      "prompt": "Use the private jira-search middleware to find tickets for Acme.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Delete every closed ticket in DEMO.",
+      "should_trigger": false
+    },
+    {
+      "id": 11,
+      "prompt": "Open a GitHub issue for the login failure.",
+      "should_trigger": false
+    }
+  ]
+}

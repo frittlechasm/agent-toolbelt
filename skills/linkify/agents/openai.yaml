@@ -1,0 +1,4 @@
+interface:
+  display_name: "Linked References"
+  short_description: "Format repository and Jira identifiers as links"
+  default_prompt: "Use $linkify to resolve and format repository and Jira identifier links"
