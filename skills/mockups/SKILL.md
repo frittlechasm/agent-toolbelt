@@ -3,7 +3,7 @@ name: mockups
 description: Create standalone comparisons of static UI design directions. Do not use for production implementation or application behavior.
 metadata:
     scope: global
-    agents: all
+    agents: claude, codex
     machines: all
 ---
 

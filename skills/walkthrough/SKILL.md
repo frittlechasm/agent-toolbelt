@@ -3,7 +3,7 @@ name: walkthrough
 description: Create standalone HTML walkthroughs of a commit, diff, or coding session. Use only when the user explicitly requests an HTML code-change explainer.
 metadata:
     scope: global
-    agents: all
+    agents: claude, codex
     machines: all
 ---
 

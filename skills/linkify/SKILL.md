@@ -3,7 +3,7 @@ name: linkify
 description: Use to resolve and format repository and Jira links when a response cites commit, PR, ticket, or issue identifiers.
 metadata:
     scope: global
-    agents: all
+    agents: claude, codex
     machines: all
 ---
 

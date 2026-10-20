@@ -3,7 +3,7 @@ name: architecture
 description: Create source-grounded codebase architecture reports or explain its systems and flows. Use only for architecture documentation or onboarding.
 metadata:
     scope: global
-    agents: all
+    agents: claude, codex
     machines: all
 ---
 

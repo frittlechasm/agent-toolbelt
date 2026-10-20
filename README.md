@@ -6,25 +6,25 @@ Reusable agent skills and supporting utilities.
 
 | Skill | What it does | Runtime |
 | --- | --- | --- |
-| `architecture` | Creates source-backed architecture reports. | Shared |
+| `architecture` | Creates source-backed architecture reports. | Local |
 | `bitbucket` | Fetches and reviews a Bitbucket Cloud PR without changing it. | Local |
 | `commit` | Writes conventional commit messages from Git changes. | Local |
 | `critique` | Reviews rendered UI for visual quality and polish. | Shared |
-| `declutter` | Reviews code for simplification and performance improvements. | Shared |
+| `declutter` | Reviews code for simplification and performance improvements. | Local |
 | `eli5` | Creates illustrated HTML explanations for beginners. | Shared |
 | `erd` | Creates source-grounded interactive database ERDs. | Shared |
 | `flowchart` | Creates process flows with optional animation of all supported scenarios. | Shared |
 | `html` | Creates standalone HTML documents. | Shared |
 | `jira` | Searches, reads, creates, and updates Jira Cloud issues; every write previews first. | Local |
-| `linkify` | Resolves and formats repository and Jira identifier links. | Shared |
-| `mockups` | Creates HTML UI mockups, stacked vertically by default. | Shared |
+| `linkify` | Resolves and formats repository and Jira identifier links. | Local |
+| `mockups` | Creates HTML UI mockups, stacked vertically by default. | Local |
 | `retro` | Reviews Claude and Codex history for recurring problems, navigation friction, stale docs, and workflow improvements. | Local |
 | `topology` | Creates source-grounded architecture maps with optional animation of all supported flows. | Shared |
 | `upstream` | Syncs all branches in a fork with upstream. | Local |
-| `walkthrough` | Creates an HTML explainer for code changes. | Shared |
+| `walkthrough` | Creates an HTML explainer for code changes. | Local |
 
 **Shared** skills work in ChatGPT and in local Claude Code and Codex when their tools are available.
-**Local** skills need local state and work only in Claude Code and Codex.
+**Local** skills target Claude Code and Codex; their workflows assume local tools or state.
 
 The `metadata` block in each `SKILL.md` controls where a skill goes:
 

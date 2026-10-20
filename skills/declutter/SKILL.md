@@ -3,7 +3,7 @@ name: declutter
 description: Review code or skills for simplification, redundant guidance, and performance improvements when asked to declutter, simplify, or optimize.
 metadata:
     scope: global
-    agents: all
+    agents: claude, codex
     machines: all
 ---
 
