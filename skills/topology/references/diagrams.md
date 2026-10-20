@@ -5,22 +5,9 @@ Use this reference for system, infrastructure, cloud, security, and network topo
 ## Select and preserve the visual system
 
 - Use a neutral architecture map by default.
-- Use illustrated mode only when:
-  - the user requests it, or
-  - the user supplies a matching visual reference.
-- When given a visual benchmark, inventory its:
-  - shell
-  - palette
-  - fonts
-  - relative composition
-  - region and node arrangement
-  - route axes
-  - reusable sourced SVG symbols
-- Preserve those choices and assets.
-- Make only requested changes.
-- Make only the smallest geometry corrections required by this reference's clearance and legibility contracts.
-- Preserve relative composition instead of copying flawed coordinates.
-- Similar content is not a visual match.
+- Use illustrated mode only when requested or supplied as a matching visual reference.
+- For a visual benchmark, inventory and preserve its shell, palette, fonts, composition, node/region arrangement, route axes, and sourced SVG symbols.
+  Similar content is not a visual match. Apply only requested changes and the smallest geometry corrections needed for clearance and legibility.
 - Arrange components by request path, dependency direction, or supplied system layers.
 - Do not use flowchart shapes for architecture components.
 - Add only supplied regions, trust zones, clusters, or ownership boundaries.
@@ -85,8 +72,6 @@ Choose the natural width after layout.
 
 - It must meet this floor.
 - It may exceed 1600px.
-
-Worked example: a 2720-unit view box whose smallest label is 24 units has a 1360px floor for a 12px rendered minimum.
 
 Large diagrams need a labelled horizontal scroller, not `width: 100%` alone:
 
@@ -184,8 +169,7 @@ This pattern fills wider containers and scrolls inside narrower ones.
 - Give boundary-crossing labels dedicated annotation lanes.
 - Keep the full label on one side of the stroke.
   - Maintain at least 8 rendered px clearance.
-- If needed, move the label into a related region.
-  - Use `text-anchor="start"` or `"end"` beside a clear segment.
+- Use `text-anchor="start"` or `"end"` beside a clear segment when moving the label into a related region.
 - Never straddle, mask, or interrupt a boundary for a connector label.
 
 ### Titles, boundaries, and knockouts
@@ -298,55 +282,13 @@ Use JetBrains Mono for all SVG text. This is this reference's only intentional e
 | Security components | Rose | `#fb7185` |
 | Message brokers | Orange | `#fb923c` |
 
-## Reusable SVG scaffold
-
-- Use direct SVG for stable primitives and layer order.
-- Customize its view box, grid, masks, IDs, and content.
-- Never copy placeholder nodes or routes.
-
-```html
-<svg class="architecture-diagram" viewBox="0 0 1200 760" role="img"
-     aria-labelledby="architecture-title architecture-description">
-  <title id="architecture-title">SYSTEM architecture</title>
-  <desc id="architecture-description">Supplied components and relationships.</desc>
-  <defs>
-    <pattern id="architecture-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M40 0H0V40" fill="none" stroke="#d7dee8" stroke-width="0.75" />
-    </pattern>
-    <marker id="architecture-arrow" viewBox="0 0 8 8" refX="8" refY="4"
-      markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
-      <path d="M0 0L8 4L0 8Z" fill="#475569" fill-opacity="0.72" />
-    </marker>
-    <mask id="connector-knockouts" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="760">
-      <rect width="1200" height="760" fill="white" />
-      <!-- Add black rectangles only where connectors pass beneath intervening labels. -->
-    </mask>
-    <mask id="boundary-title-gaps" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="760">
-      <rect width="1200" height="760" fill="white" />
-      <!-- One tight measured rectangle per title. -->
-      <rect x="TITLE_X_MINUS_8" y="BOUNDARY_Y_MINUS_10"
-        width="TITLE_WIDTH_PLUS_16" height="20" fill="black" />
-    </mask>
-  </defs>
-  <rect class="canvas" width="1200" height="760" fill="url(#architecture-grid)" />
-  <g class="boundary-fills"><!-- translucent fills; no strokes --></g>
-  <g class="boundary-strokes" mask="url(#boundary-title-gaps)" fill="none"><!-- outer solid; nested broken --></g>
-  <g class="connectors" mask="url(#connector-knockouts)" fill="none"
-    stroke="#475569" stroke-opacity="0.72" stroke-width="1.5"><!-- terminal markers only --></g>
-  <g class="nodes"><!-- opaque cards and centered artwork --></g>
-  <g class="labels"><!-- node, boundary, and connector labels --></g>
-</svg>
-```
-
 ## Accessibility, embedding, and responsive behavior
 
-- Give the SVG concise `<title>` and `<desc>` elements.
+- Give the SVG `role="img"` and concise `<title>` and `<desc>` elements.
 - Connect them with `aria-labelledby`.
 - Do not repeat the full description nearby.
 - Trim the view box to the drawing plus a small even margin.
-- Preserve the readable-width floor on narrow screens.
-- Fill containers wider than the natural width.
-- In a narrower container, keep the SVG readable inside a labelled horizontal scroller.
+- Use the horizontal-scroller pattern above to preserve the readable-width floor and fill wider containers.
 - Only while the scroller overflows:
   - make it keyboard-focusable, and
   - provide a visible focus style.

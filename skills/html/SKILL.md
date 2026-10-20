@@ -21,12 +21,11 @@ metadata:
 - For a process flow diagram, use the `flowchart` skill when available and embed its SVG in the document.
 - For a system architecture diagram, use the `topology` skill when available and embed its SVG in the document.
 - Do not use a generic process-flow fallback as a system architecture diagram.
-- When an ERD or database relationships is to be shown then use the `erd` skill when available and include it in the same HTML document.
+- For database relationships, use the `erd` skill when available and include its ERD in the same document.
 - If required content was not supplied and cannot be found, ask for it instead of fabricating examples or domain details.
 
 ## Output
 
-- Keep HTML, CSS, and any required JavaScript in the file.
 - Add JavaScript only for behavior the user requested.
 - Keep the page readable to about 320px without page-level horizontal scrolling.
 - For flowing documents, drive multi-column reflow from container width, let grid and flex children shrink with `min-width: 0`, and wrap code.
@@ -57,7 +56,5 @@ Read only what the selected content requires:
 ## Verify
 
 - Render every result in an available browser and visually inspect it at narrow and desktop widths.
-- Check hierarchy, readability, clipping, page overflow, semantics, and any requested interactions.
-- Remove every element that adds no information or required behavior, then re-render.
-- Prefer fewer boxes, borders, controls, and hidden views when both versions communicate the same content.
-- Fix issues before delivery.
+- Check hierarchy, readability, clipping, page overflow, semantics, and requested interactions; fix failures before delivery.
+- Remove elements that add no information or required behavior. Prefer fewer boxes, borders, controls, and hidden views, then re-render any changes.

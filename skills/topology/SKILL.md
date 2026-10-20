@@ -9,8 +9,7 @@ metadata:
 
 # Architecture Diagram
 
-- Create a system-level topology from supplied descriptions, configuration, documentation, or source code.
-- Show deployed components, infrastructure, boundaries, and relationships, not process, protocol, sequence, or application flow.
+Map system components, infrastructure, boundaries, and relationships from supplied descriptions, configuration, documentation, or source code.
 
 ## Ground the topology
 
@@ -41,9 +40,7 @@ Use embedded mode when an existing HTML document is supplied or the diagram belo
 
 ### Existing visual design
 
-- Treat a supplied diagram or visual benchmark as the design system.
-- Preserve its document shell, palette, typography, relative composition, node and region arrangement unless the user requests a change.
-- Apply topology and wording edits within that system.
+- Preserve a supplied diagram or benchmark's shell, palette, typography, relative composition, and node/region arrangement unless asked to change them.
 - Adjust geometry only as needed for clearance, routing, or legibility. Do not arbitrarily redesign it or freeze flawed coordinates.
 
 ## Render and verify

@@ -28,9 +28,7 @@ metadata:
 ## Write the message
 
 - For a message-only request, return the message with no recap, alternatives, or command instructions.
-- Follow the format below.
 - Choose the type and optional scope from the actual behavioral intent of the diff.
-- Write a concise, human-readable subject that reflects the diff and the user's intent.
 - Do not add commit trailers or attribution lines such as `Co-authored-by:`.
 - For breaking changes, add `!` before the colon: `feat(auth)!: remove OAuth 1.0`.
 
@@ -50,22 +48,8 @@ metadata:
 [optional body]
 ```
 
-- **Subject**: concise, imperative, lowercase, no period
+- **Subject**: concise, imperative, lowercase, no period; reflect the diff and the user's intent
 - **Scope**: component or area affected (optional but preferred)
 - **Body**: include only if changes are complex; explain what changed and why
 
-## Types
-
-| Type | Use For | Example |
-|----------|----------------------|-----------------------------------------------|
-| feat | New features | `feat(auth): add JWT refresh token` |
-| fix | Bug fixes | `fix(api): handle null pointer in user service` |
-| refactor | Code restructuring | `refactor: extract duplicate logic into helper` |
-| chore | Maintenance tasks | `chore(deps): bump spring-boot to 3.2.0` |
-| docs | Documentation only | `docs(readme): update API endpoint examples` |
-| test | Adding/updating tests | `test(auth): add unit tests for token validation` |
-| style | Formatting only | `style: run prettier on all ts files` |
-| perf | Performance | `perf(cache): add redis for session storage` |
-| build | Build system changes | `build(docker): optimize image layers` |
-| ci | CI/CD pipeline | `ci(github): add integration test workflow` |
-| revert | Reverting commits | `revert: undo breaking change in auth module` |
+Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`, `build`, `ci`, `revert`.

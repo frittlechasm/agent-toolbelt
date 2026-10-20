@@ -9,15 +9,13 @@ metadata:
 
 # Flow Diagram
 
-- Turn supplied process descriptions, procedures, or source material into a flow whose steps and paths remain accurate.
-- Show process order, decisions, branches, retries, loops, failure paths, and rollback paths when supported.
-- Do not substitute a deployment topology, request sequence, data model, or class structure.
+Diagram the supplied process, including supported decisions, branches, retries, loops, failures, and rollback paths.
 
 ## Ground the flow
 
 - Preserve supplied step order, decision conditions, branch labels, loop targets, and terminal outcomes.
-- Do not invent missing branches, outcomes, or operational behavior. Ask only when an omission prevents an accurate diagram.
-- Label material inferences or proposed behavior instead of presenting them as established process.
+- Do not invent missing branches, outcomes, or operational behavior. Label material inferences or proposals.
+  Ask only when an omission prevents an accurate diagram.
 - Keep the main path easy to scan and route retries or loops outside it.
 
 ## Integrate the output
@@ -47,4 +45,4 @@ Before rendering, read `references/diagrams.md` completely.
 It is the source of SVG layout, typography, connector, responsive, accessibility, and verification requirements.
 
 Keep diagrams static by default. For requested animation or a guided walkthrough, read `references/motion.md`.
-For guided walkthrough cover every supported scenario and flow in scope.
+For a guided walkthrough, cover every supported scenario and flow in scope.

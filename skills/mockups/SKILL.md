@@ -20,13 +20,11 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 ## Directions
 
 - Follow the supplied design system, references, and design preferences. Otherwise, base the design on the product, its users, and their main task.
-- Before coding, define each direction with a target feeling, layout idea, signature element, and restraint rule.
-- Keep these notes private unless the user asks for them.
+- Before coding, privately define each direction's target feeling, layout idea, signature element, and restraint rule.
 - Take ideas from the product's users, tools, language, and common actions. Do not start from generic trends.
 - Give each direction one bold choice. Keep the rest calm and consistent.
 - Use references as a quality bar and moodboard. Do not copy them.
-- If the directions still feel alike and the user gave no visual direction, use a different random string as a private creative seed for each one.
-- Do not show the strings or let randomness hurt usability.
+- If directions still feel alike and the user gave no visual direction, use a different private random-string seed for each; preserve usability.
 
 ## Variants
 
@@ -41,8 +39,7 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 ## Build
 
 - Keep HTML and CSS in the file. Add JavaScript only for a requested state, motion demo, or comparison control.
-- When imagery, illustration, iconography, or texture is central to a direction, use supplied, generated, inline SVG, or embedded assets.
-- Do not add images as filler.
+- When imagery is central to a direction, use supplied, generated, inline SVG, or embedded assets. Omit filler images.
 - Keep controls presentational. Do not add application logic, persistence, routing, or data fetching.
 - Use semantic HTML and accessible labels.
   - Give keyboard focus a visible, theme-aligned `:focus-visible` style. Never hide focus.
@@ -50,8 +47,7 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 
 ## Revise a selected design
 
-- Preserve the user's selected variant and required elements during correctness fixes.
-- Repair incorrect data, labels, or layout without removing or replacing the selected visualization unless the user requests it.
+- During correctness fixes, preserve the selected variant, visualization, and required elements unless the user requests a change.
 
 ## Motion
 
@@ -66,9 +62,9 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 
 ## Verify
 
-- Render the file and inspect screenshots at narrow and desktop widths. Judge the result, not the code or effort.
+- Render the file and inspect screenshots at narrow and desktop widths.
 - Check that every requirement appears in every variant and that the variants are truly different.
-- Review composition and hierarchy first, then type, spacing, color, controls, and polish. Compare with supplied references without copying them.
+- Review composition and hierarchy first, then type, spacing, color, controls, and polish.
 - Make one or two improvement passes. Fix the largest gaps first.
 - Remove anything that adds no information, hierarchy, identity, or required behavior. Preserve elements the user selected or required.
 - Remove generic defaults unless the direction calls for them:

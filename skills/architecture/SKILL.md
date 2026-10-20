@@ -9,26 +9,20 @@ metadata:
 
 # Codebase Architecture Report
 
-Create a clear architecture report that explains how a codebase works using evidence from the repository.
+Explain the system's purpose, major parts, runtime flows, and boundaries using repository evidence.
 
 ## Goal
 
-- Give the intended audience the smallest complete explanation of the system without stripping away important boundaries or caveats.
-- Explain the system's purpose, major parts, important runtime flows, and boundaries.
-- Support important claims with source files. Clearly distinguish facts from inference or missing information.
-- Focus on what helps the reader understand the system. Do not force sections, labels, tables, or diagrams that add no value.
-- Do not invent components, integrations, controls, decisions, or failure behavior.
 - Begin with a practical system mental model and the conclusions that matter most, then add detail progressively.
 - Define unfamiliar project or platform terms once, near first use, and keep terminology stable afterward.
-- Prefer concrete runtime behavior, real module and symbol names, and source-backed examples over generic architecture language.
-- Include a focused code or configuration example when it demonstrates an important boundary or mechanism more clearly than prose.
-- Do not add snippets merely because source is available.
+- Use real module and symbol names. Include code or configuration examples only when they clarify an important mechanism or boundary.
+- Keep the explanation as small as the audience and scope permit without losing important boundaries or caveats.
 
 ## Scope the report
 
 - Determine the repository, audience, output format, focus, and desired depth from the request and available context.
 - Ask only when a missing choice would materially change the report; otherwise state a reasonable assumption and proceed.
-- For a large repository, begin with a high-level map and inspect a representative set of important flows. State what was covered, sampled, or left uninspected.
+- For a large repository, begin with a high-level map and sample important flows. State what was covered, sampled, or left uninspected.
 - When the user explicitly requests architecture-improvement recommendations, follow any direction they provide; absent such direction:
     - inspect roughly the last 20 commit messages
     - use recent churn only to prioritize which areas to examine more deeply
@@ -45,8 +39,6 @@ Start with repository guidance and architecture clues, then read only what the s
 - deployment, infrastructure, CI/CD, and environment examples
 - tests that confirm important behavior or boundaries
 
-Use fast file discovery and targeted searches. Keep a working list of the files read and what each one supports.
-
 ## Explain the architecture
 
 Cover the parts that matter for the requested scope:
@@ -59,21 +51,18 @@ Cover the parts that matter for the requested scope:
 - external services, APIs, webhooks, and integration owners
 - deployment topology and cross-cutting concerns such as configuration, logging, audit, and error handling
 
-Trace important flows from real source. When evidence exists:
-
-- cover the trigger, entry point, main modules, data access, external calls, failure handling, and relevant tests.
-- if a step cannot be verified, say so.
+Trace important flows through their trigger, entry point, modules, data access, external calls, failure handling, and relevant tests.
+Identify unverified steps instead of inventing behavior.
 
 ### Diagrams
 
-- Use a diagram only when relationships or sequence are materially clearer visually.
+- Use diagrams only when they clarify relationships or sequence; one system diagram may be enough.
 - When the requested deliverable includes a system architecture map, use the `topology` skill when available.
 - When an ERD is requested or database relationships are materially clearer visually, use the `erd` skill when available.
   - Include its ERD in the HTML report.
 - Every node and connection must be supported by the source or explicitly marked as inferred.
 - Label a connection with a protocol or transport only when the source supports it. Otherwise, leave the label out or mark it as inferred.
 - Show a component inside a deployment or infrastructure boundary only when configuration or documentation confirms it.
-- One system diagram may be enough; add flow diagrams only when they improve understanding.
 
 ## Handle evidence honestly
 
@@ -84,46 +73,29 @@ Make the confidence of important claims clear in natural language or concise lab
 - **Unclear** — the available repository evidence cannot confirm it.
 - **Gap** — something missing, inconsistent, risky, or under-documented for a stated reason.
 
-Do not label every sentence mechanically. Cite important source-backed claims with file paths and line numbers when practical.
-Distinguish configured state from observed runtime state.
-For example, a deployment manifest can show that two replicas should run. It cannot prove that two are running now.
+Do not label every sentence mechanically. Cite important claims with file paths and line numbers when practical.
+Distinguish configured state from observed runtime state; a replica count in a manifest does not prove how many replicas are running.
 Before finalizing, recheck high-impact claims and downgrade anything the source does not support.
 
 When the report concludes that a requested component or flow is absent, summarize the files, directories, or search scope checked so the absence is auditable.
 
 ## Decisions, security, and gaps
 
-Prefer documented architecture decisions.
-When a decision is inferred from code, say so and explain the evidence, tradeoff, and consequence without inventing intent.
-
-When explaining why a design exists, distinguish current mechanism from historical intent.
+Prefer documented decisions. Distinguish current mechanism from historical intent when explaining why a design exists.
 Inspect local git history and, when available, linked PRs, issues, ADRs, and long-form documentation.
-Treat code shape alone as evidence of what exists, not proof of why it was chosen.
+Code shape alone does not prove why a design was chosen. Label inferred rationale and explain its evidence, tradeoff, and consequence.
 
 Include security controls when the request, audience, or scope calls for them.
 Read [references/security-controls.md](references/security-controls.md) for that review.
 Describe concrete controls and residual gaps; never claim that the system is secure.
 Do not turn an architecture report into a standalone vulnerability review unless requested.
 
-Separate unclear areas from demonstrated gaps. Explain why each gap matters and the evidence or absence behind it.
-For each important gap, suggest the smallest practical next step supported by the evidence. If there is not enough evidence, say so.
+Separate unclear areas from demonstrated gaps. Explain each important gap's evidence and impact, and suggest the smallest supported next step.
 Leave out recommendations only when the user asks for findings without them.
 
 ## Assemble the report
 
-Choose the smallest structure that communicates the findings. A complete report commonly includes:
-
-- an executive summary that stands on its own
-- system purpose and scope
-- architecture map and major modules
-- data and external integration boundaries
-- selected key flows
-- important architecture decisions
-- security controls when in scope
-- gaps, risks, and corresponding recommendations
-- an evidence index or equivalent source-reference trail
-
-Omit sections that are irrelevant or unsupported. Do not pad the report with generic architecture advice.
-
-For Markdown, use a clean heading hierarchy and only the tables or code blocks that aid comparison.
+Choose the smallest structure that communicates the findings, with a source-reference trail.
+Include a standalone summary for full reports.
+Omit irrelevant or unsupported sections.
 For HTML, pass the finished report content and useful diagrams to the `html` skill when available; let it decide the presentation.

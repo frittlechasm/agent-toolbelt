@@ -14,17 +14,15 @@ Judge the rendered result as a design critic. Do not make changes unless the use
 ## Evidence
 
 - Review screenshots at the intended viewport. If the user supplies a URL or runnable UI, render it in a browser first.
-- For the first pass, use only the screenshots, product goal, target feeling, constraints, and references.
-- Ignore the code, implementation effort, earlier rationale, and past critiques. Preserve the agreed product goal and design constraints.
+- For the first pass, use only screenshots, product goal, target feeling, accepted constraints, and references.
+  Ignore code, implementation effort, earlier rationale, and past critiques.
 - If the goal or target feeling is missing, state the assumption you used instead of blocking the review.
 - If screenshots or other visual evidence are missing, review what is available. Say what you cannot assess and ask only for what you need to finish that part.
-- Do not invent findings.
 - Use references as a quality bar and visual guide. Do not reward copying them.
 - For motion, inspect the resting state and a few key frames. Check the reduced-motion state when available.
 - A still image cannot show interaction behavior, transition quality, animation smoothness, or rendering performance.
 - Mark any inferences and ask for a runnable UI, recording, or key states when those qualities matter.
-- Delegate an independent review only when the user asks and delegation is available and authorized. Give the reviewer fresh context.
-- Provide only the visual evidence, product goal, accepted constraints, target feeling, and references. Do not include earlier rationale or critiques.
+- Delegate only when the user asks and delegation is available and authorized. Give the reviewer only the first-pass evidence listed above.
 
 ## Review
 
@@ -63,7 +61,6 @@ Examples include:
 
 ## Boundaries
 
-- Do not edit files or redesign the UI unless the user asks.
 - Mention visible accessibility problems, but use a dedicated accessibility review for a full audit.
 - Do not reward complexity for its own sake. A restrained design can be the strongest option.
 - Do not start an automatic builder-review loop. Review the submitted state once, then wait for a new version or an explicit request to continue.
