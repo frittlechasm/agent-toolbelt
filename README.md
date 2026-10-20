@@ -18,7 +18,7 @@ Reusable agent skills and supporting utilities.
 | `jira` | Searches, reads, creates, and updates Jira Cloud issues; every write previews first. | Local |
 | `linkify` | Resolves and formats repository and Jira identifier links. | Shared |
 | `mockups` | Creates HTML UI mockups, stacked vertically by default. | Shared |
-| `retro` | Reviews Claude and Codex history for repeated problems and workflow improvements. | Local |
+| `retro` | Reviews Claude and Codex history for recurring problems, navigation friction, stale docs, and workflow improvements. | Local |
 | `topology` | Creates source-grounded architecture maps with optional animation of all supported flows. | Shared |
 | `upstream` | Syncs all branches in a fork with upstream. | Local |
 | `walkthrough` | Creates an HTML explainer for code changes. | Shared |

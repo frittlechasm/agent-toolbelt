@@ -40,6 +40,21 @@
       "id": 8,
       "prompt": "Create a new skill for recurring database migration reviews.",
       "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Read my last 10 coding agent sessions for this repository and find navigation friction and reliance on out-of-date docs.",
+      "should_trigger": true
+    },
+    {
+      "id": 10,
+      "prompt": "Audit last month's agent sessions for repo discovery detours and recommend better documentation entry points.",
+      "should_trigger": true
+    },
+    {
+      "id": 11,
+      "prompt": "Read this repository's README and fix its broken links without inspecting agent history.",
+      "should_trigger": false
     }
   ]
 }
