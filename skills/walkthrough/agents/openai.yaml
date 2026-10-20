@@ -1,4 +1,4 @@
 interface:
-  display_name: "Code Change Explainer"
+  display_name: "Walkthrough"
   short_description: "Teach code changes through standalone HTML"
   default_prompt: "Use $walkthrough to explain this code change as a standalone HTML document."

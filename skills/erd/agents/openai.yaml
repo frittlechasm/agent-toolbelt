@@ -1,4 +1,4 @@
 interface:
-  display_name: "ERD Diagram"
+  display_name: "ERD"
   short_description: "Create accurate interactive database ERDs"
   default_prompt: "Use $erd to create an interactive ERD from this database schema."

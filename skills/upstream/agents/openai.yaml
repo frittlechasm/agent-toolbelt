@@ -1,5 +1,5 @@
 interface:
-  display_name: "Sync Upstream"
+  display_name: "Upstream"
   short_description: "Synchronize every branch in a GitHub fork"
   default_prompt: "Use $upstream to synchronize this fork with its upstream repository."
 

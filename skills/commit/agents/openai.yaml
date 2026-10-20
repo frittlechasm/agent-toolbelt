@@ -1,4 +1,4 @@
 interface:
-  display_name: "Commit Message"
+  display_name: "Commit"
   short_description: "Draft Conventional Commit messages from changes"
   default_prompt: "Use $commit to draft a commit message for the current changes."

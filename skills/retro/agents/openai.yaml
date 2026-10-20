@@ -1,5 +1,5 @@
 interface:
-  display_name: "Agent History Audit"
+  display_name: "Retro"
   short_description: "Find recurring friction in agent history"
   default_prompt: "Use $retro to review Claude and Codex history for failures, navigation friction, stale docs, usage, and evidence-backed improvements."
 policy:

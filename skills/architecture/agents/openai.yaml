@@ -1,4 +1,4 @@
 interface:
-  display_name: "Codebase Architecture Report"
+  display_name: "Architecture"
   short_description: "Explain codebase architecture with source evidence"
   default_prompt: "Use $architecture to document this codebase architecture with source evidence."
