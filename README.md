@@ -10,7 +10,7 @@ Reusable agent skills and supporting utilities.
 | `bitbucket` | Fetches and reviews a Bitbucket Cloud PR without changing it. | Local |
 | `commit` | Writes conventional commit messages from Git changes. | Local |
 | `critique` | Reviews rendered UI for visual quality and polish. | Shared |
-| `declutter` | Reviews code for simplification and performance improvements. | Local |
+| `declutter` | Reviews code for simplification, performance improvements, and low-value or flaky tests. | Local |
 | `eli5` | Creates illustrated HTML explanations for beginners. | Shared |
 | `erd` | Creates source-grounded interactive database ERDs. | Shared |
 | `flowchart` | Creates process flows with optional animation of all supported scenarios. | Shared |

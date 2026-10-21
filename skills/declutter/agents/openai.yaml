@@ -1,4 +1,4 @@
 interface:
   display_name: "Declutter"
-  short_description: "Simplify code and spot performance gains"
-  default_prompt: "Use $declutter to review the requested code for simplification and performance improvements."
+  short_description: "Simplify code, improve performance, and assess tests"
+  default_prompt: "Use $declutter to review the requested code for simplification, performance improvements, and low-value or flaky tests."
