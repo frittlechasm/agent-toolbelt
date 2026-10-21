@@ -17,7 +17,8 @@ Find worthwhile simplifications in the requested code or skills while preserving
 - Check callers, existing helpers, and tests before judging code unnecessary.
 - In skills, comments, and documentation, remove generic advice, repetition, and explanations the model can readily infer from the code or surrounding context.
     - Keep non-obvious intent, constraints, contracts, and gotchas that affect decisions or prevent mistakes.
-- Prioritize dead or duplicate code, needless wrappers, redundant tests, and custom code a standard library, platform, or current dependency can replace.
+- Prioritize dead or duplicate code, needless wrappers, and custom code a standard library, platform, or current dependency can replace.
+- Find redundant or flaky tests, weak assertions, tests that mirror implementation, and mocks that bypass behavior; remove low-value tests and fix useful ones.
 - Share a UI component only when its behavior and design are genuinely common.
 - Check for avoidable repeated work, inefficient queries or I/O, and unnecessary rendering where relevant.
 - Treat performance ideas as hypotheses until a benchmark, profile, or clear complexity analysis supports them. Do not add caching or memoization by default.
@@ -25,14 +26,6 @@ Find worthwhile simplifications in the requested code or skills while preserving
     - Compare equivalent workloads and conditions. Repeat consequential comparisons and report variation.
     - Separate measured improvement from inferred cause, and relate microbenchmarks to the complete user path.
 - Report the few worthwhile findings with file references, expected benefit, and behavior risk. Say when no change is justified.
-
-## Test quality
-
-- Find redundant tests, weak assertions, tests that mirror implementation, and mocks that bypass the behavior under test.
-- Remove tests that add no distinct confidence; repair or consolidate useful tests. Explain removals and preserve distinct behavioral coverage.
-- Investigate suspected flakiness using failure history, targeted repeated runs, or demonstrable defects; distinguish test defects from product bugs.
-    - Fix causes or replace flaky tests with deterministic coverage; do not mask failures with retries, sleeps, skips, or weaker assertions.
-- Repeat affected tests for flakiness fixes, including combined runs for state or order issues. Report failures, run counts, and verification limits.
 
 ## Changes
 
