@@ -7,6 +7,7 @@ Reusable agent skills and supporting utilities.
 | Skill | What it does | Runtime |
 | --- | --- | --- |
 | `architecture` | Creates source-backed architecture reports. | Local |
+| `audit` | Reviews changes for blast radius, correctness, performance, and security issues. | Local |
 | `bitbucket` | Fetches and reviews a Bitbucket Cloud PR without changing it. | Local |
 | `commit` | Writes conventional commit messages from Git changes. | Local |
 | `critique` | Reviews rendered UI for visual quality and polish. | Shared |

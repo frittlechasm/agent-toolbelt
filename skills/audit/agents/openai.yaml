@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit"
+  short_description: "Review changes for blast radius, bugs, performance, and security"
+  default_prompt: "Use $audit to review the requested changes for blast radius, correctness, performance, and security issues."

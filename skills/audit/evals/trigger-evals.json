@@ -1,0 +1,45 @@
+{
+  "skill_name": "audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review this PR for blast radius, bugs, and OWASP issues before I approve it.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Review this service for security vulnerabilities.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "What could this migration and API change break downstream? Check for bottlenecks too.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Do a thorough code review of the current branch diff.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Remove duplicate code and useless tests from this module.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Critique the screenshots of the new settings page.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Write a commit message for my staged changes.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Explain what this PR changes in a beginner-friendly HTML page.",
+      "should_trigger": false
+    }
+  ]
+}
