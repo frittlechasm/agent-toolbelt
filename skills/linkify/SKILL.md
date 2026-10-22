@@ -1,6 +1,6 @@
 ---
 name: linkify
-description: Use to resolve and format repository and Jira links when a response cites commit, PR, ticket, or issue identifiers.
+description: Use to format repository and Jira links when a response cites commit, PR, ticket, or issue identifiers, or a file or line in a PR.
 metadata:
     scope: global
     agents: claude, codex
@@ -14,6 +14,8 @@ metadata:
     - link commits to `/commits/<hash>`
     - pull requests to `/pull-requests/<id>`
     - comments to `/pull-requests/<id>#comment-thread-<comment-id>`
+    - Link PR lines as `<pr-url>/diff#L<repo-relative-path>T<new-line>`.
+    - Use the repository hosting the PR, including when its source branch is a fork.
 - Link Jira issue keys such as `PROJ-123` to the matching Jira Cloud `/browse/PROJ-123` URL.
 - Preserve the concise identifier as the link text, for example `[a1b2c3d](...)`, `[#42](...)`, and `[PROJ-123](...)`.
 

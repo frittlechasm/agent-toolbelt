@@ -50,6 +50,11 @@
       "id": 10,
       "prompt": "Is it okay to use a commit hash as a database primary key?",
       "should_trigger": false
+    },
+    {
+      "id": 11,
+      "prompt": "List where to post each of these review comments on the Bitbucket PR, with a link to each file and line.",
+      "should_trigger": true
     }
   ]
 }

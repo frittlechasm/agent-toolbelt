@@ -95,6 +95,20 @@
         "Does not assume GitHub, Bitbucket, or a repository path from the fixture's directory name.",
         "Makes no network request or workspace change."
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "Give the link to use for an inline review comment on line 262 (new side) of src/main/Service.java in PR #42 of the current repository. The PR's source branch lives in the fork eval-workspace/sample-service-fork. Use only this workspace, without network requests or changes.",
+      "expected_output": "Links Service.java:262 to https://bitbucket.org/eval-workspace/sample-service/pull-requests/42/diff#Lsrc/main/Service.javaT262.",
+      "files": [],
+      "setup": ["fixtures/setup_context.py", "bitbucket"],
+      "capabilities": ["shell"],
+      "expectations": [
+        "Uses https://bitbucket.org/eval-workspace/sample-service/pull-requests/42/diff#Lsrc/main/Service.javaT262, in the repository that hosts the PR.",
+        "Keeps the file and line concise in the link text.",
+        "Does not link a /src/ source view or the fork repository.",
+        "Makes no network request or workspace change."
+      ]
     }
   ]
 }
