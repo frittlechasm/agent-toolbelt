@@ -11,65 +11,49 @@ metadata:
 
 Create one self-contained `.html` file that makes UI directions easy to compare.
 
-## Requirements
-
-- Render the UI with HTML and CSS. Do not replace it with descriptions or annotated placeholders.
-- Show every required element and state in every variant. Keep the content, data, viewport, and scope the same unless the user wants to compare them.
-- Ask for missing essential content or constraints. Do not invent product details.
-
 ## Directions
 
-- Follow the supplied design system, references, and design preferences. Otherwise, base the design on the product, its users, and their main task.
+- Render real UI in HTML and CSS, not descriptions or annotated placeholders.
+- Show every required element and state in every variant, with the same content, data, viewport, and scope unless the user wants those compared.
+- Ask for missing essential content or constraints; do not invent product details.
+- Follow any supplied design system, references, and preferences. Otherwise start from the product, its users, their tools, and their main task, not trends.
 - Before coding, privately define each direction's target feeling, layout idea, signature element, and restraint rule.
-- Take ideas from the product's users, tools, language, and common actions. Do not start from generic trends.
-- Give each direction one bold choice. Keep the rest calm and consistent.
-- Use references as a quality bar and moodboard. Do not copy them.
-- If directions still feel alike and the user gave no visual direction, use a different private random-string seed for each; preserve usability.
+- Give each direction one bold choice and keep the rest calm. Use references as a quality bar, not something to copy.
+- If directions still feel alike and the user gave no visual direction, use a different private random-string seed for each.
 
 ## Variants
 
-- Render three variants by default, or the count the user requests. Label them `A`, `B`, `C`, and so on.
-- Change the layout, hierarchy, navigation, density, or controls between variants. Color, type, spacing, or decoration alone do not make a new direction.
-- Keep each variant consistent across layout, type, color, surfaces, images, and controls.
-- Do not imply a preferred option. Unless asked, show only the letter label and the mock.
-- Stack variants vertically in alphabetical order by default. Use side-by-side or another arrangement only when the user requests it.
-- Keep the comparison page neutral and give matching surfaces the same dimensions when practical.
-- Preserve the target viewport. Put fixed desktop or mobile surfaces in their own horizontal scroller when needed.
+- Make three by default, or the requested count, labelled `A`, `B`, `C`, and so on.
+  Show only the label and the mock unless asked, and do not imply a favorite.
+- Vary layout, hierarchy, navigation, density, or controls. Color, type, spacing, or decoration alone is not a new direction.
+  Do not reuse one page shell or header layout across variants, or restyle the same markup with CSS.
+- Keep each variant consistent within itself.
+- Stack variants vertically in order unless the user asks for another arrangement. Keep the page neutral and matching surfaces the same size.
+- Keep the target viewport; put fixed desktop or mobile surfaces in their own horizontal scroller if needed.
 
 ## Build
 
-- Keep HTML and CSS in the file. Add JavaScript only for a requested state, motion demo, or comparison control.
-- When imagery is central to a direction, use supplied, generated, inline SVG, or embedded assets. Omit filler images.
-- Keep controls presentational. Do not add application logic, persistence, routing, or data fetching.
-- Use semantic HTML and accessible labels.
-  - Give keyboard focus a visible, theme-aligned `:focus-visible` style. Never hide focus.
-- Keep the page usable at about 320px wide without page-level horizontal scrolling for mobile devices.
-
-## Revise a selected design
-
-- During correctness fixes, preserve the selected variant, visualization, and required elements unless the user requests a change.
+- Add JavaScript only for a requested state, motion demo, or comparison control. No app logic, persistence, routing, or data fetching.
+- Use supplied, generated, inline SVG, or embedded images only when imagery is central to a direction. No filler images.
+- Use semantic HTML, accessible labels, and a visible, theme-aligned `:focus-visible` style. Never hide focus.
+- Keep the page usable at about 320px wide without page-level horizontal scrolling.
+- When fixing a selected design, keep the chosen variant, visualization, and required elements unless asked to change them.
 
 ## Motion
 
-- Use motion only when it shows a state change, gives feedback, explains hierarchy, or carries the main design idea.
-- Prefer short CSS transitions, keyframes, or inline SVG animation.
-- Use canvas or WebGL only for a central visual that cannot be expressed well with CSS or SVG.
-- Prefer motion triggered by hover, focus, or a state change. Avoid constant loops unless requested or central to the direction.
-- Animate `transform` and `opacity` when practical. Avoid effects that continuously repaint large areas.
-- Respect `prefers-reduced-motion`. The mock must still make sense when motion is off.
-- Keep motion the same across variants unless it is part of the design direction or is being compared.
-- Do not use generated video unless the user asks for it.
+- Use motion only for state changes, feedback, hierarchy, or the main design idea.
+- Prefer short CSS transitions or inline SVG animation; use canvas or WebGL only for a central visual that CSS and SVG cannot handle.
+- Prefer hover, focus, or state triggers over constant loops. Animate `transform` and `opacity`, and avoid large continuous repaints.
+- Respect `prefers-reduced-motion`; the mock must still make sense without motion.
+- Keep motion the same across variants unless it is what's being compared. Do not use generated video unless asked.
 
 ## Verify
 
-- Render the file and inspect screenshots at narrow and desktop widths.
-- Check that every requirement appears in every variant and that the variants are truly different.
-- Review composition and hierarchy first, then type, spacing, color, controls, and polish.
-- Make one or two improvement passes. Fix the largest gaps first.
-- Remove anything that adds no information, hierarchy, identity, or required behavior. Preserve elements the user selected or required.
-- Remove generic defaults unless the direction calls for them:
-  - Avoid generic hero layouts, arbitrary gradients or glows, and random accent colors.
-  - Avoid excess containers, decorative labels, and repeated rounded cards.
-- Check labels, dimensions, clipping, overflow, semantics, focus styles, and reduced motion before delivery.
-- Present the variants and wait for the user's selection before editing production code or assets.
-  - If the user explicitly asks you to choose and implement, follow that request.
+- Render and screenshot at narrow and desktop widths. Confirm every requirement is in every variant and the variants differ in structure,
+  not only in CSS applied to shared markup.
+- Review the screenshots with the `critique` skill's criteria, then make one or two passes that fix the biggest gaps first.
+- Remove anything that adds no information, hierarchy, identity, or required behavior, but keep elements the user selected or required.
+- Remove generic defaults the direction does not need: stock hero layouts, arbitrary gradients or glows, random accent colors,
+  extra containers, decorative labels, and repeated rounded cards.
+- Check labels, sizes, clipping, overflow, semantics, focus styles, and reduced motion before delivery.
+- Present the variants and wait for the user's pick before touching production code or assets, unless they asked you to choose and implement.

@@ -9,16 +9,16 @@ metadata:
 
 # Agent History Audit
 
-Keep the audited environment read-only, including code, checks, history, instructions, installed skills, and remote machines.
+Keep everything you audit read-only: code, checks, history, instructions, installed skills, and remote machines.
 
-Default to both agents on the current machine over the last 30 days; honor requested scope and exclusions.
-For last-N requests without explicit time bounds, omit the default 30-day filter.
-Inventory instructions and installed skills only for instruction or skill recommendations.
+By default, audit both agents on the current machine over the last 30 days, following any requested scope or exclusions.
+For "last N sessions" requests without dates, drop the 30-day filter.
+Inventory instructions and installed skills only when recommending changes to them.
 
 ## Collect and summarize
 
-Run the collector once, then use the consumer for selection, coverage, and usage; do not recreate these calculations.
-Keep all audit files in the private temporary directory and remove it afterward:
+Run the collector once, then use the summarizer for selection, coverage, and usage instead of recomputing them.
+Keep audit files in a private temporary directory and remove it afterward:
 
 ```bash
 audit_dir=$(mktemp -d)
@@ -32,43 +32,44 @@ python3 <skill-dir>/scripts/summarize_history.py "$audit_dir/history.jsonl" \
   > "$audit_dir/summary.json"
 ```
 
-- Adjust collector inputs to scope: `--ssh-host HOST` for each remote, `--no-local` for remote-only, and `--help` for supplied roots.
-- Use `--recent-only` for rolling windows; omit it for full-history/count-only requests.
-  Calendar periods use inclusive `--since` and exclusive `--until` timestamps with a timezone; these override `--recent-only`.
-- Use consumer `--last N` and `--help` for session filters. Exclude the active audit thread.
-  For repository audits, identify membership from normalized content and pass matching IDs with `--include-session`; leave ambiguity unattributed.
-- Use only collector-normalized history. Never parse, quote, expose, or link raw history; check paraphrased evidence for residual credentials.
-- Report summary coverage and selection, including exclusions and shortfalls. Explain partial/unknown coverage from `collection.log`;
-  affected counts are lower bounds, and excluded sources are not collection failures. Report parsing diagnostics without raw snippets.
-- Keep unranked usage separate from selected-task totals and vendor cache/reasoning fields separate.
-  Cross-vendor token totals are not equivalent; Claude subagent usage is outside coverage.
+- Collector: add `--ssh-host HOST` per remote and `--no-local` for remote-only audits; see `--help` for custom history roots.
+- Use `--recent-only` for rolling windows and omit it for full-history or count-only requests.
+  For calendar periods, pass inclusive `--since` and exclusive `--until` with a timezone; they override `--recent-only`.
+- Summarizer: use `--last N` and see `--help` for session filters. Always exclude the active audit thread.
+  For a repository audit, find its sessions from normalized content and pass them with `--include-session`; leave unclear ones unattributed.
+- Use only collector-normalized history. Never parse, quote, expose, or link raw history, and check paraphrased evidence for leftover credentials.
+- Report coverage and selection, including exclusions and shortfalls. Explain partial or unknown coverage from `collection.log`:
+  affected counts are lower bounds, and excluded sources are not collection failures. Report parse diagnostics without raw snippets.
+- Keep unranked usage separate from selected-task totals, and vendor cache and reasoning fields separate.
+  Token totals are not comparable across vendors, and Claude subagent usage is not covered.
 
 ## Assess evidence
 
-- Distinguish model errors, navigation/documentation gaps, user refinements, tool failures, and permission gates.
-  Repeated patterns require two independent user interactions; prompt frequency alone is not failure frequency.
-- Use `message_origin`: injected/tool-wrapper content is not evidence; scheduled, reviewer, and delegated prompts are not human corrections.
-  Unknown origin is not proof of human feedback. Delegated work can support findings; later human follow-ups can supply direct evidence.
-  Ignore duplicate snapshots/forks, without discarding independent runs just because their prompts match.
-- The collector retains conversation text, not full tool traces or repository metadata.
-  Do not infer search counts, failures, repository identity, or navigation delay from missing traces or timestamp gaps.
-- For navigation/stale-doc findings, identify the misleading or missing guidance and observed consequence.
-  Check implicated files against current code in an identified checkout/revision; distinguish fixed history, current gaps, and unverified claims.
-  Report unavailable repositories as validation gaps. One verified gap may justify repair, but is not a recurring pattern.
+- Classify each issue as a model error, navigation or doc gap, user refinement, tool failure, or permission gate.
+- A repeated pattern needs two independent user interactions. How often a prompt appears is not how often something failed.
+- Check `message_origin`. Injected or tool-wrapper content is not evidence. Scheduled, reviewer, and delegated prompts are not human corrections,
+  and unknown origin does not prove human feedback. Delegated work can support a finding; later human follow-ups are direct evidence.
+- Ignore duplicate snapshots and forks, but keep independent runs even when their prompts match.
+- History holds conversation text, not full tool traces or repository metadata.
+  Do not infer search counts, failures, repository identity, or navigation delays from missing traces or timestamp gaps.
+- For navigation or stale-doc findings, name the misleading or missing guidance and what it caused.
+  Check it against current code in a known checkout and revision, and say whether it is fixed, still a gap, or unverified.
+  Report unavailable repositories as validation gaps. One verified gap can justify a fix but is not a pattern.
 
-## Recommend improvements
+## Recommend
 
-- Recommend skills only for repeated, stable workflows; define trigger, boundary, inputs, verification, and non-goals.
-  Compare active contents across scoped machines, distinguishing installed skills from drafts/caches/archives.
-- Prefer existing skills, repository entry points, and enforcement. Keep discoverable repository facts out of global guidance.
-  Check relevant scripts, hooks, CI, and prior failures before proposing a guard; leave judgment to the model.
-- Validate proposed guards with synthetic failure and valid cases in an isolated temporary workspace, when practical.
-  Never use private history or mutate the audited repository; otherwise mark the proposal unvalidated.
+- Recommend a new skill only for a repeated, stable workflow, with its trigger, boundary, inputs, verification, and non-goals.
+  Compare installed skills across the machines in scope, separately from drafts, caches, and archives.
+- Prefer existing skills, repository entry points, and enforcement. Keep facts that are easy to find in a repository out of global guidance.
+- Before proposing a guard, check existing scripts, hooks, CI, and past failures, and leave judgment calls to the model.
+  When practical, test it on synthetic failing and passing cases in a temporary workspace, never with private history or the audited repository.
+  Otherwise mark it unvalidated.
 
 ## Report
 
-- Prioritize recommendations with expected/observed behavior, classification, frequency, confidence, and evidence before/after known fixes.
-  Cite machine, session basename, full event timestamp, and affected paths; give the smallest edit, owner, coverage gap, and machine drift.
-- Separate scan totals, usable/supporting evidence, and verified incidents; distinguish confirmed findings, weak signals, and deferred ideas.
-- HTML reports include an executive summary, successful patterns, recurring errors, failures by model, usage/inefficiency by agent/model,
-  collection gaps, and metric limits. Show unknown models; flag repeated context, low cache reuse, correction churn, and unusually high output.
+- Prioritize recommendations with expected and observed behavior, classification, frequency, confidence, and evidence before and after known fixes.
+- Cite machine, session basename, full event timestamp, and affected paths. Give the smallest edit, its owner, coverage gaps, and machine drift.
+- Separate scan totals, usable evidence, and verified incidents; separate confirmed findings, weak signals, and deferred ideas.
+- Build HTML reports with the `html` skill. Include an executive summary, what worked, recurring errors, failures by model,
+  usage and waste by agent and model, collection gaps, and metric limits.
+  Show unknown models, and flag repeated context, low cache reuse, correction churn, and unusually high output.

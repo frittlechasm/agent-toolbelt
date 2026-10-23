@@ -7,40 +7,23 @@ metadata:
   machines: all
 ---
 
-# Commit Message Generator
+# Commit Message
 
-## Inspect changes
+## Inspect
 
-- Run `git status --short` so untracked files are visible.
-- Run `git diff --cached` to inspect staged changes.
-- For a message-only request, use the staged diff when present; otherwise inspect `git diff` for unstaged changes.
-- If only untracked files remain, inspect their relevant contents before writing the message.
-- If there are no changes, say there are no changes to summarize.
+- Run `git status --short` (it shows untracked files) and `git diff --cached`.
+- For a message only, describe the staged diff. If nothing is staged, use `git diff`; if only untracked files remain, read them.
+  Do not mix staged and unstaged changes unless asked to cover the whole tree.
+- If there are no changes, say so.
 
-## Commit scope
+## Commit
 
-- When asked to commit, use the user's requested files or task as the boundary. Staging alone does not authorize unrelated changes.
-- Inspect the diff for the authorized changes and derive the message from what the commit will contain.
-- Commit only those changes after normal repository checks. Preserve unrelated staged and unstaged changes, including their index state.
-- Each commit should cover one meaningful change and include its related tests and documentation.
-- Keep commits buildable and testable when practical. Do not split changes just to increase the number of commits.
+- Commit only the files or task the user named. Staged changes alone do not authorize unrelated work.
+- Preserve unrelated staged and unstaged changes, including their index state.
+- Make one meaningful change per commit, with its tests and docs. Keep commits buildable; do not split just to make more commits.
+- If the diff mixes unrelated changes, suggest separate commits unless the user wants them together.
 
-## Write the message
-
-- For a message-only request, return the message with no recap, alternatives, or command instructions.
-- Choose the type and optional scope from the actual behavioral intent of the diff.
-- Do not add commit trailers or attribution lines such as `Co-authored-by:`.
-- For breaking changes, add `!` before the colon: `feat(auth)!: remove OAuth 1.0`.
-
-## Gotchas
-
-- For message-only requests, do not mix staged and unstaged changes unless the user asks to cover the whole working tree.
-- Prefer the narrowest accurate type. A dependency bump that fixes a bug can be `fix`; routine metadata churn is usually `chore`.
-- If the diff combines unrelated changes:
-  - Suggest one message only when the user intends to commit them together.
-  - Otherwise, mention that separate commits would be clearer.
-
-## Format
+## Message
 
 ```
 <type>(<scope>): <subject>
@@ -48,8 +31,10 @@ metadata:
 [optional body]
 ```
 
-- **Subject**: concise, imperative, lowercase, no period; reflect the diff and the user's intent
-- **Scope**: component or area affected (optional but preferred)
-- **Body**: include only if changes are complex; explain what changed and why
-
-Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`, `build`, `ci`, `revert`.
+- Subject: short, imperative, lowercase, no period. Scope: the affected area (optional but preferred).
+- Add a body only for complex changes, saying what changed and why.
+- Pick the narrowest type from the change's intent: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`, `build`, `ci`, `revert`.
+  A dependency bump that fixes a bug is `fix`; routine metadata churn is `chore`.
+- Mark breaking changes with `!`: `feat(auth)!: remove OAuth 1.0`.
+- Do not add trailers or attribution lines such as `Co-authored-by:`.
+- For a message-only request, return just the message: no recap, alternatives, or commit instructions.

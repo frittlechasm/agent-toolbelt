@@ -9,58 +9,43 @@ metadata:
 
 # Visual Design Review
 
-Judge the rendered result as a design critic. Do not make changes unless the user asks.
+Judge the rendered result as a design critic. Do not change anything unless asked.
 
 ## Evidence
 
-- Review screenshots at the intended viewport. If the user supplies a URL or runnable UI, render it in a browser first.
-- For the first pass, use only screenshots, product goal, target feeling, accepted constraints, and references.
+- Review screenshots at the intended viewport. Render a supplied URL or runnable UI in a browser first.
+- Judge only from screenshots, the product goal, target feeling, constraints, and references.
   Ignore code, implementation effort, earlier rationale, and past critiques.
-- If the goal or target feeling is missing, state the assumption you used instead of blocking the review.
-- If screenshots or other visual evidence are missing, review what is available. Say what you cannot assess and ask only for what you need to finish that part.
-- Use references as a quality bar and visual guide. Do not reward copying them.
-- For motion, inspect the resting state and a few key frames. Check the reduced-motion state when available.
-- A still image cannot show interaction behavior, transition quality, animation smoothness, or rendering performance.
-- Mark any inferences and ask for a runnable UI, recording, or key states when those qualities matter.
-- Delegate only when the user asks and delegation is available and authorized. Give the reviewer only the first-pass evidence listed above.
+- If the goal or feeling is missing, state the assumption you used. If visuals are missing, say what you cannot assess and ask only for that.
+- Use references as a quality bar, not something to copy.
+- Stills cannot show interaction, transitions, smoothness, or performance. For motion, check the resting state, key frames, and reduced motion.
+  Ask for a recording or runnable UI only when a conclusion needs it.
+- Delegate only when the user asks, and give the reviewer only the evidence above.
 
 ## Review
 
-Start with the whole design before inspecting details:
+Look at the whole before the details:
 
-1. Does the composition guide attention to the main task?
-2. Does the design create the intended feeling and fit the product's users?
-3. Do layout, type, color, surfaces, images, controls, and motion create one clear identity?
-4. Is the design useful and easy to read, or does visual novelty get in the way?
-5. Which details weaken the result: spacing, alignment, type, contrast, control styling, imagery, or motion?
-6. What should be removed because it adds no information, hierarchy, identity, or useful feedback?
+1. Does the composition lead to the main task?
+2. Does it create the intended feeling for these users?
+3. Do layout, type, color, surfaces, images, controls, and motion form one identity?
+4. Is it useful and readable, or does novelty get in the way?
+5. Which details weaken it: spacing, alignment, type, contrast, controls, imagery, or motion?
+6. What adds no information, hierarchy, identity, or feedback and should go?
 
-Flag generic AI-looking patterns only when the design does not justify them.
-Examples include:
-
-- generic hero layouts
-- arbitrary gradients or glows
-- too many containers
-- decorative labels
-- random accent colors
-- repeated rounded cards
-- filler images
-- constant decorative animation
+Flag generic AI patterns only when the design does not justify them: stock hero layouts, arbitrary gradients or glows, too many containers,
+decorative labels, random accent colors, repeated rounded cards, filler images, and constant decorative animation.
 
 ## Response
 
-- Lead with a direct one- or two-sentence verdict.
-- Report up to three important problems, ordered by impact. If there are no important visual problems, say so instead of inventing some.
-- For each problem, point to visible evidence, explain why it matters, and give a specific visual change.
-- Separate visible defects from subjective preferences. Present preferences as options, not corrections.
-- Name an element worth keeping when it helps define the design direction.
-- End with a short brief for the next design pass only when another pass is warranted.
-- Recommend visual changes, not implementation details, unless the user asks for code guidance.
-- Score the work only when the user asks or provides a clear comparison reference. Explain what the score measures.
-- Rank variants only when the user asks. Apply the same criteria to every variant and keep real tradeoffs visible instead of forcing a winner.
-
-## Boundaries
-
-- Mention visible accessibility problems, but use a dedicated accessibility review for a full audit.
-- Do not reward complexity for its own sake. A restrained design can be the strongest option.
-- Do not start an automatic builder-review loop. Review the submitted state once, then wait for a new version or an explicit request to continue.
+- Lead with a one- or two-sentence verdict.
+- Give up to three important problems by impact, each with visible evidence, why it matters, and a specific visual fix. If there are none, say so.
+- Separate visible defects from preferences, and offer preferences as options.
+- Name an element worth keeping when it defines the direction.
+- Add a short brief for the next pass only when one is warranted.
+- Recommend visual changes, not code, unless asked.
+- Score only when asked or given a clear reference, and say what the score measures.
+- Rank variants only when asked, with the same criteria for each. Keep real tradeoffs visible instead of forcing a winner.
+- Mention visible accessibility problems, but leave a full audit to a dedicated review.
+- Do not reward complexity; a restrained design can be the strongest.
+- Review the submitted state once, then wait for a new version or a request to continue.

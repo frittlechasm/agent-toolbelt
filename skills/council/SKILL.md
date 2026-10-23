@@ -11,37 +11,31 @@ metadata:
 
 ## Reviewers
 
-- Launch two delegates: one Opus and one Sol, both at `xhigh` effort, regardless of the coordinating model.
-- Resolve model aliases and supported options through the live catalog.
-    - In T3 Code, use `orchestrator_capabilities` and `delegate_task`.
-    - Set `target.options` explicitly: `{"effort":"xhigh"}` for Opus and `{"reasoningEffort":"xhigh"}` for Sol.
-    - Check the returned provider, model, and options against the requested selection.
-- Report unavailable models or unsupported effort settings rather than silently substituting.
+- Launch one Opus and one Sol delegate, both at `xhigh` effort, whatever model is coordinating.
+- In T3 Code, resolve models with `orchestrator_capabilities` and launch with `delegate_task`. Set `target.options` to
+  `{"effort":"xhigh"}` for Opus and `{"reasoningEffort":"xhigh"}` for Sol, then check the returned provider, model, and options.
+- If a model or effort setting is unavailable, report it; never substitute silently.
 
-## Review and Debate
+## Review and debate
 
-1. State the models, effort, and scope, then launch both reviews in parallel.
-    - Keep both delegates read-only and prohibit further delegation.
-      Explicitly prohibit file writes, including temporary snapshots; keep verification data in memory and disable generated test files.
-    - Give each the same original request, constraints, review target, supporting context, and checks run.
-    - For code reviews, give both delegates the [audit](../audit/SKILL.md) skill's review criteria.
-      For other material, derive review criteria from the task.
-    - Do not share either delegate's initial review until both finish. Keep the reviewed material stable during those reviews.
-    - For code reviews, include relevant staged, unstaged, and untracked work through the shared checkout read-only or a complete snapshot.
-      A worktree based on the parent commit omits uncommitted edits.
-    - Request findings or objections with reasoning, evidence, impact, relevant locations where applicable, and a verdict.
-    - Distinguish demonstrated problems from assumptions, risks, and preferences, especially when reviewing approaches or ideas.
-
-2. Verify each review's findings against available evidence and checks.
-    - Argue disputed findings with the reviewer using concrete evidence; challenge unsupported claims and scope expansion.
-    - Share conflicting findings after both independent reviews finish, and ask the reviewers to address the opposing evidence.
-    - Accept supported findings, discard disproven ones, and preserve unresolved objections. Do not force agreement.
-
-3. For follow-up discussion or re-review, supply the original brief, current material, prior findings, responses, and check results.
-    - In T3 Code, call `delegate_task` again for each round; retain task IDs and use a distinct, retry-stable `clientRequestId` per task.
-    - Stop discussion when the findings are resolved, disagreement stalls, or execution is blocked; report anything unresolved.
+1. State the models, effort, and scope, then launch both reviews in parallel (`delegate_task` with `mode: "async"`).
+    - Delegates are read-only: no file writes (including temporary snapshots or generated tests) and no further delegation.
+      They keep verification data in memory.
+    - Give both the same request, constraints, target, context, and checks run.
+      For code, include the [audit](../audit/SKILL.md) criteria; otherwise derive criteria from the task.
+    - For code, share staged, unstaged, and untracked work through the read-only checkout or a full snapshot.
+      A worktree from the parent commit misses uncommitted edits.
+    - Ask for findings with reasoning, evidence, impact, locations, and a verdict.
+      Separate demonstrated problems from assumptions, risks, and preferences.
+    - Keep the material unchanged, and share neither review until both finish.
+2. Verify each finding against the evidence.
+    - Send conflicting findings to both reviewers and ask them to address the opposing evidence. Challenge unsupported claims and scope creep.
+    - Accept supported findings, drop disproven ones, and keep unresolved objections. Do not force agreement.
+3. For follow-up rounds, send the original brief, current material, prior findings, responses, and check results.
+    - In T3 Code, call `delegate_task` again for each round with a distinct, retry-stable `clientRequestId`, and keep the task IDs.
+    - Stop when findings are resolved, disagreement stalls, or work is blocked.
 
 ## Result
 
-- Report both models and effort settings, scope, rounds, verified findings, and each reviewer's verdict.
-- Include unresolved objections, checks run, and next steps required by the task prompt.
+Report both models and effort, scope, rounds, verified findings, each reviewer's verdict, unresolved objections, checks run,
+and any next steps the task asked for.

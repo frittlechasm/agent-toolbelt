@@ -7,60 +7,42 @@ metadata:
     machines: all
 ---
 
-# Code Change Explainer HTML
+# Code Change Explainer
 
-Create a standalone `.html` document that teaches what changed in code and why, with only the context the reader needs.
-
-## Goal
-
-- Lead with the practical outcome or mental model, then move from old behavior to new behavior, mechanism, and meaningful line-level detail.
-- Define unfamiliar target-language or platform terms briefly near first use.
-- Claim only what the supplied diff, source, or prompt supports. Do not invent bugs, causes, or consequences.
-- Choose a structure that fits the change; avoid repeating the introduction in outcome callouts or later sections.
-
-## Comparison language
-
-Use the comparison language named in the prompt, otherwise a stored preference, otherwise explain the target code directly.
-Ask only when the missing language would materially change the teaching approach.
-Compare languages only to clarify an unfamiliar mechanism; keep the analogy brief, state its limits, and skip familiar syntax.
+Create a standalone `.html` document, built with the `html` skill, that teaches what changed in code and why, with only the context the reader needs.
 
 ## Gather the change
 
 - Read the real before and after from `git diff`, `git diff --staged`, the requested commit, or the supplied source.
-- Read `CONTEXT.md` when present and use its established domain terms unless the source contradicts them.
-- Understand the changes and their motivation. Check the interaction, prompts, and decisions from the session when available.
-- Clearly distinguish observed behavior, stated intent or specification, and inferred rationale.
-- Use examples from the supplied change. When only the prompt describes it, label reconstructed surrounding code as illustrative.
-  Do not let examples imply unsupported behavior.
-- Skip generated, vendored, lockfile, formatting-only, and import-order churn. Briefly note material omissions.
-- Group related changes by concept or runtime flow when that is clearer than file order.
+  Use the session's prompts and decisions for motivation when available.
+- Use domain terms from `CONTEXT.md` when present, unless the source contradicts them.
+- Separate observed behavior, stated intent, and inferred rationale. Claim only what the evidence supports; do not invent bugs, causes, or consequences.
+- Use examples from the change. Label reconstructed surrounding code as illustrative, and do not let it imply unsupported behavior.
+- Skip generated, vendored, lockfile, formatting-only, and import-order churn, and briefly note material omissions.
+- Group changes by concept or runtime flow when that is clearer than file order.
 
-## Protect secrets
+## Teach it
 
-- Redact passwords, tokens, API keys, private keys, JWTs, authentication values, embedded URL credentials, and suspicious secret-like values.
-- Use distinct labeled placeholders such as `[REDACTED:API_TOKEN]` for distinct secrets.
-- Preserve surrounding syntax and redact only the credential component.
-- Redact secrets in both Before and After snippets, even when removing the secret is the change.
-- State visibly that credentials were redacted. If a real committed credential is found, warn that it may remain in Git history and should be rotated.
-
-## Teach the change
-
-For each distinct concept:
-
-- Explain the practical old and new behavior and why the change matters before walking through syntax.
-- Show aligned Before and After code panels when code is available; do not use a unified diff.
-- Walk through every meaningful changed line in a focused snippet. Group boilerplate or repetition in larger changes and say what was grouped.
-- Quote the relevant line and explain unfamiliar syntax or semantics.
+- Lead with the practical outcome or mental model, then old and new behavior, the mechanism, and meaningful line-level detail.
+  Do not repeat the introduction in later sections.
+- Define unfamiliar language or platform terms briefly near first use.
+- Use the comparison language from the prompt or a stored preference; otherwise explain the target code directly.
+  Ask only when the missing language would change the approach. Keep comparisons brief, state their limits, and skip familiar syntax.
+- For each concept, explain the behavior change and why it matters before the syntax.
+- Show aligned Before and After panels, not a unified diff. Walk through every meaningful changed line, quoting it and explaining unfamiliar syntax.
+  In large changes, group boilerplate and say what you grouped.
 - When an unfamiliar protocol or platform feature drives the change, show one small request/response or input/output example.
-- Explain tradeoffs or failure behavior only when supported by the evidence.
+- Explain tradeoffs or failure behavior only when the evidence supports them.
 
-## Preserve source code
+## Copy code exactly
 
-- Copy source code exactly, including snippets delimited in the user's prompt. Preserve punctuation, spacing, line breaks, and supplied context.
-  Secret redaction is the only exception.
-- Before finalizing, compare every code block with its source and confirm that only secret redactions differ.
-- Put simplifications and explanations in prose, not inside quoted code.
+- Copy source code exactly, including snippets from the prompt: punctuation, spacing, line breaks, and context. Secret redaction is the only exception.
+- Put simplifications and explanations in prose, never inside quoted code.
+- Before finishing, compare every code block with its source.
 
-## Render
+## Redact secrets
 
-- Use the `html` skill when available; otherwise create the standalone HTML directly.
+- Redact passwords, tokens, API keys, private keys, JWTs, auth values, URL credentials, and anything secret-like.
+  Do it in both Before and After, even when removing the secret is the change.
+- Use distinct labeled placeholders such as `[REDACTED:API_TOKEN]`, and redact only the credential part, keeping the surrounding syntax.
+- Say visibly that credentials were redacted. If a real committed credential appears, warn that it stays in Git history and should be rotated.
