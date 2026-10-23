@@ -1,0 +1,4 @@
+interface:
+  display_name: "Council"
+  short_description: "Independent Opus and Sol reviews with evidence-based debate"
+  default_prompt: "Use $council to review the supplied material independently with Opus and Sol at xhigh effort, then debate and verify their findings."

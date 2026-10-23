@@ -10,6 +10,7 @@ Reusable agent skills and supporting utilities.
 | `audit` | Reviews changes for blast radius, correctness, performance, and security issues. | Local |
 | `bitbucket` | Fetches and reviews a Bitbucket Cloud PR without changing it. | Local |
 | `commit` | Writes conventional commit messages from Git changes. | Local |
+| `council` | Reviews code, findings, approaches, or ideas through independent Opus and Sol reviews and debate. | Local |
 | `critique` | Reviews rendered UI for visual quality and polish. | Shared |
 | `declutter` | Reviews code for simplification, performance improvements, and low-value or flaky tests. | Local |
 | `eli5` | Creates illustrated HTML explanations for beginners. | Shared |

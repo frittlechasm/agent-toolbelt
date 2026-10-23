@@ -1,0 +1,55 @@
+{
+  "skill_name": "council",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use $council to review the current branch's code changes.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Run a council review of these findings and challenge anything unsupported by the evidence.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Have the council evaluate our proposed retry and idempotency approach before we implement it.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Use $council to debate this product idea and its tradeoffs. There is no code yet.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Get independent Opus and Sol reviews of this design, then argue their findings with them.",
+      "should_trigger": true
+    },
+    {
+      "id": 6,
+      "prompt": "Review this diff for correctness, performance, and security issues.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Have Opus alone review this plan. I only want one reviewer.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Summarize these review findings into three bullets without evaluating them.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Explain this architecture and trace the authentication flow from the source.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Critique the spacing and typography in this screenshot.",
+      "should_trigger": false
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "skill_name": "council",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use $council to review all staged, unstaged, and untracked work in this workspace. Read CONTRACT.md and run the existing tests if useful. Report findings only; leave the code and Git index unchanged.",
+      "capabilities": ["shell", "t3-code delegation"],
+      "expected_output": "Two independent reviews of the complete working state identify the cross-tenant cache leak. The coordinator verifies and reconciles the findings without modifying the target or inventing cache invalidation requirements.",
+      "files": [],
+      "setup": ["fixtures/setup_review.py"],
+      "expectations": [
+        "Resolves Opus and Sol through the live catalog and launches two read-only delegates before consuming either review, with further delegation prohibited.",
+        "Uses delegate_task with explicit xhigh options for both models and checks the returned selection; does not silently substitute an unavailable model or effort setting.",
+        "Gives both delegates the same workspace target, original brief, supporting context, and audit criteria, including the staged cache-key change, unstaged refactor, and untracked test.",
+        "Identifies that document IDs can collide across tenants and the shared cache key omits tenant_id, allowing tenant beta to receive tenant alpha's cached document.",
+        "Verifies consequential findings against documents.py, CONTRACT.md, and the existing test; distinguishes the demonstrated leak from unsupported stale-cache concerns.",
+        "Shares initial review findings only after both reviews finish and sends any material disagreements back with evidence rather than forcing agreement.",
+        "Leaves reviewed source, contract, regression tests, and the Git index unchanged and reports both models, effort settings, verdicts, checks, and any unresolved objections."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use $council to assess these existing findings against documents.py and CONTRACT.md: F1 says the shared cache can return another tenant's document; F2 says the cache must invalidate entries on document updates. Decide which findings are supported and explain why. Do not change files or draft or post comments.",
+      "capabilities": ["shell", "t3-code delegation"],
+      "expected_output": "Independent Opus and Sol assessments verify F1 and reject F2 under the supplied immutability contract. The coordinator reconciles the assessments using source evidence and reports the disposition of each supplied finding.",
+      "files": [],
+      "setup": ["fixtures/setup_review.py"],
+      "expectations": [
+        "Uses separate read-only Opus and Sol delegates at xhigh, giving both the supplied findings and source context without sharing either delegate's initial assessment.",
+        "Keeps delegate verification read-only, including temporary files; stores verification data in memory and reports any execution limitation honestly.",
+        "Treats the findings themselves as the review target and checks each claim against documents.py and CONTRACT.md rather than merely summarizing or accepting the supplied claims.",
+        "Supports F1 with the tenant-independent cache key and a concrete same-document-ID request sequence across tenants.",
+        "Rejects F2 as unsupported because the contract makes documents immutable for the cache lifetime; does not describe it as a confirmed defect or demand out-of-scope implementation work.",
+        "Challenges unsupported reviewer claims if any arise, preserves unresolved evidence-based objections, and does not manufacture disagreement when both assessments are supported.",
+        "Reports each finding's disposition and both reviewers' verdicts without edits, comment drafts, remote writes, or an automatic fix-and-review cycle."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use $council to review this approach, not implementation code: before charging an invoice, a worker acquires a Redis lock with a five-second TTL, calls the payment provider, then marks the invoice paid in Postgres. Calls can take 20 seconds, jobs retry for two minutes, and a worker can crash after the provider charges but before Postgres commits. The provider already supports stable per-invoice idempotency keys. Recommend the smallest change that makes retries safe. Do not implement anything.",
+      "capabilities": ["t3-code delegation"],
+      "expected_output": "Two independent reviews evaluate the approach against the supplied timing and crash behavior. The coordinator explains the duplicate-charge scenarios and recommends stable provider idempotency plus recoverable payment state without claiming the Redis lock guarantees exactly-once charging.",
+      "files": [],
+      "expectations": [
+        "Launches independent Opus and Sol reviews at xhigh with the same timing, retry, crash, and provider constraints; does not require a code diff to review the approach.",
+        "Explains how lock expiry while a charge is in flight permits overlapping attempts and how a crash after charging leaves local state ambiguous.",
+        "Uses the provider's existing per-invoice idempotency support in the recommendation and addresses retry or reconciliation of the ambiguous local state.",
+        "Avoids claiming that a longer lock alone solves the crash window or guarantees exactly-once external side effects.",
+        "Verifies reviewer arguments against the supplied failure scenarios, distinguishes assumptions from demonstrated design gaps, and keeps implementation choices proportional to the request.",
+        "Reports both reviewers' verdicts and unresolved tradeoffs without writing code or making external changes."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Use $council to evaluate this process idea: require a ten-minute synchronous call with the author and two reviewers before every PR can merge. We have 12 engineers, average eight PRs per day, and currently wait a median of two business days for review. Correctness incidents are rare. We cannot add headcount. Is this a useful experiment? Discuss benefits, cost, assumptions, and how we would judge the result. Do not create a policy or change any tools.",
+      "capabilities": ["t3-code delegation"],
+      "expected_output": "Independent reviews assess the process idea using the supplied team constraints. The coordinator weighs possible benefits against at least four engineer-hours per day plus scheduling overhead, makes uncertainty explicit, and proposes a measurable experiment rather than assuming synchronous calls remove the review delay.",
+      "files": [],
+      "expectations": [
+        "Uses independent Opus and Sol delegates at xhigh even though the review target is an idea rather than code or existing findings.",
+        "Calculates the proposed calls' minimum attendance cost as eight times ten minutes times three engineers, or four engineer-hours per day, and recognizes additional scheduling overhead.",
+        "Does not assume that the existing two-day wait is caused by asynchronous discussion or that mandatory calls will eliminate it.",
+        "Debates benefits, cost, and uncertainty using the team's stated constraints without forcing a code-audit checklist or manufacturing security findings.",
+        "Suggests a bounded experiment with measures such as review wait, engineer time, and rework, and gives a recommendation without presenting assumptions as proven outcomes.",
+        "Reports both reviewers' verdicts and any unresolved objections without creating policy files, modifying tools, or performing remote actions."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Use $council to review all staged, unstaged, and untracked work here. Fix confirmed defects, run the existing tests, then get another council review of the changes. Preserve unrelated work and leave the Git index as it is. Do not post comments, commit, push, or merge anything.",
+      "capabilities": ["shell", "t3-code delegation"],
+      "expected_output": "The first review verifies the cross-tenant cache leak. The coordinator applies a minimal tenant-aware key fix, confirms the existing tests pass, and obtains fresh independent Opus and Sol reviews of the updated working state before reporting the result.",
+      "files": [],
+      "setup": ["fixtures/setup_review.py"],
+      "expectations": [
+        "Completes both independent xhigh reviews before editing the initial target and verifies the cross-tenant cache defect rather than treating agreement alone as proof.",
+        "Makes the shared cache key include both tenant_id and document_id while preserving the unstaged refactor, untracked test, and original Git index.",
+        "Runs the existing tenant-isolation regression and cache-reuse test and reports their actual result after the fix; does not weaken the assertions or change the contract to hide the defect.",
+        "Calls delegate_task again for each Opus and Sol re-review, using distinct retry-stable clientRequestId values and retaining task IDs instead of sending messages to completed childThreadId values.",
+        "Supplies the original brief, updated material, prior findings, responses, and check results to both re-reviewers; keeps the updated target stable until both finish.",
+        "Reports each re-review verdict, checks, and any unresolved objections or changes still awaiting review, with no comments, commits, pushes, or merges."
+      ]
+    }
+  ]
+}
