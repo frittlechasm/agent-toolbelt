@@ -13,16 +13,15 @@ Create a source-grounded interactive ERD, either as a standalone HTML file or as
 
 ## Workflow
 
-1. Establish scope and source authority.
-   - Prefer DDL and migrations over ORM mappings, and ORM mappings over prose, unless the user names another source of truth.
-   - Render only supported tables, columns, constraints, and relationships. Report conflicts instead of merging them.
-     Mark unenforced relationships `logical` or `derived`.
-   - Record the important inspected files in the model's source fields.
-   - Preserve composite-key order, nullability, uniqueness, cardinality, and referential actions. Omit unknown relationships rather than guessing.
-2. Read [references/schema-model.md](references/schema-model.md) and create the normalized JSON model.
-   - Follow the user's scope. Include directly referenced external tables only when useful and mark them `existing`.
-   - Keep every column for a complete schema. Abbreviate only with the user's permission.
-   - Group and order tables from left to right by domain or dependency without inventing semantics.
+1. Establish scope and the source of truth.
+   - Prefer DDL and migrations over ORM mappings, and ORM mappings over prose, unless the user names another source.
+   - Render only supported tables, columns, constraints, and relationships. Report conflicts instead of merging them; omit unknown relationships.
+   - Mark unenforced relationships `logical` or `derived`. Keep composite-key order, nullability, uniqueness, cardinality, and referential actions.
+   - Record the key inspected files in the model's source fields.
+2. Read [references/schema-model.md](references/schema-model.md) and create the JSON model.
+   - Follow the user's scope. Include directly referenced outside tables only when useful, and mark them `existing`.
+   - Keep every column for a complete schema; abbreviate only with the user's permission.
+   - Group and order tables left to right by domain or dependency without inventing meaning.
 3. Validate and render:
 
    ```bash
@@ -30,11 +29,10 @@ Create a source-grounded interactive ERD, either as a standalone HTML file or as
    python3 scripts/render_erd.py schema.json --output erd.html
    ```
 
-   Include the ERD in the same deliverable when composing a larger HTML document. Modify the template only for requested behavior it cannot express.
-4. Verify source and browser behavior.
-   - Match rendered counts and ordered relationship mappings to the source and model.
-   - Check desktop and 320–390px widths, light and dark appearance, connector alignment, and console errors.
-   - Exercise search, existing-table filtering, zoom, details, Escape, and focus restoration. Only the diagram may scroll horizontally.
-   - Fix schema, layout, or interaction failures before delivery.
+   For a larger HTML document, include the ERD in that same deliverable. Change the template only for requested behavior it cannot express.
+4. Verify against the source and in the browser, and fix failures before delivery.
+   - Rendered counts and ordered relationship mappings match the source and model.
+   - Desktop and 320–390px widths, light and dark mode, connector alignment, and no console errors.
+   - Search, existing-table filtering, zoom, details, Escape, and focus restoration work. Only the diagram scrolls horizontally.
 
-If the artifact will be published as an HTML note, use the HTML-notes workflow only after the user authorizes that external write.
+To publish it as a note, use the `notes` skill only after the user approves that external write.

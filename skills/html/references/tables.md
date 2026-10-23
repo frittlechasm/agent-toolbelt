@@ -1,8 +1,5 @@
 # Tables
 
-Read this only when selected content already contains a data table, the user explicitly requests tabular presentation.
-Do not read it for prose comparisons, option panels, CSS grids, or other layouts that merely use rows or columns.
-
 ## Structure
 
 - Use `<caption>`, `<thead>`, `<tbody>`, scoped column headers, and row headers where appropriate.
@@ -13,7 +10,7 @@ Do not read it for prose comparisons, option panels, CSS grids, or other layouts
 
 ## Spreadsheet transfer
 
-Apply this only when the user asks to copy a table or move it into a spreadsheet.
+Only when the user asks to copy a table or move it into a spreadsheet:
 
 - Derive the copied payload from the rendered table so it cannot drift from the visible data.
 - Use TSV by default. For requested CSV, double embedded quotes and quote fields containing commas, quotes, or line breaks.

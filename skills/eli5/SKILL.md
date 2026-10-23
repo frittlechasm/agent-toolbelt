@@ -7,19 +7,15 @@ metadata:
     machines: all
 ---
 
-Explain like I'm someone who knows nothing about this topic.
-Create one visual HTML document explainer with big, purposeful illustrations and few words.
+Create one visual HTML explainer, built with the `html` skill, for an adult who knows nothing about the topic.
+Use big, purposeful illustrations, few words, and plain language. ELI5 means new to the topic, not a child.
 
-## Guide
-
-- ELI5 means the reader is new to the topic, not that they are a child. Use plain language for adults.
-- Do not use image generation unless the user explicitly requests a raster image.
-- Prefer progressive disclosure. For a process, sequence, or comparison, use one focused interaction with one short caption per state.
-- If something exists to manage a change, show a clear before-and-after example that explains why it is needed.
-- Let visuals and interaction replace prose. Do not repeat the same explanation in multiple places.
-- Keep diagram elements proportional. Prevent overlaps between text and other diagram elements.
-- If used, keep connectors thin and arrowheads small and fixed-size; route them around nodes and labels with visible endpoint clearance.
-- Keep connector labels and text inside icons clearly smaller than node labels.
-- Make controls easy to click or tap, even when the visible icon is small.
-- Use the `html` skill when available.
-- Check the document at about 320px wide and at desktop width. Make sure nothing is cut off, overflows, or is misaligned, and test the interaction.
+- Do not generate raster images unless the user asks for one.
+- Reveal ideas step by step. For a process, sequence, or comparison, use one focused interaction with one short caption per state.
+- If something exists to manage a change, show a before-and-after that explains why it is needed.
+- Let visuals replace prose, and say each thing once.
+- Keep diagram elements proportional, with no text overlapping other elements.
+- Keep any connectors thin, with small fixed-size arrowheads, routed around nodes and labels with clear space at the ends.
+- Keep connector labels and icon text clearly smaller than node labels.
+- Make controls easy to click or tap, even when the icon is small.
+- Check at about 320px and desktop widths for clipping, overflow, and misalignment, and test the interaction.

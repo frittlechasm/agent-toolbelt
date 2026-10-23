@@ -1,7 +1,5 @@
 # Default design
 
-Use this visual system only when the user or invoking skill supplies no template, brand, or design system.
-
 ## Foundation
 
 - Use `#0a0a0a` for the page, `#f5f5f5` for primary text, `#a3a3a3` for secondary text, and `#262626` for subtle separators.

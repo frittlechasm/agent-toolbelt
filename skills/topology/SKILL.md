@@ -9,42 +9,29 @@ metadata:
 
 # Architecture Diagram
 
-Map system components, infrastructure, boundaries, and relationships from supplied descriptions, configuration, documentation, or source code.
+Map system components, infrastructure, boundaries, and relationships from supplied descriptions, configuration, docs, or source code.
 
 ## Ground the topology
 
-- Prefer deployed configuration and executable source over conflicting prose. Report material conflicts instead of merging them.
-- Label requested inferences and proposals. Do not present configured state as observed runtime state.
-- Preserve meaningful runtime, data, identity, provisioning, build, and deployment relationships.
-- Include only supported components and relationships.
-- If a requested deployment lacks a target topology, establish the missing scope or label the result as a requested proposal.
-- Do not substitute an authentication protocol sequence or login flow.
+- Prefer deployed configuration and executable source over conflicting prose, and report material conflicts instead of merging them.
+- Include only supported components and relationships, keeping runtime, data, identity, provisioning, build, and deployment links.
+- Label inferences and proposals. Configured state is not observed runtime state.
+- If a requested deployment has no target topology, settle the scope or label the result a proposal.
+- Do not substitute an authentication sequence or login flow.
 
-## Integrate the output
+## Output
 
-Use embedded mode when an existing HTML document is supplied or the diagram belongs in a larger HTML deliverable. Otherwise use standalone mode.
-
-### Standalone
-
-- When available, use the `html` skill for the shell and this skill for the architecture SVG.
-- Otherwise create a minimal HTML shell using Nunito at 17px/1.7. Include only the title and context needed to understand the diagram.
-- A Google Fonts stylesheet for Nunito and JetBrains Mono is allowed. Inline every other asset.
-
-### Embedded
-
-- Edit the supplied document in place. Preserve its content, hierarchy, typography, colors, responsive behavior, CSS, IDs, and global JavaScript.
-- Insert one inline SVG inside a uniquely named wrapper.
-- Scope added CSS and JavaScript to that wrapper. Namespace every SVG ID and reference.
-- Reuse an identical permitted font stylesheet or add it once.
-- Do not create another document or iframe.
-
-### Existing visual design
-
-- Preserve a supplied diagram or benchmark's shell, palette, typography, relative composition, and node/region arrangement unless asked to change them.
-- Adjust geometry only as needed for clearance, routing, or legibility. Do not arbitrarily redesign it or freeze flawed coordinates.
+- **Standalone:** build the page with the `html` skill around this skill's SVG.
+  Without it, make a minimal page in Nunito at 17px/1.7 with only the title and context needed to read the diagram.
+  Only the Google Fonts stylesheet for Nunito and JetBrains Mono may load externally; inline everything else.
+- **Embedded** (an existing HTML document is supplied, or the map belongs in a larger one): edit the document in place,
+  keeping its content, styles, responsive behavior, IDs, and scripts. Insert one inline SVG in a uniquely named wrapper,
+  scope added CSS and JavaScript to it, and prefix every SVG ID and reference. Reuse a matching font stylesheet or add it once.
+  Do not create another document or iframe.
+- Treat a supplied diagram or benchmark as the visual system: keep its shell, palette, type, composition, and node and region layout unless asked.
+  Adjust geometry only for clearance, routing, or legibility; do not redesign it or keep flawed coordinates.
 
 ## Render and verify
 
-Before rendering, read `references/diagrams.md` completely.
-It defines the SVG design, layout, responsive, accessibility, mechanics, and verification requirements.
-Keep maps static by default. For requested animation or a guided walkthrough, read `references/motion.md` and cover every supported scenario and flow in scope.
+Read `references/diagrams.md` completely before rendering.
+Keep maps static unless animation or a guided walkthrough is requested; then also read `references/motion.md`.

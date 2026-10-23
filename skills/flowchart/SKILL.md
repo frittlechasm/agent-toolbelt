@@ -9,40 +9,25 @@ metadata:
 
 # Flow Diagram
 
-Diagram the supplied process, including supported decisions, branches, retries, loops, failures, and rollback paths.
+Diagram the supplied process, including its decisions, branches, retries, loops, failures, and rollback paths.
 
 ## Ground the flow
 
-- Preserve supplied step order, decision conditions, branch labels, loop targets, and terminal outcomes.
-- Do not invent missing branches, outcomes, or operational behavior. Label material inferences or proposals.
-  Ask only when an omission prevents an accurate diagram.
-- Keep the main path easy to scan and route retries or loops outside it.
+- Keep the supplied step order, decision conditions, branch labels, loop targets, and end states.
+- Do not invent branches, outcomes, or behavior. Label material inferences or proposals; ask only when a gap prevents an accurate diagram.
+- Keep the main path easy to scan. Place retry and loop steps beside the main column, not on it, and route their connectors outside it.
 
-## Integrate the output
+## Output
 
-Use embedded mode when an existing HTML document is supplied or the flow belongs in a larger HTML deliverable. Otherwise use standalone mode.
-
-### Standalone
-
-- When available, use the `html` skill for the document shell and this skill for the flow SVG.
-- Otherwise create a minimal standalone HTML document with only the title and context needed to understand the process.
-
-### Embedded
-
-- Edit the supplied document in place. Preserve its content, hierarchy, typography, colors, responsive behavior, CSS, IDs, and global JavaScript.
-- Insert one inline SVG inside a uniquely named wrapper.
-- Scope added CSS and JavaScript to that wrapper. Namespace every SVG ID and reference.
-- Do not create another document or iframe.
-
-### Existing visual design
-
-- Treat a supplied diagram as the visual system. Preserve its palette, typography, and relative arrangement unless the user requests a redesign.
-- Adjust geometry only as needed for clear labels, connectors, routing, and responsive legibility.
+- **Standalone:** build the page with the `html` skill around this skill's SVG.
+  Without it, make a minimal HTML page with only the title and context needed to follow the process.
+- **Embedded** (an existing HTML document is supplied, or the flow belongs in a larger one): edit the document in place,
+  keeping its content, styles, responsive behavior, IDs, and scripts. Insert one inline SVG in a uniquely named wrapper,
+  scope added CSS and JavaScript to it, and prefix every SVG ID and reference. Do not create another document or iframe.
+- Treat a supplied diagram as the visual system: keep its palette, type, and arrangement unless asked to redesign.
+  Adjust geometry only for clear labels, connectors, and responsive legibility.
 
 ## Render and verify
 
-Before rendering, read `references/diagrams.md` completely.
-It is the source of SVG layout, typography, connector, responsive, accessibility, and verification requirements.
-
-Keep diagrams static by default. For requested animation or a guided walkthrough, read `references/motion.md`.
-For a guided walkthrough, cover every supported scenario and flow in scope.
+Read `references/diagrams.md` completely before rendering.
+Keep diagrams static unless animation or a guided walkthrough is requested; then also read `references/motion.md`.
