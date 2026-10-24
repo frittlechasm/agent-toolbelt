@@ -36,5 +36,6 @@ Use the current OWASP Top 10. Check at least:
 
 ## Report
 
-- Rank findings by severity with file references, impact, and fix. Mark unverified suspicions.
+- Rank confirmed findings by severity with file references, impact, and the smallest effective fix.
+- Verify reachability and existing controls; separate confirmed defects, validation blockers, and hardening advice.
 - State what you did not inspect and give a verdict.

@@ -1,6 +1,6 @@
 ---
 name: bitbucket
-description: Use this for any read-only interaction with a specific Bitbucket Cloud PR.
+description: Use only for any read-only interaction with a specific Bitbucket Cloud PR.
 metadata:
     scope: global
     agents: claude, codex
@@ -37,9 +37,6 @@ metadata:
 
 ## Validate findings
 
-- For each defect, give a reachable scenario, the expected behavior, and the changed code that breaks it.
-- Check requirements, supported configurations, invariants, and documented intent (such as non-production switches) before calling a hypothetical a bug.
-  If reachability or intent is unclear, say so or ask.
 - On re-review, separate new defects from existing comments and resolved findings, and recheck carried-forward claims against current revisions.
 
 ## Record the review
