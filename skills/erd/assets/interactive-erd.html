@@ -160,9 +160,11 @@
       z-index: 0;
       display: flex;
       align-items: flex-start;
-      gap: 3.4rem;
+      /* Wide enough for a two-value cardinality label and a facing label on the same row. */
+      gap: 5.5rem;
       width: max-content;
-      padding: 1.7rem clamp(1rem, 3vw, 2rem) 5rem;
+      /* The right padding holds same-lane loops and their labels past the last lane. */
+      padding: 1.7rem 4.5rem 5rem clamp(1rem, 3vw, 2rem);
     }
     .wires {
       position: absolute;
@@ -392,7 +394,6 @@
       .bar .search { flex-basis: 100%; }
       .spacer { display: none; }
       .lane { width: 15.5rem; }
-      .canvas { gap: 3rem; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
@@ -632,16 +633,49 @@
       });
     }
 
-    function drawCardinality(value, x, y, anchor, relationship) {
-      const label = svgElement('text', {
-        x,
-        y: y - 6,
-        class: 'cardinality',
-        'text-anchor': anchor
+    function addCardinality(endpoints, endpoint, x, y, anchor, relationship) {
+      // Relationships that end on the same columns and side share one label listing each distinct cardinality.
+      const key = JSON.stringify([x, endpoint.table, endpoint.columns]);
+      const label = endpoints.get(key) || { x, y, anchor, values: [], ids: [], tables: [] };
+      if (!label.values.includes(endpoint.cardinality)) label.values.push(endpoint.cardinality);
+      label.ids.push(relationship.id);
+      label.tables.push(relationship.from.table, relationship.to.table);
+      endpoints.set(key, label);
+    }
+
+    function drawCardinalities(endpoints) {
+      const placed = [];
+      endpoints.forEach(({ x, y, anchor, values, ids, tables }) => {
+        const order = ['1', '0..1', '1..*', '0..*', 'unknown'];
+        const text = values.sort((a, b) => order.indexOf(a) - order.indexOf(b))
+          .map(value => value === 'unknown' ? '?' : value).join(', ');
+        // Sizes match the 10px monospace .cardinality font; the slot below clears the label's own connector.
+        const width = text.length * 6.2;
+        const left = anchor === 'end' ? x - width : x;
+        const clear = (item, baseline) => left + width <= item.left || left >= item.left + item.width
+          || Math.abs(baseline - item.baseline) >= 12;
+        // Dense composite keys put endpoints closer than a label is tall; join a label on the same card edge
+        // that already shows the same value instead of drawing a second copy.
+        const same = placed.find(item => item.x === x && item.text === text && !clear(item, y - 6));
+        if (same) {
+          same.node.dataset.relationship += ` ${ids.join(' ')}`;
+          same.node.dataset.tables = JSON.stringify([...JSON.parse(same.node.dataset.tables), ...tables]);
+          return;
+        }
+        // Move one slot up or down when a nearby endpoint's label is in the way, so it stays beside its own row.
+        const baseline = [0, -13, 20].map(offset => y - 6 + offset).find(slot => placed.every(item => clear(item, slot)));
+        const label = svgElement('text', {
+          x,
+          y: baseline ?? y - 6,
+          class: 'cardinality',
+          'text-anchor': anchor
+        });
+        label.textContent = text;
+        label.dataset.relationship = ids.join(' ');
+        label.dataset.tables = JSON.stringify(tables);
+        wires.append(label);
+        placed.push({ x, text, node: label, left, width, baseline: baseline ?? y - 6 });
       });
-      label.textContent = value === 'unknown' ? '?' : value;
-      markRelationshipNode(label, relationship);
-      wires.append(label);
     }
 
     function drawRelationships() {
@@ -651,6 +685,7 @@
       wires.setAttribute('height', height);
       wires.setAttribute('viewBox', `0 0 ${width} ${height}`);
       wires.replaceChildren();
+      const endpoints = new Map();
       MODEL.relationships.forEach(relationship => {
         const fromAnchor = endpointAnchor(relationship.from);
         const toAnchor = endpointAnchor(relationship.to);
@@ -667,8 +702,8 @@
           toX = toAnchor.right;
           const loopX = Math.max(fromX, toX) + (sameTable ? 46 : 34);
           pathData = `M${fromX} ${fromAnchor.y}C${loopX} ${fromAnchor.y} ${loopX} ${toAnchor.y} ${toX} ${toAnchor.y}`;
-          fromDirection = -1;
-          toDirection = -1;
+          fromDirection = 1;
+          toDirection = 1;
         } else {
           const rightward = fromAnchor.center < toAnchor.center;
           fromX = rightward ? fromAnchor.right : fromAnchor.left;
@@ -676,17 +711,18 @@
           const direction = rightward ? 1 : -1;
           const curve = Math.max(34, Math.abs(toX - fromX) * .42) * direction;
           pathData = `M${fromX} ${fromAnchor.y}C${fromX + curve} ${fromAnchor.y} ${toX - curve} ${toAnchor.y} ${toX} ${toAnchor.y}`;
-          fromDirection = rightward ? -1 : 1;
-          toDirection = rightward ? 1 : -1;
+          fromDirection = direction;
+          toDirection = -direction;
         }
         const path = svgElement('path', { d: pathData, class: `wire ${relationshipClass(relationship)}` });
         markRelationshipNode(path, relationship);
         wires.append(path);
         drawBracket(fromAnchor, fromX, fromDirection, relationship);
         drawBracket(toAnchor, toX, toDirection, relationship);
-        drawCardinality(relationship.from.cardinality, fromX + fromDirection * 8, fromAnchor.y, fromDirection < 0 ? 'end' : 'start', relationship);
-        drawCardinality(relationship.to.cardinality, toX + toDirection * 8, toAnchor.y, toDirection < 0 ? 'end' : 'start', relationship);
+        addCardinality(endpoints, relationship.from, fromX + fromDirection * 8, fromAnchor.y, fromDirection < 0 ? 'end' : 'start', relationship);
+        addCardinality(endpoints, relationship.to, toX + toDirection * 8, toAnchor.y, toDirection < 0 ? 'end' : 'start', relationship);
       });
+      drawCardinalities(endpoints);
       paintSelection();
     }
 
@@ -707,7 +743,8 @@
         card.querySelectorAll('.column').forEach(row => row.classList.remove('on'));
       });
       wires.querySelectorAll('[data-relationship]').forEach(node => {
-        const on = selectedTable && (node.dataset.from === selectedTable || node.dataset.to === selectedTable);
+        const tables = node.dataset.tables ? JSON.parse(node.dataset.tables) : [node.dataset.from, node.dataset.to];
+        const on = selectedTable && tables.includes(selectedTable);
         node.classList.toggle('hot', Boolean(on));
         node.classList.toggle('mute', Boolean(selectedTable) && !on);
       });
