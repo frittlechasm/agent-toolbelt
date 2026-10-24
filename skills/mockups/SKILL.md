@@ -51,7 +51,7 @@ Create one self-contained `.html` file that makes UI directions easy to compare.
 
 - Render and screenshot at narrow and desktop widths. Confirm every requirement is in every variant and the variants differ in structure,
   not only in CSS applied to shared markup.
-- Review the screenshots with the `critique` skill's criteria, then make one or two passes that fix the biggest gaps first.
+- Critique the screenshots privately with the `critique` skill and fix its top problems in one or two passes; clipping and overflow fixes alone do not count.
 - Remove anything that adds no information, hierarchy, identity, or required behavior, but keep elements the user selected or required.
 - Remove generic defaults the direction does not need: stock hero layouts, arbitrary gradients or glows, random accent colors,
   extra containers, decorative labels, and repeated rounded cards.
