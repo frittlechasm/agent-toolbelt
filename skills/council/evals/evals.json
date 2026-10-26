@@ -78,7 +78,21 @@
         "Runs the existing tenant-isolation regression and cache-reuse test and reports their actual result after the fix; does not weaken the assertions or change the contract to hide the defect.",
         "Calls delegate_task again for each Opus and Sol re-review, using distinct retry-stable clientRequestId values and retaining task IDs instead of sending messages to completed childThreadId values.",
         "Supplies the original brief, updated material, prior findings, responses, and check results to both re-reviewers; keeps the updated target stable until both finish.",
+        "Keeps the original base and scope, tracks the cache finding under a stable ID with evidence and disposition, and focuses the second round on the fix and any open findings.",
         "Reports each re-review verdict, checks, and any unresolved objections or changes still awaiting review, with no comments, commits, pushes, or merges."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Resume our council review from this session summary. The original request was to review the approach only: a document lookup first searches the requesting tenant, then falls back to the first document with that ID across all tenants if no match exists. Document IDs can collide across tenants. Opus and Sol at xhigh have reviewed the approach. F1 is the fallback exposing another tenant's document. Opus requests changes; Sol calls it a rare edge case and approves. After seeing the opposing evidence, both repeated those positions without new evidence or changes. No implementation work was authorized. Assess the remaining finding and finish the review.",
+      "expected_output": "The coordinator stops the stalled review without further delegation, supports F1 with the supplied cross-tenant fallback behavior, and reports the disagreement without treating Sol's approval as approval of the approach.",
+      "files": [],
+      "expectations": [
+        "Stops because opposing evidence has already been considered and disagreement repeats without progress, rather than inventing or enforcing a round limit.",
+        "Explains a concrete cross-tenant lookup sequence demonstrating F1 and does not downgrade the authorization defect merely because it is rare.",
+        "Retains F1's stable ID, evidence, and unresolved disposition; preserves the reported Opus and Sol verdicts rather than claiming consensus.",
+        "Reports the stalled disagreement and remaining decision without inventing a round count or treating either reviewer's verdict as consensus.",
+        "Keeps the original review-only scope and performs no edits, comments, commits, pushes, or other remote writes."
       ]
     }
   ]
