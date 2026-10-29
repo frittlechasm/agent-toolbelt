@@ -57,24 +57,32 @@
     },
     {
       "id": 6,
-      "prompt": "Change only DEMO-123's summary to 'Handle expired sessions'. The issue changes between preview and apply. Use only a simulated API; no live writes.",
-      "expected_output": "Detect the stale timestamp and reconcile the intervening changes before any new apply.",
+      "prompt": "Change only DEMO-123's summary to 'Handle expired sessions'. Use only the supplied fixture commands for Jira; they simulate the API locally. Do not run the real Jira utilities, use credentials, contact live services, or edit the fixture state or call log.",
+      "expected_output": "Detect the stale timestamp, preserve the competing summary, and ask how to reconcile the two values before another apply.",
       "files": [],
+      "setup": ["fixtures/setup_jira.py", "stale"],
+      "capabilities": ["shell"],
       "expectations": [
-        "Previews a field map containing only summary.",
-        "Passes the preview timestamp with --expected-updated.",
-        "Does not replace the timestamp blindly after a conflict."
+        "The fixture-produced .eval/jira-calls.jsonl records an edit preview with exactly the requested summary field and value.",
+        "The call log records an apply using that preview's expected_updated timestamp, followed by the simulated stale-timestamp error.",
+        "After the error, reads the current issue or a new preview through a fixture command and identifies the competing summary change.",
+        "Because the competing edit changed the same summary field, does not apply again; reports the requested and current values and asks how to proceed. The final fixture state preserves the competing summary and unrelated fields, and the response does not claim the requested edit succeeded.",
+        "Uses only the supplied fixture commands for Jira and leaves fixture implementation, state, and logs untouched except through those commands."
       ]
     },
     {
       "id": 7,
-      "prompt": "Add the approved comment 'Verified in staging' to DEMO-123. The simulated API times out after receiving the POST, and I cannot confirm whether it was saved. Do not use live Jira.",
+      "prompt": "Add the approved comment 'Verified in staging' to DEMO-123. Use only the supplied fixture commands for Jira; they simulate the API locally. Do not run the real Jira utilities, use credentials, contact live services, or edit the fixture state or call log.",
       "expected_output": "Report the uncertain outcome and inspect Jira before any retry; never post a duplicate just because the request timed out.",
       "files": [],
+      "setup": ["fixtures/setup_jira.py", "timeout"],
+      "capabilities": ["shell"],
       "expectations": [
-        "Does not automatically resend the POST.",
+        "The fixture-produced .eval/jira-calls.jsonl records exactly one post_received_timeout event containing the approved comment; no automatic POST retry occurs.",
+        "After the timeout, uses a fixture command to read back comments; the call log and final fixture state establish that exactly one matching comment was saved.",
         "Distinguishes unknown outcome from a definite rejection.",
-        "Does not claim the comment was posted unless supported by read-back."
+        "Does not claim the comment was posted unless supported by read-back, and reports the verified saved outcome once the fixture confirms it.",
+        "Uses only the supplied fixture commands for Jira and leaves fixture implementation, state, and logs untouched except through those commands."
       ]
     },
     {
