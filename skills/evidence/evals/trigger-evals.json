@@ -1,0 +1,55 @@
+{
+  "skill_name": "evidence",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Help me test this story and record evidence for its ticket.",
+      "should_trigger": true
+    },
+    {
+      "id": 2,
+      "prompt": "Prepare runnable manual cases for these acceptance criteria.",
+      "should_trigger": true
+    },
+    {
+      "id": 3,
+      "prompt": "Record the curl POST and SQL checks at a pace a teammate can follow.",
+      "should_trigger": true
+    },
+    {
+      "id": 4,
+      "prompt": "Fill my test results table from these recordings without changing my notes.",
+      "should_trigger": true
+    },
+    {
+      "id": 5,
+      "prompt": "Run the existing unit tests for my code change.",
+      "should_trigger": false
+    },
+    {
+      "id": 6,
+      "prompt": "Review this PR for security bugs.",
+      "should_trigger": false
+    },
+    {
+      "id": 7,
+      "prompt": "Rewrite this code review finding as a reply to the author.",
+      "should_trigger": false
+    },
+    {
+      "id": 8,
+      "prompt": "Find customer pipeline records for Acme through the private middleware.",
+      "should_trigger": false
+    },
+    {
+      "id": 9,
+      "prompt": "Trim my holiday video and add music.",
+      "should_trigger": false
+    },
+    {
+      "id": 10,
+      "prompt": "Attach these already approved files to DEMO-123.",
+      "should_trigger": false
+    }
+  ]
+}

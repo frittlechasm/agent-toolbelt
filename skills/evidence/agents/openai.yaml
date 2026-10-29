@@ -1,0 +1,4 @@
+interface:
+  display_name: "Evidence"
+  short_description: "Capture tests and report readable, traceable evidence"
+  default_prompt: "Use $evidence to prepare or run the requested cases and report their results with matching evidence."

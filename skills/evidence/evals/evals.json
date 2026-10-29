@@ -1,0 +1,36 @@
+{
+  "skill_name": "evidence",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use context.md to draft results.md in the existing comment style, with a short diagnostic excerpt. Do not post or run more tests.",
+      "expected_output": "A concise result table preserves the user verdict, flags the conflict, and reports actual coverage without exposing synthetic credentials.",
+      "files": [
+        "fixtures/run-report/context.md"
+      ],
+      "fixture": "fixtures/run-report",
+      "expectations": [
+        "TC-1 uses the final run and reports the API/SQL/UI checks without implying vendor coverage.",
+        "Keeps the opening note and the user TC-2 verdict while flagging its conflict with the recorded not-run result.",
+        "TC-3 is PARTIAL, NOT RUN, or BLOCKED for export, not a full pass or automatically N/A.",
+        "No synthetic credential values appear in the draft; status 200, count 3, and attempt 2 remain understandable.",
+        "Discloses fixture changes and does not post, run mutations, or claim new recordings."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Using context.md, write plan.md for a simple, readable recording a teammate can review. Do not execute anything.",
+      "expected_output": "A plan to present the existing footage at normal playback speed, without extra overlays or text, and sanitize accompanying logs.",
+      "files": [
+        "fixtures/recording-plan/context.md"
+      ],
+      "fixture": "fixtures/recording-plan",
+      "expectations": [
+        "Uses the existing footage rather than rerunning the DELETE or modifying application behavior.",
+        "Sanitizes accompanying output before sharing it and preserves the original footage.",
+        "Keeps normal playback speed without planning extra overlays, captions, or text.",
+        "Flags unreadable or unverified details rather than inventing evidence or claiming playback has been verified."
+      ]
+    }
+  ]
+}
