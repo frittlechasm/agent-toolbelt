@@ -55,6 +55,11 @@
       "id": 11,
       "prompt": "Open a GitHub issue for the login failure.",
       "should_trigger": false
+    },
+    {
+      "id": 12,
+      "prompt": "Attach these two evidence MP4s to DEMO-123 and put their links in my existing test comment.",
+      "should_trigger": true
     }
   ]
 }
