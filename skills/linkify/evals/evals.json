@@ -32,8 +32,8 @@
     },
     {
       "id": 2,
-      "prompt": "Return concise links for commit a1b2c3d and PR #42 in the current repository. Use only this workspace, without network requests or changes.",
-      "expected_output": "The commit links to https://github.com/eval-org/sample-service/commit/a1b2c3d and the PR to https://github.com/eval-org/sample-service/pull/42.",
+      "prompt": "Format this status sentence using concise links where the current repository gives a clear target: 'Fixed in commit a1b2c3d; we retry 42 times and merged PR #42.' Use only this workspace, without network requests or changes.",
+      "expected_output": "The commit links to https://github.com/eval-org/sample-service/commit/a1b2c3d and the PR to https://github.com/eval-org/sample-service/pull/42, while the ordinary retry count 42 remains plain text.",
       "files": [],
       "setup": ["fixtures/setup_context.py", "github"],
       "capabilities": ["shell"],
@@ -41,6 +41,7 @@
         "Derives GitHub and the repository path from the actual remote.",
         "Uses https://github.com/eval-org/sample-service/commit/a1b2c3d and https://github.com/eval-org/sample-service/pull/42.",
         "Uses a1b2c3d and #42 as the link text and does not use Bitbucket URL paths.",
+        "Does not link the ordinary number in '42 times', even though a repository is available.",
         "Makes no network request or workspace change."
       ]
     },
@@ -59,38 +60,14 @@
     },
     {
       "id": 4,
-      "prompt": "Format Jira issue DEMO-123 using only the current workspace. Do not ask for additional information, make network requests, or change files.",
-      "expected_output": "DEMO-123 remains plain text because no Jira site is established by the fixture.",
+      "prompt": "Format Jira issue DEMO-123 and PR #42 using only the current workspace. Do not ask for additional information, make network requests, or change files.",
+      "expected_output": "DEMO-123 and #42 remain plain text because the workspace establishes neither a Jira site nor a repository URL.",
       "files": [],
       "setup": ["fixtures/setup_context.py", "no-target"],
       "capabilities": ["shell"],
       "expectations": [
         "Leaves DEMO-123 as plain text when the workspace supplies no Jira site.",
         "Does not guess an Atlassian domain, borrow a site from outside the workspace, or fabricate a hyperlink.",
-        "Makes no network request or workspace change."
-      ]
-    },
-    {
-      "id": 5,
-      "prompt": "Format this status sentence using links where the current repository gives a clear target: 'We retry 42 times and merged PR #42.' Use only this workspace, without network requests or changes.",
-      "expected_output": "The ordinary retry count 42 remains plain text while PR #42 links to https://github.com/eval-org/sample-service/pull/42.",
-      "files": [],
-      "setup": ["fixtures/setup_context.py", "github"],
-      "capabilities": ["shell"],
-      "expectations": [
-        "Does not link the ordinary number in '42 times', even though a repository is available.",
-        "Links the unambiguous PR identifier #42 to https://github.com/eval-org/sample-service/pull/42.",
-        "Makes no network request or workspace change."
-      ]
-    },
-    {
-      "id": 6,
-      "prompt": "Format PR #42 using only the current workspace. Do not ask for additional information, make network requests, or change files.",
-      "expected_output": "#42 remains plain text because the repository has no remote and no repository URL is supplied.",
-      "files": [],
-      "setup": ["fixtures/setup_context.py", "no-target"],
-      "capabilities": ["shell"],
-      "expectations": [
         "Leaves #42 as plain text when no real repository URL can be established.",
         "Does not assume GitHub, Bitbucket, or a repository path from the fixture's directory name.",
         "Makes no network request or workspace change."

@@ -42,13 +42,8 @@
       "should_trigger": false
     },
     {
-      "id": 9,
-      "prompt": "Read my last 10 coding agent sessions for this repository and find navigation friction and reliance on out-of-date docs.",
-      "should_trigger": true
-    },
-    {
       "id": 10,
-      "prompt": "Audit last month's agent sessions for repo discovery detours and recommend better documentation entry points.",
+      "prompt": "Audit last month's agent sessions for repo discovery detours and reliance on outdated docs, and recommend better documentation entry points.",
       "should_trigger": true
     },
     {

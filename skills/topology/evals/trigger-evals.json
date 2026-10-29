@@ -42,11 +42,6 @@
       "should_trigger": false
     },
     {
-      "id": 9,
-      "prompt": "Draw a flowchart for this customer support process.",
-      "should_trigger": false
-    },
-    {
       "id": 10,
       "prompt": "Create a Mermaid sequence diagram for the checkout request.",
       "should_trigger": false

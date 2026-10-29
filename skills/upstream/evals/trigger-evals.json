@@ -7,16 +7,6 @@
       "should_trigger": false
     },
     {
-      "id": 2,
-      "prompt": "Bring this repo up to date with the original project.",
-      "should_trigger": false
-    },
-    {
-      "id": 3,
-      "prompt": "Update from upstream, but preserve my local main commits.",
-      "should_trigger": false
-    },
-    {
       "id": 4,
       "prompt": "/upstream",
       "should_trigger": true
@@ -29,11 +19,6 @@
     {
       "id": 6,
       "prompt": "Fetch the latest changes from origin.",
-      "should_trigger": false
-    },
-    {
-      "id": 7,
-      "prompt": "Rebase my current branch onto main.",
       "should_trigger": false
     },
     {
