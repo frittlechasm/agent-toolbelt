@@ -1,6 +1,6 @@
 ---
 name: evidence
-description: Prepare manual test cases, capture UI/API/SQL evidence and recordings, and draft test-result comments. Not for code review.
+description: Plan and run UI/API/SQL checks, save evidence and recordings, and draft test-result comments. Not for code review.
 metadata:
     scope: global
     agents: claude, codex

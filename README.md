@@ -15,7 +15,7 @@ Reusable agent skills and supporting utilities.
 | `declutter` | Reviews code and skills for simplification, performance improvements, and low-value or flaky tests. | Local |
 | `eli5` | Creates illustrated HTML explanations for beginners. | Shared |
 | `erd` | Creates source-grounded interactive database ERDs. | Shared |
-| `evidence` | Prepares manual cases, records UI/API/SQL proof, and drafts concise test results. | Local |
+| `evidence` | Plans and runs UI/API/SQL checks, saves evidence, and drafts test results. | Local |
 | `flowchart` | Creates process flows with optional animation of all supported scenarios. | Shared |
 | `html` | Creates standalone HTML documents. | Shared |
 | `jira` | Searches, reads, creates, and updates Jira Cloud issues. | Local |

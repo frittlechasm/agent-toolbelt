@@ -1,7 +1,8 @@
 # API and SQL checks
 
-- Run API requests and SQL queries in a terminal. A recording of that terminal is enough; prefer computer use when available.
-- Follow [video.md](video.md) for pace and framing.
+- Run API requests and SQL queries in a terminal. A recording of that terminal is enough.
+  Without terminal control, run them from the shell tool and keep the sanitized transcript.
+- Follow [video.md](video.md) for recording, pace, and framing.
 - Choose the environment, tenant, actor, and target records explicitly; do not default to a personal or production host.
 - Load curl credentials from a protected header or config file (`-H @file` or `-K file`). Disable shell tracing and verbose HTTP output.
 - Show the request or query, timestamp, status, and relevant output, including errors. Filter sensitive output before it reaches the recorded terminal.
