@@ -1,0 +1,34 @@
+{
+  "skill_name": "declutter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use $declutter to review the supplied repository's hooks and supporting scripts for worthwhile simplifications. Preserve secret scanning and post-commit skill synchronization. Review only: report findings with source evidence and behavior tradeoffs; do not edit files or run mutating scripts.",
+      "expected_output": "An evidence-backed recommendation to remove the legacy eval-workspace rejection script and its repository-specific pre-commit routing, after tracing evaluation output to temporary directories and checking the existing ignore rule. It explains the remaining protection against force-staged ignored files and preserves secret scanning and post-commit sync.",
+      "files": [],
+      "fixture": "fixtures/hook-workflow",
+      "expectations": [
+        "Reads scripts/evaluate.py and recognizes that the active producer creates workspaces outside the checkout with TemporaryDirectory.",
+        "Checks .gitignore and scripts/reject-legacy-workspaces.py before recommending removal of the guard and its pre-commit routing.",
+        "Explains that the old guard still blocks force-staged ignored workspace files, so removing it changes optional protection rather than being exactly behavior-neutral.",
+        "Preserves secret scanning and post-commit skill synchronization instead of recommending removal of all pre-commit checks.",
+        "Follows the cleanup through callers and guard-only support rather than optimizing the obsolete guard itself.",
+        "Does not edit files, run mutating scripts, or claim an unmeasured performance improvement."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use $declutter to review the supplied repository's hook setup. Our required policy is that legacy eval-workspace files must be rejected even when someone force-stages ignored files. Preserve that policy, secret scanning, and post-commit skill sync. Review only; do not edit files or run mutating scripts.",
+      "expected_output": "A review that retains the workspace guard because the explicit force-staging policy gives it a distinct purpose. It explains why temporary directories and .gitignore do not enforce that requirement, preserves scanning and post-commit sync, and makes no forced simplification if no other worthwhile change is supported.",
+      "files": [],
+      "fixture": "fixtures/hook-workflow",
+      "expectations": [
+        "Traces the current producer and reads the ignore rule and guard before assessing necessity.",
+        "Keeps enforcement of the explicit force-staging rejection policy; does not mistake .gitignore for equivalent enforcement.",
+        "Does not generalize the obsolete-workflow case into deleting every guard when a temporary directory is used.",
+        "Preserves secret scanning and post-commit sync, and reports when no worthwhile deletion is justified.",
+        "Does not modify files or claim performance gains without measurements."
+      ]
+    }
+  ]
+}

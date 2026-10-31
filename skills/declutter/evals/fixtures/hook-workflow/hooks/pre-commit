@@ -1,0 +1,11 @@
+#!/bin/sh
+
+root=$(git rev-parse --show-toplevel) || exit 1
+"$root/scripts/scan-secrets" || exit 1
+
+origin=$(git config --get remote.origin.url || true)
+case "$origin" in
+  */forge-tools.git)
+    python3 "$root/scripts/reject-legacy-workspaces.py"
+    ;;
+esac

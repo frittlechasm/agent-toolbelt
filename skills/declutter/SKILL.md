@@ -1,6 +1,6 @@
 ---
 name: declutter
-description: Review code or skills for simplification, performance improvements, and low-value or flaky tests when asked to declutter, simplify, or optimize.
+description: Review code or skills for simpler approaches, better performance, and weak or unreliable tests when asked to declutter, simplify, or optimize.
 metadata:
     scope: global
     agents: claude, codex
@@ -9,28 +9,39 @@ metadata:
 
 # Declutter
 
-Find worthwhile simplifications in the requested code or skills while preserving intended behavior and essential guidance.
+Find worthwhile ways to simplify the requested code or skills. Keep the intended behavior and essential guidance.
+Review the requested diff, commit, module, skill, or repository.
+If the user does not say what to review, choose from context and say what you will review before starting.
 
-## Review
+## Code review
 
-- Follow the requested scope: diff, commit, module, skill, or repository. If unstated, choose a reasonable scope from context and say what you inspected.
-- Check callers, existing helpers, and tests before judging code unnecessary.
-- In skills, comments, and documentation, remove generic advice, repetition, and explanations the model can readily infer from the code or surrounding context.
-    - Use other skills and scripts at the step that needs them instead of listing them up front or repeating what they cover.
-    - Prefer deleting unneeded steps, files, and support for old workflows over rewording them.
-    - Keep non-obvious intent, constraints, contracts, and gotchas that affect decisions or prevent mistakes.
-- Prioritize dead or duplicate code, needless wrappers, and custom code a standard library, platform, or current dependency can replace.
-- Find redundant or flaky tests, weak assertions, tests that mirror implementation, and mocks that bypass behavior; remove low-value tests and fix useful ones.
-- Share a UI component only when its behavior and design are genuinely common.
-- Check for avoidable repeated work, inefficient queries or I/O, and unnecessary rendering where relevant.
-- Treat performance ideas as hypotheses until a benchmark, profile, or clear complexity analysis supports them. Do not add caching or memoization by default.
-    - Verify that timed work completes correctly; count errors and skipped work.
-    - Compare equivalent workloads and conditions. Repeat consequential comparisons and report variation.
-    - Separate measured improvement from inferred cause, and relate microbenchmarks to the complete user path.
-- Report the few worthwhile findings with file references, expected benefit, and behavior risk. Say when no change is justified.
+- Before deciding code is unnecessary, check its callers, what creates and uses its files or data, and related helpers and tests.
+    - For checks and code kept for older versions or workflows, find what they protect. A working check may no longer be needed.
+    - Check whether other protections cover the same risk. Explain what protection would still be lost if the code were deleted.
+- Start with unused or duplicate code, needless wrappers, and custom code that the standard library, platform, or a current dependency can replace.
+- Look for duplicate or unreliable tests, weak checks, tests that copy the code's logic, and mocks that skip the behavior being tested.
+- Remove tests that add little confidence. Fix useful tests.
+- Share a UI component only when its uses need the same behavior and design.
+- Look for repeated work, inefficient queries, unnecessary reads and writes, and needless rendering where relevant.
+- Treat performance ideas as unproven until a benchmark, profile, or clear analysis of how work grows with input size supports them.
+    - Make sure timed runs finish correctly. Count errors and skipped work.
+    - Compare the same work under the same conditions. Repeat comparisons that guide decisions, and report how much results vary.
+    - Separate measured gains from possible explanations. Explain what small benchmarks mean for the full user flow.
+- Do not add caching by default.
 
-## Changes
+## Skills, comments, and documentation
 
-- Edit only when the user asks for changes. Make the smallest useful change and avoid cleanup unrelated to the requested scope.
-- Verify affected behavior with focused checks. Measure before and after when claiming a performance gain.
-- Summarize what changed and any worthwhile findings left untouched.
+- Remove advice that fits almost any task, repeated points, and explanations already clear from the code or context.
+- Use other skills and scripts where needed. Do not list them in advance or repeat their instructions.
+- Delete steps, files, and support for old workflows that are no longer needed instead of just rewriting them.
+- Keep non-obvious reasons, limits, rules others rely on, and pitfalls that affect decisions or prevent mistakes.
+- Keep setup steps, background, examples, and links only if the skill needs them for its stated job.
+- Keep steps handled by scripts out of skill instructions.
+- For each instruction, ask what decision or action it changes. Remove it if it changes neither.
+
+## Findings and changes
+
+- Report only findings worth acting on. Include file references, expected benefit, and risks to current behavior. Say when no change is needed.
+- Edit only when the user asks. Make the smallest useful change within the requested scope.
+- Run checks focused on the changed behavior. Measure before and after if you claim a performance gain.
+- Summarize the changes and any useful findings you did not address.

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+root=$(git rev-parse --show-toplevel) || exit 0
+python3 "$root/scripts/sync-skills.py"
