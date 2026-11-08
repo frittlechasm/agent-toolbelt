@@ -67,7 +67,7 @@ def coverage(log):
         for line in log.splitlines():
             summary = re.fullmatch(r"collected [0-9]+ events; remote failures: ([0-9]+)", line.strip())
             if summary:
-                remote_failures = int(summary[1])
+                remote_failures = (remote_failures or 0) + int(summary[1])
                 continue
             if not line.lstrip().startswith("{"):
                 continue
@@ -75,7 +75,7 @@ def coverage(log):
                 row = json.loads(line)
                 if row.get("record_type") == "collection_diagnostics":
                     roots.append({key: row.get(key) for key in (
-                        "machine", "agent", "complete", "files_seen", "files_read", "invalid_records")})
+                        "machine", "agent", "root", "complete", "files_seen", "files_read", "invalid_records")})
             except (ValueError, AttributeError):
                 invalid_lines += 1
     if remote_failures or invalid_lines or any(row.get("complete") is False for row in roots):

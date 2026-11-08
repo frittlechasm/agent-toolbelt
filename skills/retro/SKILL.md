@@ -17,7 +17,9 @@ Inventory instructions and installed skills only when recommending changes to th
 
 ## Collect and summarize
 
-Run the collector once, then use the summarizer for selection, coverage, and usage instead of recomputing them.
+Find history roots on each machine, including native Windows and WSL profiles when both exist.
+Collect each root once. Combine the normalized events and collection logs, then use the summarizer for selection, coverage, and usage.
+Check that every discovered root appears in the summary's `coverage.roots`.
 Keep audit files in a private temporary directory and remove it afterward:
 
 ```bash
@@ -27,12 +29,15 @@ trap 'rm -rf "$audit_dir"' EXIT
 python3 <skill-dir>/scripts/collect_history.py \
   --agent all --recent-days 30 --recent-only \
   > "$audit_dir/history.jsonl" 2> "$audit_dir/collection.log"
+# Append other roots' events and logs before summarizing.
 python3 <skill-dir>/scripts/summarize_history.py "$audit_dir/history.jsonl" \
   --diagnostics "$audit_dir/collection.log" --exclude-session <active-thread-id> \
   > "$audit_dir/summary.json"
 ```
 
-- Collector: add `--ssh-host HOST` per remote and `--no-local` for remote-only audits; see `--help` for custom history roots.
+- Add `--ssh-host HOST` for each remote and `--no-local` for remote-only audits. SSH collection uses the remote's default roots.
+  For custom roots, run the collector on that machine with `--claude-root` or `--codex-root`.
+  Use `--agent claude` or `--agent codex` when collecting only one agent. Give each profile on a shared host its own `--machine` label.
 - Use `--recent-only` for rolling windows and omit it for full-history or count-only requests.
   For calendar periods, pass inclusive `--since` and exclusive `--until` with a timezone; they override `--recent-only`.
 - Summarizer: use `--last N` and see `--help` for session filters. Always exclude the active audit thread.
@@ -47,8 +52,9 @@ python3 <skill-dir>/scripts/summarize_history.py "$audit_dir/history.jsonl" \
 
 - Classify each issue as a model error, navigation or doc gap, user refinement, tool failure, or permission gate.
 - A repeated pattern needs two independent user interactions. How often a prompt appears is not how often something failed.
-- Check `message_origin`. Injected or tool-wrapper content is not evidence. Scheduled, reviewer, and delegated prompts are not human corrections,
-  and unknown origin does not prove human feedback. Delegated work can support a finding; later human follow-ups are direct evidence.
+- Check `message_origin`. Injected content and tool wrappers are not evidence. Scheduled and sub-agent prompts are not human corrections.
+  Unknown origin does not prove human feedback, and prompt wording does not prove delegated execution.
+  Delegated work can support a finding; later human follow-ups are direct evidence.
 - Ignore duplicate snapshots and forks, but keep independent runs even when their prompts match.
 - History holds conversation text, not full tool traces or repository metadata.
   Do not infer search counts, failures, repository identity, or navigation delays from missing traces or timestamp gaps.

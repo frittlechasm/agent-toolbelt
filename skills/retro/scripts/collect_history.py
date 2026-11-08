@@ -57,10 +57,21 @@ INJECTED_PREFIXES = (
     "# agents.md instructions",
     "delegated task node:",
     "context handoff (manual_context):",
+    "context continuation:",
+    "this session is being continued from a previous conversation",
+    "harness correction:",
     "[request interrupted",
 )
-SCHEDULED_PROMPT = re.compile(r"\AAutomation:[^\n]+\nAutomation ID:[^\n]+(?:\n|$)", re.IGNORECASE)
-REVIEWER_PROMPT = re.compile(r"\AAct as (?:a )?review(?:er)? sub-agent\b", re.IGNORECASE)
+SCHEDULED_PROMPT = re.compile(
+    r"\A(?:Automation:[^\n]+\nAutomation ID:[^\n]+(?:\n|$)"
+    r"|Scheduled automation execution\.(?:\s|$)"
+    r"|(?:Explicitly )?forwarded scheduled automation trigger for\b)",
+    re.IGNORECASE,
+)
+REVIEWER_PROMPT = re.compile(r"\AAct as (?:(?:a|the) )?review(?:er)? sub-agent\b", re.IGNORECASE)
+DELEGATE_PROMPT = re.compile(
+    r"\AAct as (?:(?:an?|the) )?(?:test|implementation|design) sub-agent\b", re.IGNORECASE,
+)
 CODEX_USAGE_MIRROR_WINDOW_SECONDS = 60
 
 
@@ -502,6 +513,8 @@ def mark_message_origins(records: list[dict]) -> None:
             origin = "delegated"
         elif REVIEWER_PROMPT.match(text):
             origin = "reviewer_prompt"
+        elif DELEGATE_PROMPT.match(text):
+            origin = "delegate_prompt"
         else:
             origin = record.get("delegation_status", "unknown")
         record["message_origin"] = origin

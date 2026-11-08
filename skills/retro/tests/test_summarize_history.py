@@ -28,9 +28,9 @@ def usage(thread="root", response="r1", tokens=10, **extra):
             "usage": {"input_tokens": tokens, "cached_input_tokens": 3, "output_tokens": 2}, **extra}
 
 
-def diagnostics(complete=True, remote=0, summary=True):
+def diagnostics(complete=True, remote=0, summary=True, root="/fixture/.codex"):
     line = json.dumps({"record_type": "collection_diagnostics", "agent": "codex", "machine": "fmp",
-                       "complete": complete, "files_seen": 2, "files_read": 2, "invalid_records": 0})
+                       "root": root, "complete": complete, "files_seen": 2, "files_read": 2, "invalid_records": 0})
     return line + (f"\ncollected 2 events; remote failures: {remote}\n" if summary else "")
 
 
@@ -86,6 +86,19 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual("partial", helper.coverage(diagnostics(complete=False))["status"])
         self.assertEqual("complete_for_reported_roots", helper.coverage(diagnostics())["status"])
 
+    def test_combined_collection_logs_accumulate_remote_failures(self):
+        for failures in ((1, 0), (1, 2), (0, 0)):
+            with self.subTest(failures=failures):
+                result = helper.coverage("".join(diagnostics(remote=count) for count in failures))
+                self.assertEqual(sum(failures), result["remote_failures"])
+                expected = "partial" if sum(failures) else "complete_for_reported_roots"
+                self.assertEqual(expected, result["status"])
+
+    def test_coverage_keeps_root_paths_for_inventory_check(self):
+        roots = ["/fixture/wsl/.codex", "/fixture/windows/.codex"]
+        result = helper.coverage("".join(diagnostics(root=root) for root in roots))
+        self.assertEqual(roots, [row.get("root") for row in result["roots"]])
+
     def test_vendor_fields_remain_separate_and_unknown_model_is_retained(self):
         claude = {**usage("claude"), "agent": "claude", "usage_source": "assistant_message", "message_id": "c1",
                   "model": None, "usage": {"input_tokens": 4, "cache_read_input_tokens": 50}}
@@ -100,7 +113,7 @@ class SummaryTests(unittest.TestCase):
     def test_cli_partial_input_emits_usable_aggregates_without_exposing_bad_records(self):
         with tempfile.TemporaryDirectory() as directory:
             history = Path(directory) / "normalized.jsonl"
-            history.write_text(json.dumps(message()) + '\n{"secret": "synthetic-bad-record"}\n')
+            history.write_text(json.dumps(message()) + '\n{"fixture": "synthetic-bad-record"}\n')
             result = subprocess.run([sys.executable, str(SCRIPT), str(history)], capture_output=True, text=True)
         self.assertEqual(1, result.returncode)
         self.assertEqual([2], json.loads(result.stdout)["input"]["invalid_record_lines"])
