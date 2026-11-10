@@ -29,6 +29,22 @@
         "Preserves secret scanning and post-commit sync, and reports when no worthwhile deletion is justified.",
         "Does not modify files or claim performance gains without measurements."
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use $declutter to simplify skills/release-notes/SKILL.md. Edit the file directly, keep the release-notes workflow working, and leave the script unchanged.",
+      "expected_output": "The skill keeps only the script step, the internal-title exclusion, one grouping rule, and the tag-date rule with its reason. Generic advice, the repeated grouping line, the manual steps the script already performs, and the Mercurial fallback are deleted outright rather than reworded.",
+      "files": [],
+      "setup": ["fixtures/setup_verbose_skill.py"],
+      "expectations": [
+        "Deletes the generic lines about being thorough, writing clearly, and double-checking outright instead of shortening them or merging them into other lines.",
+        "Keeps one grouping instruction and removes the repeated one.",
+        "Reads scripts/collect_prs.py and removes the manual tag lookup, git log, and extraction steps that the script already performs.",
+        "Removes the Mercurial fallback as support for a workflow the skill does not have, instead of keeping it in case it is needed later.",
+        "Keeps the [internal] exclusion and the tag-date rule with its docs-site reason.",
+        "Makes the deletions without asking about each item, adds no new instructions, and leaves scripts/collect_prs.py unchanged.",
+        "Reports what was removed and why."
+      ]
     }
   ]
 }
