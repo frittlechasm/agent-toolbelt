@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Create staged, unstaged, and untracked evidence for a tenant-cache review."""
+"""Create staged, unstaged, and untracked evidence for a tenant-cache review.
+
+With --fixed, the unstaged documents.py fixes the cache key and adds an out-of-scope invalidation helper.
+"""
 
 from __future__ import annotations
 
@@ -9,7 +12,8 @@ from pathlib import Path
 
 
 def main() -> None:
-    workspace = Path(sys.argv[1])
+    workspace = Path(sys.argv[-1])
+    fixed = "--fixed" in sys.argv[1:-1]
     baseline = """def read_document(cache, store, tenant_id, document_id):
     key = (tenant_id, document_id)
     if key not in cache:
@@ -40,17 +44,21 @@ def main() -> None:
         encoding="utf-8",
     )
     subprocess.run(["git", "add", "documents.py"], cwd=workspace, check=True)
-    source.write_text(
-        """def read_document(cache, store, tenant_id, document_id):
+    refactor = """def read_document(cache, store, tenant_id, document_id):
     key = document_id
     if key in cache:
         return cache[key]
     document = store[(tenant_id, document_id)]
     cache[key] = document
     return document
-""",
-        encoding="utf-8",
-    )
+"""
+    if fixed:
+        refactor = refactor.replace("key = document_id", "key = (tenant_id, document_id)") + """
+
+def invalidate_document(cache, tenant_id, document_id):
+    cache.pop((tenant_id, document_id), None)
+"""
+    source.write_text(refactor, encoding="utf-8")
     (workspace / "test_documents.py").write_text(
         """import unittest
 

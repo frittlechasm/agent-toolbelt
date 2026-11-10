@@ -9,40 +9,34 @@ metadata:
 
 # Council
 
-Review the requested material; apply fixes only when asked.
+Only review. Never make fixes.
 
 ## Reviewers
 
-- Launch one Opus and one Sol delegate, both at `xhigh` effort, whatever model is coordinating.
-- In T3 Code, resolve models with `orchestrator_capabilities` and launch with `delegate_task`. Set `target.options` to
-  `{"effort":"xhigh"}` for Opus and `{"reasoningEffort":"xhigh"}` for Sol, then check the returned provider, model, and options.
-- If a model or effort setting is unavailable, report it; never substitute silently.
+- Start one Opus and one Sol reviewer at the same time with `delegate_task`, both at `xhigh` effort. Do this even if you are Opus or Sol.
+- Check that each reviewer runs the right model and effort. If one is not available, say so. Do not swap in another.
 
-## Review and debate
+## Review
 
-1. State the models, effort, and scope, then launch both reviews in parallel (`delegate_task` with `mode: "async"`).
-    - Delegates are read-only: no file writes (including temporary snapshots or generated tests) and no further delegation.
-      They keep verification data in memory.
-    - Give both the same request, constraints, target, context, and checks run.
-      For code, include the [audit](../audit/SKILL.md) criteria; otherwise derive criteria from the task.
-    - For code, share staged, unstaged, and untracked work through the read-only checkout or a full snapshot.
-      A worktree from the parent commit misses uncommitted edits.
-      Record the base and reviewed state; keep the same base and scope across rounds so fixes do not hide earlier changes.
-    - Ask for findings with stable IDs, severity, evidence, impact, locations, and a verdict.
-      Separate demonstrated problems from assumptions, risks, and preferences.
-    - Keep the material unchanged, and share neither review until both finish.
-2. Verify each finding against the evidence.
-    - Keep each finding's ID and disposition across rounds, with reasons for disputed or declined findings.
-    - Send conflicting findings to both reviewers and ask them to address the opposing evidence. Challenge unsupported claims and scope creep.
-    - Accept supported findings, drop disproven ones, and keep unresolved objections. Do not force agreement.
-3. Use follow-up rounds for unresolved substantive findings and meaningful changes that prior verdicts do not cover.
-    - Send the original brief, current material, finding dispositions, responses, check results, and changes since the previous round.
-      Focus reviewers on open findings and changed material.
-    - In T3 Code, call `delegate_task` again for each round with a distinct, retry-stable `clientRequestId`, and keep the task IDs.
-    - Stop when the current material is reviewed and substantive findings are settled, disagreement repeats without new evidence, or work is blocked.
-      A failed or missing review is not approval.
+1. Brief both reviewers.
+    - Tell them not to change any files, including temporary files and new tests.
+    - Give both the same brief and any check results. For code, include the [audit](../audit/SKILL.md) checklist.
+    - For code, note the base commit and what you reviewed, including uncommitted work.
+      Use the same base and scope every round, so later fixes do not hide earlier changes.
+    - Ask for a verdict and findings with IDs, severity, and evidence. Ask them to mark what is proven and what is a guess or preference.
+    - For changes, ask them to flag code that the request or accepted findings do not need.
+    - Do not change what they are reviewing, and do not share either review until both are done.
+2. Check each finding against the evidence. Write down whether you accept or reject it, and why.
+    - When reviewers disagree, send both findings to both reviewers and ask them to answer the other side's evidence.
+    - Push back on claims without evidence. Turn down suggestions outside the scope and list them as follow-ups.
+    - Keep open disagreements open. Do not force agreement.
+3. Run another round when an important finding is still open, or when something changed after the last verdicts.
+    - Reviewers do not remember earlier rounds. Send the original brief, each finding with its ID and status, check results, and what changed.
+      Ask them to focus on open findings and changes.
+    - Stop when the latest changes are reviewed and important findings are settled, when the same disagreement repeats with no new evidence,
+      or when you are blocked. A failed or missing review is not an approval.
 
 ## Result
 
-Report both models and effort, scope and reviewed state, rounds and stopping reason, finding dispositions, each reviewer's verdict,
-unresolved objections, checks run, and any next steps the task asked for. Identify changes not covered by the reported verdicts.
+Report both models and effort, the base and what was reviewed, the number of rounds and why you stopped, each finding and its status,
+each reviewer's verdict, and open disagreements. Say which changes no reviewer has approved.

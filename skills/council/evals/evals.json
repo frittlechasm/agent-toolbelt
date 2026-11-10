@@ -67,19 +67,18 @@
     },
     {
       "id": 5,
-      "prompt": "Use $council to review all staged, unstaged, and untracked work here. Fix confirmed defects, run the existing tests, then get another council review of the changes. Preserve unrelated work and leave the Git index as it is. Do not post comments, commit, push, or merge anything.",
+      "prompt": "Continue our council review of all staged, unstaged, and untracked work here against CONTRACT.md. In round 1, Opus and Sol at xhigh both requested changes for F1: the shared cache key omits tenant_id, so tenant beta can receive tenant alpha's cached document. I have since changed documents.py to address F1. Review the changes, and run the existing tests if useful. Report only; leave the code and Git index unchanged.",
       "capabilities": ["shell", "t3-code delegation"],
-      "expected_output": "The first review verifies the cross-tenant cache leak. The coordinator applies a minimal tenant-aware key fix, confirms the existing tests pass, and obtains fresh independent Opus and Sol reviews of the updated working state before reporting the result.",
+      "expected_output": "Fresh independent Opus and Sol reviews of the updated working state confirm that the tenant-aware key resolves F1 and flag the added invalidation helper as unneeded by F1 and out of scope under CONTRACT.md. The coordinator reports the result without editing anything.",
       "files": [],
-      "setup": ["fixtures/setup_review.py"],
+      "setup": ["fixtures/setup_review.py", "--fixed"],
       "expectations": [
-        "Completes both independent xhigh reviews before editing the initial target and verifies the cross-tenant cache defect rather than treating agreement alone as proof.",
-        "Makes the shared cache key include both tenant_id and document_id while preserving the unstaged refactor, untracked test, and original Git index.",
-        "Runs the existing tenant-isolation regression and cache-reuse test and reports their actual result after the fix; does not weaken the assertions or change the contract to hide the defect.",
-        "Calls delegate_task again for each Opus and Sol re-review, using distinct retry-stable clientRequestId values and retaining task IDs instead of sending messages to completed childThreadId values.",
-        "Supplies the original brief, updated material, prior findings, responses, and check results to both re-reviewers; keeps the updated target stable until both finish.",
-        "Keeps the original base and scope, tracks the cache finding under a stable ID with evidence and disposition, and focuses the second round on the fix and any open findings.",
-        "Reports each re-review verdict, checks, and any unresolved objections or changes still awaiting review, with no comments, commits, pushes, or merges."
+        "Launches fresh read-only Opus and Sol delegates at xhigh for the follow-up round and keeps the material unchanged until both finish.",
+        "Gives both reviewers the original brief, F1 with its evidence and disposition, and the changes since round 1, while keeping the original base and full working-state scope.",
+        "Verifies that the key now includes tenant_id and document_id and reports the actual result of the existing tests rather than treating reviewer agreement as proof.",
+        "Flags invalidate_document as code F1 does not need and as out of scope because CONTRACT.md makes documents immutable for the cache lifetime.",
+        "Never applies, reverts, or drafts fixes; leaves source, tests, and the Git index unchanged.",
+        "Reports F1's disposition, both reviewers' verdicts, the scope finding, and any unresolved objections."
       ]
     },
     {
