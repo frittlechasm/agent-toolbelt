@@ -4,6 +4,7 @@
 - Drive app interactions with computer use. If app control is unavailable, report the blocker without handing the test to the user.
 - Before the full take, record a short sample on a screen that changes no data, with pointer travel, a click, a scroll, and a result.
 - If the sample shows jumps or holds the available tools cannot avoid, record anyway and note the limitation in the report.
+- On the sample, check resolution and bitrate with `ffprobe` and view one frame at full size. Fix unreadable text before the full take.
 - Prepare the steps and readable text sizes before recording. Use an unhurried pace, with time to read meaningful changes and results.
 - Move the pointer along a visible path to each control, pause briefly, then click. Avoid sudden jumps and unnecessary movement.
 - Keep the viewport size stable. Record the visible area and scroll naturally to other areas; do not use full-page captures.
