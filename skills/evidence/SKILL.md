@@ -24,7 +24,7 @@ metadata:
 - For recordings, read [video.md](references/video.md).
 - Read only the needed configuration values; do not dump configuration or container environments.
 - Redact secrets and unrelated personal data before saving evidence; sanitizing a summary does not fix the source artifact.
-- Link requests, results, and clips to a case and run. Use IDs from the final run and disclose changes made by earlier attempts.
+- Link requests, results, and clips to a case and run. Use final-run IDs and note earlier attempts' changes in the README.
 - Keep originals and edited copies separate. Before cleanup, verify delivered copies by size or checksum.
 - Keep one evidence folder per ticket, with a folder per case and a README. Build it during the run and end each report with its path.
 - Do not change records or repeat writes for a better recording. Use fresh fixtures for a rerun.
@@ -36,9 +36,12 @@ metadata:
 - Follow the existing status format; otherwise use PASS, FAIL, PARTIAL, NOT RUN, BLOCKED, or N/A.
 - Missing tools do not automatically make a test case N/A. Flag disputed expected results as questions, not failures.
 - For a new table, use the columns Case, Steps, Status, and Evidence. Do not add Expected, Setup, or Actual columns.
+- Write only each case's result, what failed or is untested, and its evidence. No footer that repeats the table.
 - State the environment and the untested layers once, above the table. Write "same as TC n" for repeated steps.
-- After the status, add one short plain sentence only when a row did not pass.
-  Name the cause: product defect, environment, test data, or outdated case.
+- Add one short sentence after the status only when a row did not pass or a limitation changes its result.
+  Name a failure's cause (product defect, environment, test data, or outdated case) or the limitation.
+- Never mark PARTIAL or FAIL as PASS, or hide missing coverage, to keep it short.
+- Keep run history, scheduling, restored settings, webhook totals and retries, email capture, and video review in the README, not the comment.
 - Evidence cells hold only the matching media: embedded where the tracker supports it, otherwise one link.
 - Keep sanitized logs with the evidence. Video is optional for API-only cases.
 - Claim coverage only for tested layers and database vendors; an API check does not prove UI behavior.
