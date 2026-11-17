@@ -1,0 +1,6 @@
+The service normally runs two instances. Each calls run_pending once per hourly tick.
+Failure limits count scheduled ticks, not worker attempts within one tick.
+Store operations are atomic and shared across instances; pending returns unfinished items.
+claim excludes other workers until release; release makes the item immediately available again.
+bump_failure increments and returns the persisted count. stop and complete remove the item from pending.
+job_lock grants at most one instance entry for a job name and tick, even if the first instance exits early.

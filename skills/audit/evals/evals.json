@@ -1,0 +1,47 @@
+{
+  "skill_name": "audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use $audit to review change.diff against the surrounding files. Report only confirmed findings with evidence; do not edit files.",
+      "expected_output": "Finds that the new entry is hidden from the admin screen and lacks its sibling's required-field check.",
+      "files": [],
+      "fixture": "fixtures/catalog-review",
+      "expectations": [
+        "Reads the existing catalog and admin grouping code beyond change.diff.",
+        "Shows that the new key matches no admin group prefix, hiding it from the screen.",
+        "Compares sibling save checks and finds that the new entry can lose its required field.",
+        "Supports findings with code evidence, without editing files or inventing races."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use $audit to review this background job and its tests against contract.txt. Report findings and test gaps with evidence; do not edit files.",
+      "capabilities": ["shell"],
+      "expected_output": "Finds repeated counts within one tick under normal deployment and a missing test of the real client's failure behavior.",
+      "files": [],
+      "fixture": "fixtures/background-review",
+      "expectations": [
+        "Traces two instances claiming, failing, and releasing the same item within one tick; does not dismiss this as a rare race.",
+        "Compares run_pending with the sibling's tick lock and notes that the hourly-run comment is false.",
+        "Verifies that Client.send currently propagates exceptions while try_send swallows them; does not falsely report that send already swallows them.",
+        "Identifies that job_checks mocks the client, leaving the real failure contract untested; reports this as a test gap, not a current runtime defect.",
+        "Supports findings with source evidence and leaves files unchanged."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Use $audit to review these UI excerpts and their test using runtime.txt. Report findings only; do not install dependencies or edit files.",
+      "capabilities": ["shell"],
+      "expected_output": "Finds cache clearing on replay and remount, a false lifetime comment, and a test that passes without navigation.",
+      "files": [],
+      "fixture": "fixtures/lifecycle-review",
+      "expectations": [
+        "Uses the supplied strict-mode contract to trace load, cleanup, and load again, showing a second fetch after the shared cache is cleared.",
+        "Reads Shell and shows that its changing key remounts Panel at startup, disproving the app-lifetime comment even in production.",
+        "Shows that both routes render Ready, so the test still passes if navigation is removed; suggests a route-specific heading or location assertion.",
+        "Separates supplied runtime facts and code evidence from unverified assumptions; leaves files unchanged without installing packages."
+      ]
+    }
+  ]
+}
