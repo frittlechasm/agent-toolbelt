@@ -12,6 +12,7 @@
         "Resolves Opus and Sol through the live catalog and launches two read-only delegates before consuming either review, with further delegation prohibited.",
         "Uses delegate_task with explicit xhigh options for both models and checks the returned selection; does not silently substitute an unavailable model or effort setting.",
         "Gives both delegates the same workspace target, original brief, supporting context, and audit criteria, including the staged cache-key change, unstaged refactor, and untracked test.",
+        "Derives the tenant-isolation rule from CONTRACT.md and asks each reviewer how a realistic request sequence could break it.",
         "Identifies that document IDs can collide across tenants and the shared cache key omits tenant_id, allowing tenant beta to receive tenant alpha's cached document.",
         "Verifies consequential findings against documents.py, CONTRACT.md, and the existing test; distinguishes the demonstrated leak from unsupported stale-cache concerns.",
         "Shares initial review findings only after both reviews finish and sends any material disagreements back with evidence rather than forcing agreement.",
@@ -75,6 +76,7 @@
       "expectations": [
         "Launches fresh read-only Opus and Sol delegates at xhigh for the follow-up round and keeps the material unchanged until both finish.",
         "Gives both reviewers the original brief, F1 with its evidence and disposition, and the changes since round 1, while keeping the original base and full working-state scope.",
+        "Before the final verdict, gives both reviewers one pointed question per preserved rule using relevant audit checks.",
         "Verifies that the key now includes tenant_id and document_id and reports the actual result of the existing tests rather than treating reviewer agreement as proof.",
         "Flags invalidate_document as code F1 does not need and as out of scope because CONTRACT.md makes documents immutable for the cache lifetime.",
         "Never applies, reverts, or drafts fixes; leaves source, tests, and the Git index unchanged.",
