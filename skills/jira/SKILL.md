@@ -30,6 +30,7 @@ python3 <skill-dir>/scripts/jira-write --help
 
 - Apply only requested changes; advice, reviews, and drafts do not authorize writes.
 - Read current content first; preserve unrelated text, media, visibility, and later edits.
+- If a ticket description is wrong, propose a correction to the description itself.
 - Get field, account, and transition IDs from Jira metadata. Ask about missing required values or ambiguous matches before applying.
 - Reconcile stale timestamps with current content; never copy a new timestamp blindly.
 - After an error, timeout, or exit 3, inspect Jira before retrying or making further changes.
